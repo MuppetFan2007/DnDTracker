@@ -78,17 +78,39 @@ export function useInp() {
   }
 }
 
-export function FullCircleHP({ current, max, color, size = 88 }) {
-  const pct = max ? Math.max(0, Math.min(1, current / max)) : 0
-  const r = size * 0.41
-  const cx = size / 2, cy = size / 2
-  const circ = 2 * Math.PI * r
+export function FullCircleHP({ current, max, color, size = 88, temp = 0 }) {
+  const pct     = max ? Math.max(0, Math.min(1, current / max)) : 0
+  const tempPct = max && temp > 0 ? Math.min(1, temp / max) : 0
+  const sw    = size * 0.09
+  const swT   = size * 0.065
+  const r     = size * 0.41
+  const rOut  = r + sw * 0.5 + swT * 0.5 + 3
+  // expand container so outer ring never clips surrounding elements
+  const pad   = temp > 0 ? Math.ceil(rOut + swT / 2 - size / 2 + 3) : 0
+  const total = size + pad * 2
+  const cx = total / 2, cy = total / 2
+  const circ  = 2 * Math.PI * r
+  const circT = 2 * Math.PI * rOut
   return (
-    <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} overflow="visible">
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={size * 0.09} />
+    <div style={{ position: 'relative', width: total, height: total, flexShrink: 0 }}>
+      <svg width={total} height={total} viewBox={`0 0 ${total} ${total}`}>
+        {/* Temp HP outer track */}
+        {temp > 0 && (
+          <circle cx={cx} cy={cy} r={rOut} fill="none" stroke="rgba(100,180,255,0.12)" strokeWidth={swT} />
+        )}
+        {/* Temp HP outer arc */}
+        {tempPct > 0 && (
+          <circle cx={cx} cy={cy} r={rOut} fill="none" stroke="#7ab8e8" strokeWidth={swT}
+            strokeDasharray={`${tempPct * circT} ${(1 - tempPct) * circT}`} strokeLinecap="round"
+            style={{ filter: 'drop-shadow(0 0 4px #7ab8e888)' }}
+            transform={`rotate(-90 ${cx} ${cy})`}
+          />
+        )}
+        {/* Main HP track */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={sw} />
+        {/* Main HP arc */}
         {pct > 0 && (
-          <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={size * 0.09}
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={sw}
             strokeDasharray={`${pct * circ} ${(1 - pct) * circ}`} strokeLinecap="round"
             style={{ filter: `drop-shadow(0 0 5px ${color}99)` }}
             transform={`rotate(-90 ${cx} ${cy})`}
@@ -98,6 +120,7 @@ export function FullCircleHP({ current, max, color, size = 88 }) {
       <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ fontSize: size * 0.21, fontWeight: 700, color, lineHeight: 1 }}>{current}</div>
         <div style={{ fontSize: size * 0.13, color: 'rgba(255,255,255,0.3)' }}>/ {max}</div>
+        {temp > 0 && <div style={{ fontSize: size * 0.11, color: '#7ab8e8', lineHeight: 1, marginTop: 2 }}>+{temp}</div>}
       </div>
     </div>
   )

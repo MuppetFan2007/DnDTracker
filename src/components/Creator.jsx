@@ -213,7 +213,7 @@ function StepProfs({ draft, set, inp }) {
   )
 }
 
-/* ── Step: Background ── */
+/* ── Step: Backgrounds ── */
 function StepBackground({ draft, set, setN, inp }) {
   const C = useT()
   return (

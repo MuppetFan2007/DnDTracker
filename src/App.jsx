@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { ThemeCtx, THEMES } from './themes.js'
-import { loadLS, saveLS, blank } from './utils.js'
+import { loadLS, saveLS, blank, uid } from './utils.js'
 import { GlobalCSS }  from './components/GlobalCSS.jsx'
 import { Roster }     from './components/Roster.jsx'
 import { Creator }    from './components/Creator.jsx'
@@ -10,8 +10,11 @@ export default function App() {
   const [themeKey, setThemeKey] = useState(() => {
     try { return localStorage.getItem('dnd_theme') || 'vcr' } catch { return 'vcr' }
   })
-  const C     = THEMES[themeKey] || THEMES.vcr
-  const isVcr = themeKey === 'vcr'
+  const C        = THEMES[themeKey] || THEMES.vcr
+  const isVcr    = themeKey === 'vcr'
+  const isRacing = themeKey === 'racing'
+  const isMoon   = themeKey === 'moon'
+  const isSakura = themeKey === 'sakura'
 
   useEffect(() => {
     try { localStorage.setItem('dnd_theme', themeKey) } catch {}
@@ -27,47 +30,74 @@ export default function App() {
 
   const saveChar   = (char) => setChars(cs => cs.some(c => c.id === char.id) ? cs.map(c => c.id === char.id ? char : c) : [...cs, char])
   const deleteChar = (id)   => setChars(cs => cs.filter(c => c.id !== id))
+  const importChars = (newChars) => newChars.forEach(c => saveChar({ ...c, id: uid() }))
+
+  const rootClass = isVcr ? 'vcr-root' : isRacing ? 'racing-root' : isMoon ? 'moon-root' : isSakura ? 'sakura-root' : ''
+  const fontFamily = isVcr
+    ? "'Share Tech Mono', monospace"
+    : isRacing
+    ? "'Rajdhani', 'Segoe UI', sans-serif"
+    : "'Segoe UI', system-ui, sans-serif"
 
   return (
     <ThemeCtx.Provider value={C}>
       <GlobalCSS />
+
+      {/* VCR scanlines */}
       {isVcr && <div className="vcr-scanlines" />}
+
+      {/* Moon — star field only */}
+      {isMoon && <div className="moon-stars" />}
+
+      {/* Sakura Miku — falling petals + sparkles + corner bloom */}
+      {isSakura && <div className="sakura-petals" />}
+      {isSakura && <div className="sakura-sparkles" />}
+      {isSakura && <div className="sakura-bloom" />}
+
+      {/* Racing Miku — speed lines + animated stripe */}
+      {isRacing && <div className="racing-speedlines" />}
+      {isRacing && <div className="racing-stripe" />}
+
       <div
-        className={isVcr ? 'vcr-root' : ''}
-        style={{
-          minHeight: '100vh',
-          background: C.bg,
-          color: C.text,
-          fontFamily: isVcr ? "'Share Tech Mono', monospace" : "'Segoe UI', system-ui, sans-serif",
-        }}
+        className={rootClass}
+        style={{ minHeight: '100vh', background: C.bg, color: C.text, fontFamily, display: 'flex', flexDirection: 'column' }}
       >
-        {view === 'roster' && (
-          <Roster
-            chars={chars}
-            themeKey={themeKey}
-            setThemeKey={setThemeKey}
-            onCreate={() => { setDraft(blank()); setStep(0); setView('create') }}
-            onOpen={id  => { setActiveId(id); setView('sheet') }}
-            onDelete={deleteChar}
-          />
-        )}
+        <div style={{ flex: '1 0 auto' }}>
+          {view === 'roster' && (
+            <Roster
+              chars={chars}
+              themeKey={themeKey}
+              setThemeKey={setThemeKey}
+              onCreate={() => { setDraft(blank()); setStep(0); setView('create') }}
+              onOpen={id  => { setActiveId(id); setView('sheet') }}
+              onDelete={deleteChar}
+              onImport={importChars}
+            />
+          )}
 
-        {view === 'create' && draft && (
-          <Creator
-            draft={draft}
-            setDraft={setDraft}
-            step={step}
-            setStep={setStep}
-            onFinish={() => { saveChar(draft); setActiveId(draft.id); setView('sheet') }}
-            onCancel={() => setView('roster')}
-          />
-        )}
+          {view === 'create' && draft && (
+            <Creator
+              draft={draft}
+              setDraft={setDraft}
+              step={step}
+              setStep={setStep}
+              onFinish={() => { saveChar(draft); setActiveId(draft.id); setView('sheet') }}
+              onCancel={() => setView('roster')}
+            />
+          )}
 
-        {view === 'sheet' && (() => {
-          const char = chars.find(c => c.id === activeId)
-          if (!char) { setTimeout(() => setView('roster'), 0); return null }
-          return <Sheet char={char} onChange={saveChar} onBack={() => setView('roster')} />
-        })()}
+          {view === 'sheet' && (() => {
+            const char = chars.find(c => c.id === activeId)
+            if (!char) { setTimeout(() => setView('roster'), 0); return null }
+            return <Sheet char={char} onChange={saveChar} onBack={() => setView('roster')} />
+          })()}
+        </div>
+
+        <footer className="app-footer" style={{ borderTop: `1px solid ${C.border}`, background: C.surface, color: C.textMuted }}>
+          <span style={{ color: C.gold, fontWeight: 700 }}>⚔ D&D 2024 Manager</span>
+          <span className="app-footer-mid">May your rolls be ever in your favor</span>
+          <span>Characters saved locally</span>
+        </footer>
       </div>
     </ThemeCtx.Provider>
   )

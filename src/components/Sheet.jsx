@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
-import { useT } from '../themes.js'
+import React, { useState, useContext } from 'react'
+import { useT, ThemeCtx, THEMES } from '../themes.js'
 import { DND } from '../data/dnd.js'
-import { mod, fmt, profB, totalLevel } from '../utils.js'
+import { mod, fmt, profB, totalLevel, uid } from '../utils.js'
 import { DND_ICONS } from './Icons.jsx'
 import { CLabel, SecHdr, Btn, useInp, FullCircleHP } from './UI.jsx'
-import { SpellEditor } from './SpellEditor.jsx'
+import { SpellSlotsTab } from './SpellSlotsTab.jsx'
+import { CombatTab } from './CombatTab.jsx'
 
 export function Sheet({ char, onChange, onBack }) {
   const C   = useT()
@@ -12,17 +13,21 @@ export function Sheet({ char, onChange, onBack }) {
   const [tab,     setTab]     = useState('core')
   const [editing, setEditing] = useState(false)
 
+  // detect which theme is active
+  const themeKey = Object.entries(THEMES).find(([, t]) => t.gold === C.gold)?.[0] || ''
+  const isRacing = themeKey === 'racing'
+
   const set  = (k, v)    => onChange({ ...char, [k]: v })
   const setN = (o, k, v) => onChange({ ...char, [o]: { ...char[o], [k]: v } })
 
   const lvl      = totalLevel(char)
   const pb       = profB(lvl)
   const getSave  = (s)  => mod(char.stats[s]) + (char.savingThrowProfs.includes(s) ? pb : 0)
-  const getSkill = (sk) => mod(char.stats[DND.skillStat[sk]]) + (char.skillProfs.includes(sk) ? pb : 0)
+  const getSkill = (sk) => mod(char.stats[DND.skillStat[sk]]) + ((char.skillExpert || []).includes(sk) ? pb * 2 : char.skillProfs.includes(sk) ? pb : 0)
   const hpPct    = char.hp.max ? char.hp.current / char.hp.max * 100 : 0
   const hpColor  = hpPct > 60 ? C.green : hpPct > 30 ? C.yellow : C.red
 
-  const TABS = ['core', 'skills', 'spells', 'character']
+  const TABS = ['core', 'combat', 'spells', 'encounter', 'character']
 
   const updateClass = (idx, field, val) => {
     const cls = [...(char.classes || [])]
@@ -33,11 +38,14 @@ export function Sheet({ char, onChange, onBack }) {
   return (
     <div style={{ minHeight: '100vh' }}>
       {/* ── Header ── */}
-      <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: '11px 20px' }}>
+      <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: '11px 20px', boxShadow: isRacing ? `0 1px 0 #00e5cc22` : 'none' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Btn onClick={onBack}>← Back</Btn>
+          <Btn onClick={onBack} style={isRacing ? { borderRadius: 20 } : {}}>← Back</Btn>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 16, color: C.gold, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase' }}>{char.name}</div>
+            <div style={{ fontSize: 16, color: C.gold, fontWeight: 700, letterSpacing: isRacing ? 1 : 3, textTransform: 'uppercase', textShadow: isRacing ? `0 0 12px ${C.gold}88` : 'none' }}>
+              {char.name}
+              {isRacing && <span className="miku-sparkle" style={{ marginLeft: 8, fontSize: 10, color: '#ff4fa3' }}>✦</span>}
+            </div>
             <div style={{ fontSize: 9, color: C.textMuted, display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2, letterSpacing: 2, alignItems: 'center' }}>
               <span>{char.customSpecies || char.species}</span>
               {(char.classes || []).map((cl, i) => (
@@ -46,7 +54,7 @@ export function Sheet({ char, onChange, onBack }) {
               <span>· LV {lvl}</span>
             </div>
           </div>
-          <Btn variant={editing ? 'gold' : 'default'} onClick={() => setEditing(e => !e)}>
+          <Btn variant={editing ? 'gold' : 'default'} onClick={() => setEditing(e => !e)} style={isRacing ? { borderRadius: 20 } : {}}>
             {editing ? '✓ Done' : '✎ Edit'}
           </Btn>
         </div>
@@ -54,9 +62,9 @@ export function Sheet({ char, onChange, onBack }) {
 
       {/* ── Combat bar ── */}
       <div style={{ background: C.card, borderBottom: `1px solid ${C.border}`, padding: '14px 20px' }}>
-        <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', maxWidth: 860, margin: '0 auto' }}>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-            <FullCircleHP current={char.hp.current} max={char.hp.max} color={hpColor} size={90} />
+            <FullCircleHP current={char.hp.current} max={char.hp.max} color={hpColor} size={90} temp={char.hp.temp || 0} />
             {!editing ? (
               <div style={{ display: 'flex', gap: 5 }}>
                 <Btn onClick={() => setN('hp', 'current', Math.max(0, char.hp.current - 1))} style={{ padding: '3px 10px' }}>−</Btn>
@@ -84,21 +92,29 @@ export function Sheet({ char, onChange, onBack }) {
       </div>
 
       {/* ── Tabs ── */}
-      <div style={{ display: 'flex', borderBottom: `1px solid ${C.border}`, background: C.surface }}>
+      <div className="sheet-tabs" style={{ display: 'flex', borderBottom: `1px solid ${C.border}`, background: C.surface }}>
         {TABS.map(t => (
           <button key={t} className="hov-btn" onClick={() => setTab(t)}
-            style={{ background: 'transparent', border: 'none', borderBottom: `2px solid ${tab === t ? C.gold : 'transparent'}`, color: tab === t ? C.gold : C.textMuted, padding: '10px 18px', cursor: 'pointer', fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, fontFamily: 'inherit' }}>
+            style={{
+              background: 'transparent', border: 'none',
+              borderBottom: `2px solid ${tab === t ? C.gold : 'transparent'}`,
+              color: tab === t ? C.gold : C.textMuted,
+              padding: '10px 18px', cursor: 'pointer', fontSize: 10,
+              textTransform: 'uppercase', letterSpacing: 2, fontFamily: 'inherit',
+              textShadow: isRacing && tab === t ? `0 0 10px ${C.gold}88` : 'none',
+            }}>
             {t}
           </button>
         ))}
       </div>
 
       {/* ── Tab content ── */}
-      <div style={{ padding: '20px', maxWidth: 860, margin: '0 auto' }}>
+      <div className="sheet-content" style={{ padding: '20px' }}>
         <div className="fade-up" key={tab}>
-          {tab === 'core'      && <TabCore      char={char} onChange={onChange} set={set} setN={setN} editing={editing} inp={inp} getSave={getSave} getSkill={getSkill} pb={pb} hpColor={hpColor} C={C} />}
-          {tab === 'skills'    && <TabSkills    char={char} set={set} getSkill={getSkill} C={C} />}
-          {tab === 'spells'    && <SpellEditor  spells={char.spells || []} onChange={s => set('spells', s)} />}
+          {tab === 'core'      && <TabCore      char={char} onChange={onChange} set={set} setN={setN} editing={editing} inp={inp} getSave={getSave} getSkill={getSkill} pb={pb} C={C} />}
+          {tab === 'combat'    && <CombatTab    char={char} onChange={onChange} />}
+          {tab === 'spells'    && <SpellSlotsTab char={char} onChange={onChange} />}
+          {tab === 'encounter' && <TabEncounter char={char} C={C} />}
           {tab === 'character' && <TabCharacter char={char} set={set} setN={setN} editing={editing} inp={inp} updateClass={updateClass} C={C} />}
         </div>
       </div>
@@ -107,42 +123,100 @@ export function Sheet({ char, onChange, onBack }) {
 }
 
 /* ── Tab: Core ── */
-function TabCore({ char, onChange, set, setN, editing, inp, getSave, getSkill, pb, hpColor, C }) {
+const STAT_GROUPS = [
+  { stat: 'str', skills: ['Athletics'] },
+  { stat: 'dex', skills: ['Acrobatics', 'Sleight of Hand', 'Stealth'] },
+  { stat: 'con', skills: [] },
+  { stat: 'int', skills: ['Arcana', 'History', 'Investigation', 'Nature', 'Religion'] },
+  { stat: 'wis', skills: ['Animal Handling', 'Insight', 'Medicine', 'Perception', 'Survival'] },
+  { stat: 'cha', skills: ['Deception', 'Intimidation', 'Performance', 'Persuasion'] },
+]
+
+function TabCore({ char, onChange, set, setN, editing, inp, getSave, getSkill, pb, C }) {
+  const cycleSkill = (sk) => {
+    const prof   = char.skillProfs.includes(sk)
+    const expert = (char.skillExpert || []).includes(sk)
+    if (expert) {
+      onChange({ ...char,
+        skillProfs:  char.skillProfs.filter(x => x !== sk),
+        skillExpert: (char.skillExpert || []).filter(x => x !== sk),
+      })
+    } else if (prof) {
+      onChange({ ...char, skillExpert: [...(char.skillExpert || []), sk] })
+    } else {
+      onChange({ ...char, skillProfs: [...char.skillProfs, sk] })
+    }
+  }
+
   return (
     <div>
-      {/* Ability scores */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 7, marginBottom: 14 }}>
-        {['str','dex','con','int','wis','cha'].map(s => (
-          <div key={s} style={{ background: C.card, border: `1px solid ${C.border}`, padding: '10px 5px', textAlign: 'center' }}>
-            <div style={{ fontSize: 9, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 5 }}>{s}</div>
-            {editing
-              ? <input type="number" value={char.stats[s]} min={1} max={30} onChange={e => onChange({ ...char, stats: { ...char.stats, [s]: +e.target.value } })} style={{ ...inp, textAlign: 'center', fontSize: 20, padding: '3px 2px' }} />
-              : <div style={{ fontSize: 24, fontWeight: 700, color: C.text }}>{char.stats[s]}</div>}
-            <div style={{ marginTop: 5, background: C.surface, padding: '1px 6px', display: 'inline-block', border: `1px solid ${C.border}`, fontSize: 11, color: C.gold }}>{fmt(mod(char.stats[s]))}</div>
-            <div style={{ marginTop: 7, display: 'flex', gap: 3, justifyContent: 'center', alignItems: 'center' }}>
-              <div className="hov-btn"
-                onClick={() => onChange({ ...char, savingThrowProfs: char.savingThrowProfs.includes(s) ? char.savingThrowProfs.filter(x => x !== s) : [...char.savingThrowProfs, s] })}
-                style={{ width: 9, height: 9, cursor: 'pointer', border: `1px solid ${C.textMuted}`, background: char.savingThrowProfs.includes(s) ? C.gold : 'transparent', transition: 'all 0.15s' }} />
-              <span style={{ fontSize: 8, color: C.textMuted }}>SAVE {fmt(getSave(s))}</span>
+      {/* 3×2 stat + skills grid */}
+      <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 7, marginBottom: 10 }}>
+        {STAT_GROUPS.map(({ stat, skills }) => (
+          <div key={stat} style={{ background: C.card, border: `1px solid ${C.border}`, padding: '8px 10px' }}>
+            {/* Stat header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: skills.length ? 7 : 0, paddingBottom: skills.length ? 6 : 0, borderBottom: skills.length ? `1px solid ${C.border}` : 'none' }}>
+              <div>
+                <div style={{ fontSize: 8, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 3 }}>{stat}</div>
+                {editing
+                  ? <input type="number" value={char.stats[stat]} min={1} max={30}
+                      onChange={e => onChange({ ...char, stats: { ...char.stats, [stat]: +e.target.value } })}
+                      style={{ ...inp, textAlign: 'center', fontSize: 18, padding: '2px 3px', width: 52 }} />
+                  : <div style={{ fontSize: 24, fontWeight: 700, color: C.text, lineHeight: 1 }}>{char.stats[stat]}</div>}
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.gold, marginBottom: 4 }}>{fmt(mod(char.stats[stat]))}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end' }}>
+                  <div className="hov-btn"
+                    onClick={() => onChange({ ...char, savingThrowProfs: char.savingThrowProfs.includes(stat) ? char.savingThrowProfs.filter(x => x !== stat) : [...char.savingThrowProfs, stat] })}
+                    style={{ width: 8, height: 8, cursor: 'pointer', border: `1px solid ${C.textMuted}`, background: char.savingThrowProfs.includes(stat) ? C.gold : 'transparent', transition: 'all 0.15s', flexShrink: 0 }} />
+                  <span style={{ fontSize: 7, color: C.textMuted, whiteSpace: 'nowrap' }}>SAVE {fmt(getSave(stat))}</span>
+                </div>
+              </div>
             </div>
+            {/* Skills — click cycles none → prof (●) → expertise (◆) → none */}
+            {skills.map(sk => {
+              const prof   = char.skillProfs.includes(sk)
+              const expert = (char.skillExpert || []).includes(sk)
+              const bonus  = getSkill(sk)
+              const clr    = expert ? C.blue : prof ? C.gold : C.textMuted
+              return (
+                <div key={sk} className="hov-btn" onClick={() => cycleSkill(sk)}
+                  title={expert ? 'Expertise — click to remove' : prof ? 'Proficient — click for Expertise' : 'Click to add proficiency'}
+                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 2px', cursor: 'pointer' }}>
+                  <div style={{
+                    width: 8, height: 8, flexShrink: 0, transition: 'all 0.15s',
+                    ...(expert
+                      ? { background: C.blue, border: `1.5px solid ${C.blue}`, transform: 'rotate(45deg)' }
+                      : { borderRadius: prof ? '50%' : 2, background: prof ? C.gold : 'transparent', border: `1.5px solid ${clr}` })
+                  }} />
+                  <span style={{ flex: 1, fontSize: 10, color: expert ? C.blue : prof ? C.text : C.textDim }}>{sk}</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: clr, minWidth: 22, textAlign: 'right' }}>{fmt(bonus)}</span>
+                </div>
+              )
+            })}
           </div>
         ))}
       </div>
 
       {/* Quick stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 7, marginBottom: 12 }}>
-        {[['Passive Perc.', 10 + getSkill('Perception')], ['Prof Bonus', `+${pb}`], ['Inspiration', char.inspiration ? '★ YES' : 'No']].map(([l, v]) => (
-          <div key={l} className={l === 'Inspiration' ? 'hov-btn' : ''} onClick={() => l === 'Inspiration' && set('inspiration', !char.inspiration)}
-            style={{ background: C.card, border: `1px solid ${l === 'Inspiration' && char.inspiration ? C.gold : C.border}`, padding: '9px 12px', textAlign: 'center', cursor: l === 'Inspiration' ? 'pointer' : 'default', boxShadow: l === 'Inspiration' && char.inspiration ? `0 0 10px ${C.gold}44` : 'none' }}>
-            <div style={{ fontSize: 9, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 3 }}>{l}</div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: l === 'Inspiration' && char.inspiration ? C.gold : C.text }}>{v}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 7, marginBottom: 10 }}>
+        {[['Passive Perc.', 10 + getSkill('Perception')], ['Prof Bonus', `+${pb}`]].map(([l, v]) => (
+          <div key={l} style={{ background: C.card, border: `1px solid ${C.border}`, padding: '7px 10px', textAlign: 'center' }}>
+            <div style={{ fontSize: 8, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 2 }}>{l}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: C.text }}>{v}</div>
           </div>
         ))}
+        <div className="hov-btn" onClick={() => set('inspiration', !char.inspiration)}
+          style={{ background: C.card, border: `1px solid ${char.inspiration ? C.gold : C.border}`, padding: '7px 10px', textAlign: 'center', cursor: 'pointer', boxShadow: char.inspiration ? `0 0 8px ${C.gold}44` : 'none' }}>
+          <div style={{ fontSize: 8, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 2 }}>Inspiration</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: char.inspiration ? C.gold : C.text }}>{char.inspiration ? '★ YES' : 'No'}</div>
+        </div>
       </div>
 
       {/* Death saves + Temp HP */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: 12 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '10px 12px' }}>
           <SecHdr>Death Saves</SecHdr>
           <div style={{ display: 'flex', gap: 20 }}>
             {[['Successes','successes',C.green],['Failures','failures',C.red]].map(([label, key, color]) => (
@@ -152,14 +226,14 @@ function TabCore({ char, onChange, set, setN, editing, inp, getSave, getSkill, p
                   {[0,1,2].map(i => (
                     <div key={i} className="hov-btn"
                       onClick={() => setN('deathSaves', key, i + 1 === char.deathSaves[key] ? i : i + 1)}
-                      style={{ width: 17, height: 17, cursor: 'pointer', border: `2px solid ${i < char.deathSaves[key] ? color : C.textMuted}`, background: i < char.deathSaves[key] ? color : 'transparent', transition: 'all 0.15s' }} />
+                      style={{ width: 16, height: 16, cursor: 'pointer', border: `2px solid ${i < char.deathSaves[key] ? color : C.textMuted}`, background: i < char.deathSaves[key] ? color : 'transparent', transition: 'all 0.15s' }} />
                   ))}
                 </div>
               </div>
             ))}
           </div>
         </div>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: 12 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '10px 12px' }}>
           <SecHdr>Temporary HP</SecHdr>
           <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
             <input type="number" value={char.hp.temp} onChange={e => setN('hp', 'temp', Math.max(0, +e.target.value))} style={{ ...inp, width: 80 }} />
@@ -171,32 +245,10 @@ function TabCore({ char, onChange, set, setN, editing, inp, getSave, getSkill, p
   )
 }
 
-/* ── Tab: Skills ── */
-function TabSkills({ char, set, getSkill, C }) {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-      {DND.skills.map(sk => {
-        const a = char.skillProfs.includes(sk)
-        const m = getSkill(sk)
-        return (
-          <div key={sk} className="chip-toggle"
-            onClick={() => set('skillProfs', a ? char.skillProfs.filter(x => x !== sk) : [...char.skillProfs, sk])}
-            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 10px', background: a ? C.activeSkill : C.card, border: `1px solid ${a ? C.activeBorder : C.border}` }}>
-            <div style={{ width: 9, height: 9, flexShrink: 0, background: a ? C.gold : 'transparent', border: `2px solid ${a ? C.gold : C.textMuted}`, transition: 'all 0.15s' }} />
-            <span style={{ flex: 1, fontSize: 12, color: a ? C.text : C.textDim }}>{sk}</span>
-            <span style={{ fontSize: 9, color: C.textMuted }}>{DND.skillStat[sk].toUpperCase()}</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: a ? C.gold : C.textMuted, minWidth: 24, textAlign: 'right' }}>{fmt(m)}</span>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
 /* ── Tab: Character ── */
 function TabCharacter({ char, set, setN, editing, inp, updateClass, C }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+    <div className="char-tab-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
       {/* Left col */}
       <div>
         <SecHdr>Classes</SecHdr>
@@ -262,7 +314,7 @@ function TabCharacter({ char, set, setN, editing, inp, updateClass, C }) {
       {/* Full width bottom */}
       <div style={{ gridColumn: '1 / -1' }}>
         <SecHdr>Features & Equipment</SecHdr>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
+        <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginBottom: 14 }}>
           {[['Features & Traits','features'],['Equipment','equipment'],['Notes','notes']].map(([label, key]) => (
             <div key={key}>
               <div style={{ fontSize: 9, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 3 }}>{label}</div>
@@ -284,6 +336,175 @@ function TabCharacter({ char, set, setN, editing, inp, updateClass, C }) {
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Tab: Encounter Tracker ── */
+const CONDITIONS = [
+  'Blinded','Charmed','Deafened','Exhausted','Frightened','Grappled',
+  'Incapacitated','Invisible','Paralyzed','Petrified','Poisoned',
+  'Prone','Restrained','Stunned','Unconscious',
+]
+
+function TabEncounter({ char, C }) {
+  const dexMod = mod(char.stats.dex) + (char.initiative || 0)
+  const [round,      setRound]      = useState(1)
+  const [activeId,   setActiveId]   = useState(char.id)
+  const [combatants, setCombatants] = useState([{
+    id: char.id, name: char.name || 'Your Character',
+    initiative: dexMod, hp: char.hp.current, maxHp: char.hp.max,
+    ac: char.ac, conditions: [], isPlayer: true,
+  }])
+  const [newName, setNewName] = useState('')
+  const [newInit, setNewInit] = useState('')
+  const [newHp,   setNewHp]   = useState('')
+  const [newAc,   setNewAc]   = useState('')
+
+  const sorted    = [...combatants].sort((a, b) => b.initiative - a.initiative)
+  const activeIdx = sorted.findIndex(c => c.id === activeId)
+
+  const nextTurn = () => {
+    const next = (activeIdx + 1) % sorted.length
+    if (next === 0) setRound(r => r + 1)
+    setActiveId(sorted[next].id)
+  }
+  const prevTurn = () => {
+    if (activeIdx === 0) { setRound(r => Math.max(1, r - 1)); setActiveId(sorted[sorted.length - 1].id) }
+    else setActiveId(sorted[activeIdx - 1].id)
+  }
+
+  const upd = (id, field, val) =>
+    setCombatants(cs => cs.map(c => c.id === id ? { ...c, [field]: val } : c))
+
+  const toggleCond = (id, cond) =>
+    setCombatants(cs => cs.map(c => c.id === id
+      ? { ...c, conditions: c.conditions.includes(cond) ? c.conditions.filter(x => x !== cond) : [...c.conditions, cond] }
+      : c))
+
+  const addCombatant = () => {
+    if (!newName.trim()) return
+    const hp = parseInt(newHp) || 10
+    setCombatants(cs => [...cs, {
+      id: uid(), name: newName.trim(),
+      initiative: parseInt(newInit) || 0,
+      hp, maxHp: hp, ac: parseInt(newAc) || 10,
+      conditions: [], isPlayer: false,
+    }])
+    setNewName(''); setNewInit(''); setNewHp(''); setNewAc('')
+  }
+
+  const ghost = { background: 'transparent', border: 'none', fontFamily: 'inherit', padding: 0, outline: 'none' }
+
+  return (
+    <div>
+      {/* Round bar */}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', background: C.card, border: `1px solid ${C.border}`, padding: '10px 16px', marginBottom: 14 }}>
+        <Btn onClick={prevTurn}>◀ Prev</Btn>
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, textTransform: 'uppercase' }}>Round</div>
+          <div style={{ fontSize: 30, fontWeight: 700, color: C.gold, lineHeight: 1 }}>{round}</div>
+        </div>
+        <div style={{ textAlign: 'center', maxWidth: 160 }}>
+          <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Active</div>
+          <div style={{ fontSize: 13, color: C.text, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {sorted[activeIdx]?.name || '—'}
+          </div>
+        </div>
+        <Btn variant="gold" onClick={nextTurn}>Next ▶</Btn>
+      </div>
+
+      {/* Combatant rows */}
+      <div style={{ marginBottom: 14 }}>
+        {sorted.map((c) => {
+          const isActive = c.id === activeId
+          const hpPct = c.maxHp ? c.hp / c.maxHp * 100 : 0
+          const hpClr = hpPct > 60 ? C.green : hpPct > 30 ? C.yellow : C.red
+          return (
+            <div key={c.id} style={{
+              display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap',
+              background: isActive ? C.activeSkill : C.card,
+              border: `1px solid ${isActive ? C.gold : C.border}`,
+              borderLeft: `3px solid ${isActive ? C.gold : 'transparent'}`,
+              padding: '8px 12px', marginBottom: 4, transition: 'all 0.15s',
+              boxShadow: isActive ? `0 0 10px ${C.gold}22` : 'none',
+            }}>
+              <div style={{ width: 38, textAlign: 'center', flexShrink: 0 }}>
+                <div style={{ fontSize: 8, color: C.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>Init</div>
+                <input type="number" value={c.initiative} onChange={e => upd(c.id, 'initiative', +e.target.value)}
+                  style={{ ...ghost, color: C.gold, fontSize: 16, fontWeight: 700, width: 38, textAlign: 'center' }} />
+              </div>
+              <div style={{ flex: 1, minWidth: 80 }}>
+                <input value={c.name} onChange={e => upd(c.id, 'name', e.target.value)}
+                  style={{ ...ghost, color: c.isPlayer ? C.gold : C.text, fontSize: 13, fontWeight: c.isPlayer ? 700 : 400, width: '100%' }} />
+                {c.conditions.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 3 }}>
+                    {c.conditions.map(cd => (
+                      <span key={cd} className="hov-btn" onClick={() => toggleCond(c.id, cd)}
+                        style={{ fontSize: 8, background: C.red + '22', border: `1px solid ${C.red}44`, color: C.red, padding: '1px 5px', cursor: 'pointer', letterSpacing: 1 }}>
+                        {cd} ✕
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                <button onClick={() => upd(c.id, 'hp', Math.max(0, c.hp - 1))}
+                  style={{ ...ghost, color: C.textDim, fontSize: 18, width: 22, cursor: 'pointer', textAlign: 'center' }}>−</button>
+                <div style={{ textAlign: 'center', minWidth: 42 }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: hpClr, lineHeight: 1 }}>{c.hp}</div>
+                  <div style={{ fontSize: 9, color: C.textMuted }}>/{c.maxHp}</div>
+                </div>
+                <button onClick={() => upd(c.id, 'hp', Math.min(c.maxHp, c.hp + 1))}
+                  style={{ ...ghost, color: C.textDim, fontSize: 18, width: 22, cursor: 'pointer', textAlign: 'center' }}>+</button>
+              </div>
+              <div style={{ textAlign: 'center', flexShrink: 0, minWidth: 30 }}>
+                <div style={{ fontSize: 8, color: C.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>AC</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{c.ac}</div>
+              </div>
+              <select onChange={e => { if (e.target.value) { toggleCond(c.id, e.target.value); e.target.value = '' } }}
+                style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.textDim, fontSize: 9, padding: '3px 5px', fontFamily: 'inherit', flexShrink: 0 }}>
+                <option value="">＋ Cond</option>
+                {CONDITIONS.filter(cd => !c.conditions.includes(cd)).map(cd => (
+                  <option key={cd} value={cd}>{cd}</option>
+                ))}
+              </select>
+              {!c.isPlayer && (
+                <button onClick={() => { setCombatants(cs => cs.filter(x => x.id !== c.id)); if (activeId === c.id) setActiveId(sorted[0]?.id || char.id) }}
+                  style={{ ...ghost, color: C.textMuted, fontSize: 14, cursor: 'pointer', paddingLeft: 4 }}
+                  onMouseEnter={e => e.currentTarget.style.color = C.red}
+                  onMouseLeave={e => e.currentTarget.style.color = C.textMuted}>✕</button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Add combatant */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '12px 14px', marginBottom: 10 }}>
+        <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 }}>Add Combatant</div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input placeholder="Name" value={newName} onChange={e => setNewName(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && addCombatant()}
+            style={{ flex: '2 1 100px', background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '6px 8px', fontSize: 11, fontFamily: 'inherit' }} />
+          <input placeholder="Init" type="number" value={newInit} onChange={e => setNewInit(e.target.value)}
+            style={{ width: 54, background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '6px 8px', fontSize: 11, fontFamily: 'inherit' }} />
+          <input placeholder="HP" type="number" value={newHp} onChange={e => setNewHp(e.target.value)}
+            style={{ width: 54, background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '6px 8px', fontSize: 11, fontFamily: 'inherit' }} />
+          <input placeholder="AC" type="number" value={newAc} onChange={e => setNewAc(e.target.value)}
+            style={{ width: 54, background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '6px 8px', fontSize: 11, fontFamily: 'inherit' }} />
+          <Btn variant="gold" onClick={addCombatant}>+ Add</Btn>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+        <Btn onClick={() => { setRound(1); setActiveId(sorted[0]?.id || char.id) }}>Reset Turns</Btn>
+        <Btn onClick={() => {
+          setCombatants([{ id: char.id, name: char.name || 'Your Character', initiative: dexMod, hp: char.hp.current, maxHp: char.hp.max, ac: char.ac, conditions: [], isPlayer: true }])
+          setRound(1); setActiveId(char.id)
+        }}>Clear Encounter</Btn>
       </div>
     </div>
   )

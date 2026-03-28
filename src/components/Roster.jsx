@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { useT, THEMES } from '../themes.js'
 import { totalLevel } from '../utils.js'
 import { DND_ICONS, Icons } from './Icons.jsx'
@@ -6,22 +6,52 @@ import { DND } from '../data/dnd.js'
 import { Btn, FullCircleHP } from './UI.jsx'
 import { VcrClock } from './VcrClock.jsx'
 
-export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKey }) {
-  const C = useT()
-  const isVcr = themeKey === 'vcr'
+function downloadJson(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
+
+export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKey, onImport }) {
+  const C        = useT()
+  const isVcr    = themeKey === 'vcr'
+  const isRacing = themeKey === 'racing'
   const [search, setSearch] = useState('')
+  const importRef = useRef(null)
+
+  const handleImportFile = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target.result)
+        onImport(Array.isArray(parsed) ? parsed : [parsed])
+      } catch { alert('Invalid JSON file.') }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
+
   const filtered = chars.filter(c => (c.name || '').toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div className="fade-up" style={{ minHeight: '100vh', padding: '28px 32px' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+    <div className="fade-up roster-wrap" style={{ minHeight: '100vh', padding: '28px 32px' }}>
+      <div>
 
         {/* ── Header ── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+        <div className="roster-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
           <div>
             {isVcr && (
               <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 4, marginBottom: 6 }}>
                 ▓▓░ SYSTEM BOOT — LOADING CHARACTER DATABASE ░▓▓
+              </div>
+            )}
+            {isRacing && (
+              <div style={{ fontSize: 10, color: C.textMuted, letterSpacing: 3, marginBottom: 6, textTransform: 'uppercase' }}>
+                ◆ Racing Division — Character Registry ◆
               </div>
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -30,6 +60,8 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
                   <div style={{ fontSize: 20, fontWeight: 900, color: C.gold, letterSpacing: 5, fontFamily: "'Orbitron', monospace" }}>D&D 2024</div>
                   <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, marginTop: 3 }}>CHARACTER MANAGER // v2.4.1</div>
                 </div>
+              ) : isRacing ? (
+                <RacingHeader C={C} />
               ) : (
                 <>
                   <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg,${C.gold},${C.goldDim})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.bg, boxShadow: `0 4px 16px ${C.gold}44` }}>
@@ -44,32 +76,40 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            {isVcr && <VcrClock />}
+          <div className="roster-actions" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            {isVcr    && <VcrClock />}
+            {isRacing && <RacingLapCounter C={C} />}
             {/* Theme switcher */}
-            <div style={{ display: 'flex', gap: 5, background: C.surface, border: `1px solid ${C.border}`, padding: '4px 6px' }}>
+            <div style={{ display: 'flex', gap: 5, background: C.surface, border: `1px solid ${C.border}`, padding: '4px 6px', borderRadius: isRacing ? 20 : 0 }}>
               {Object.entries(THEMES).map(([k, t]) => (
                 <button key={k} className="hov-btn" onClick={() => setThemeKey(k)} title={t.name}
-                  style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${k === themeKey ? C.gold : 'transparent'}`, background: t.gold, padding: 0, boxShadow: k === themeKey ? `0 0 6px ${t.gold}` : 'none' }} />
+                  style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${k === themeKey ? C.gold : 'transparent'}`, background: t.gold, padding: 0, boxShadow: k === themeKey ? `0 0 8px ${t.gold}` : 'none' }} />
               ))}
             </div>
-            <Btn variant="gold" onClick={onCreate}>{isVcr ? '> NEW_CHAR.EXE' : '+ New Character'}</Btn>
+            <input type="file" accept=".json" style={{ display: 'none' }} ref={importRef} onChange={handleImportFile} />
+            <Btn onClick={() => importRef.current.click()}>Import</Btn>
+            {chars.length > 0 && <Btn onClick={() => downloadJson(chars, 'dnd-characters.json')}>Export All</Btn>}
+            <Btn variant="gold" onClick={onCreate} style={isRacing ? { borderRadius: 20, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1, padding: '8px 22px' } : {}}>
+              {isVcr ? '> NEW_CHAR.EXE' : isRacing ? '✦ New Character' : '+ New Character'}
+            </Btn>
           </div>
         </div>
 
         {/* ── Stats strip ── */}
         {chars.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 20 }}>
+          <div className="roster-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10, marginBottom: 20 }}>
             {[
               ['Adventurers',    chars.length,                                                                   <Icons.Users key="u" />],
               ['Avg Level',      chars.length ? Math.round(chars.reduce((s, c) => s + totalLevel(c), 0) / chars.length) : 0, <Icons.Star key="s" />],
               ['Spells Known',   chars.reduce((s, c) => s + (c.spells || []).length, 0),                        <Icons.Zap key="z" />],
               ['Unique Classes', new Set(chars.flatMap(c => (c.classes || []).map(cl => cl.name))).size,        <Icons.Book key="b" />],
             ].map(([l, v, ic]) => (
-              <div key={l} style={{ background: C.card, border: `1px solid ${C.border}`, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div key={l}
+                className={isRacing ? 'racing-card-holo' : ''}
+                style={{ background: C.card, border: `1px solid ${C.border}`, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, borderRadius: isRacing ? 12 : 0, boxShadow: isRacing ? `0 0 0 1px ${C.border}, 0 4px 20px #00e5cc0a` : 'none' }}>
                 <span style={{ color: C.gold, fontSize: 20 }}>{ic}</span>
                 <div>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: C.gold, lineHeight: 1 }}>{v}</div>
+                  <div className={isRacing ? 'miku-glow-text' : ''} style={{ fontSize: 22, fontWeight: 700, color: C.gold, lineHeight: 1 }}>{v}</div>
                   <div style={{ fontSize: 10, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 2, marginTop: 2 }}>{l}</div>
                 </div>
               </div>
@@ -80,9 +120,9 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
         {/* ── Search ── */}
         {chars.length > 3 && (
           <input
-            placeholder={isVcr ? 'SEARCH_QUERY:_' : 'Search adventurers...'}
+            placeholder={isVcr ? 'SEARCH_QUERY:_' : isRacing ? '✦ Search pilots...' : 'Search adventurers...'}
             value={search} onChange={e => setSearch(e.target.value)}
-            style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '9px 14px', fontSize: 12, width: '100%', marginBottom: 18, fontFamily: 'inherit', letterSpacing: 1, borderRadius: 0 }}
+            style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '9px 16px', fontSize: 13, width: '100%', marginBottom: 18, fontFamily: 'inherit', letterSpacing: 1, borderRadius: isRacing ? 24 : 0 }}
           />
         )}
 
@@ -96,6 +136,8 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
                 <div style={{ fontSize: 10, color: C.textMuted, letterSpacing: 3, marginBottom: 28 }}>CHARACTER DATABASE EMPTY</div>
                 <Btn variant="gold" onClick={onCreate}>▶ INITIALIZE NEW CHARACTER</Btn>
               </>
+            ) : isRacing ? (
+              <RacingEmptyState C={C} onCreate={onCreate} />
             ) : (
               <>
                 <div style={{ fontSize: 60, marginBottom: 16, opacity: 0.2, color: C.textDim }}><Icons.Map /></div>
@@ -107,7 +149,7 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(270px,1fr))', gap: 16 }}>
-            {filtered.map(c => <CharCard key={c.id} char={c} onOpen={onOpen} onDelete={onDelete} />)}
+            {filtered.map(c => <CharCard key={c.id} char={c} onOpen={onOpen} onDelete={onDelete} onExport={() => downloadJson(c, `${c.name || 'character'}.json`)} isRacing={isRacing} />)}
           </div>
         )}
       </div>
@@ -115,7 +157,66 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
   )
 }
 
-export function CharCard({ char, onOpen, onDelete }) {
+/* ── Racing Miku header block ── */
+function RacingHeader({ C }) {
+  return (
+    <div style={{ position: 'relative' }}>
+      {/* Diagonal accent stripe */}
+      <div style={{ position: 'absolute', top: -4, left: -16, width: 4, height: '120%', background: `linear-gradient(180deg, #ff4fa3, #00e5cc)`, borderRadius: 2, boxShadow: '0 0 12px #00e5cc88' }} />
+      <div style={{ paddingLeft: 8 }}>
+        <div style={{
+          fontSize: 28, fontWeight: 700, color: C.gold, letterSpacing: 2,
+          lineHeight: 1, fontFamily: "'Rajdhani', sans-serif",
+          textShadow: `0 0 20px ${C.gold}88, 0 0 40px ${C.gold}44`,
+        }}>
+          D&amp;D 2024
+          <span className="miku-sparkle" style={{ marginLeft: 10, fontSize: 20, color: '#ff4fa3', verticalAlign: 'middle' }}>✦</span>
+        </div>
+        <div style={{ fontSize: 11, color: C.textMuted, letterSpacing: 3, marginTop: 3, textTransform: 'uppercase' }}>
+          Racing Miku — Character Manager
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Lap counter widget ── */
+function RacingLapCounter({ C }) {
+  const [lap] = useState(() => Math.floor(Math.random() * 40) + 1)
+  return (
+    <div style={{ display: 'flex', gap: 14, alignItems: 'center', fontSize: 11, letterSpacing: 2, color: C.textMuted, textTransform: 'uppercase' }}>
+      <span style={{ color: C.gold }}>✦</span>
+      <span>LAP {String(lap).padStart(2,'0')}</span>
+      <span style={{ color: '#ff4fa3' }}>◆ P1</span>
+      <span>VOCALOID FC</span>
+    </div>
+  )
+}
+
+/* ── Racing empty state ── */
+function RacingEmptyState({ C, onCreate }) {
+  return (
+    <div>
+      <div style={{ fontSize: 64, marginBottom: 6, lineHeight: 1 }}>
+        <span className="miku-sparkle" style={{ color: C.gold, filter: `drop-shadow(0 0 16px ${C.gold})` }}>✦</span>
+      </div>
+      <div style={{
+        fontSize: 36, fontWeight: 700, color: C.gold, letterSpacing: 3,
+        fontFamily: "'Rajdhani', sans-serif", marginBottom: 6,
+        textShadow: `0 0 20px ${C.gold}66, 0 0 60px ${C.gold}33`,
+      }}>
+        GRID EMPTY
+      </div>
+      <div style={{ fontSize: 12, color: '#ff4fa3', letterSpacing: 2, marginBottom: 4 }}>No pilots registered</div>
+      <div style={{ fontSize: 11, color: C.textMuted, letterSpacing: 1, marginBottom: 32 }}>Register your first character to hit the track</div>
+      <Btn variant="gold" onClick={onCreate} style={{ borderRadius: 24, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 14, letterSpacing: 2, padding: '10px 32px' }}>
+        ✦ Register Pilot
+      </Btn>
+    </div>
+  )
+}
+
+export function CharCard({ char, onOpen, onDelete, onExport, isRacing }) {
   const C = useT()
   const lvl = totalLevel(char)
   const hpPct = char.hp.max ? char.hp.current / char.hp.max * 100 : 0
@@ -125,26 +226,48 @@ export function CharCard({ char, onOpen, onDelete }) {
   const isMulti = (char.classes || []).length > 1
 
   return (
-    <div className="hov-card" onClick={() => onOpen(char.id)}
-      style={{ background: C.card, border: `1px solid ${C.border}`, overflow: 'hidden', cursor: 'pointer' }}>
-      <div style={{ height: 2, background: cc, boxShadow: `0 0 8px ${cc}88` }} />
+    <div
+      className={`hov-card${isRacing ? ' racing-card-holo' : ''}`}
+      onClick={() => onOpen(char.id)}
+      style={{
+        background: C.card,
+        border: `1px solid ${isRacing ? C.border : C.border}`,
+        overflow: 'hidden', cursor: 'pointer',
+        borderRadius: isRacing ? 14 : 0,
+        boxShadow: isRacing ? `0 0 0 1px ${C.border}, 0 4px 20px #00e5cc08` : 'none',
+      }}
+    >
+      {/* Top accent bar */}
+      <div style={{
+        height: isRacing ? 3 : 2,
+        background: isRacing
+          ? `linear-gradient(90deg, ${cc}, #00e5cc, #ff4fa3)`
+          : cc,
+        boxShadow: `0 0 ${isRacing ? 10 : 8}px ${cc}88`,
+      }} />
+
       <div style={{ padding: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: C.gold, letterSpacing: 1, marginBottom: 2 }}>{char.name || 'UNNAMED'}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.gold, letterSpacing: isRacing ? 0.5 : 1, marginBottom: 2, textShadow: isRacing ? `0 0 10px ${C.gold}66` : 'none' }}>
+              {char.name || (isRacing ? 'UNNAMED PILOT' : 'UNNAMED')}
+              {isRacing && <span className="miku-sparkle" style={{ marginLeft: 6, fontSize: 8, color: '#ff4fa3' }}>✦</span>}
+            </div>
             <div style={{ fontSize: 10, color: C.textDim, letterSpacing: 1 }}>
               {char.customSpecies || char.species} // LV.{lvl}
-              {isMulti && <span style={{ marginLeft: 6, fontSize: 9, color: C.gold, border: `1px solid ${C.gold}55`, padding: '1px 4px' }}>MULTI</span>}
+              {isMulti && <span style={{ marginLeft: 6, fontSize: 9, color: C.gold, border: `1px solid ${C.gold}55`, padding: '1px 4px', borderRadius: isRacing ? 6 : 0 }}>MULTI</span>}
             </div>
           </div>
-          <span style={{ color: cc, opacity: 0.7, fontSize: 18 }}>{DND_ICONS[mainClass]}</span>
+          <span style={{ color: cc, opacity: 0.8, fontSize: 18, filter: isRacing ? `drop-shadow(0 0 6px ${cc})` : 'none' }}>
+            {DND_ICONS[mainClass]}
+          </span>
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
           {(char.classes || []).map((cl, i) => {
             const clc = DND.classColors[cl.name] || C.gold
             return (
-              <span key={i} style={{ fontSize: 9, background: clc + '22', border: `1px solid ${clc}44`, padding: '2px 7px', color: clc, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 3 }}>
+              <span key={i} style={{ fontSize: 9, background: clc + '22', border: `1px solid ${clc}44`, padding: '2px 7px', color: clc, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 3, borderRadius: isRacing ? 8 : 0 }}>
                 {DND_ICONS[cl.name]} {cl.name} {cl.level}
               </span>
             )
@@ -152,10 +275,10 @@ export function CharCard({ char, onOpen, onDelete }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <FullCircleHP current={char.hp.current} max={char.hp.max} color={hpColor} size={62} />
+          <FullCircleHP current={char.hp.current} max={char.hp.max} color={hpColor} size={62} temp={char.hp.temp || 0} />
           <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
             {[['AC', char.ac], ['SPD', `${char.speed}ft`]].map(([l, v]) => (
-              <div key={l} style={{ background: C.surface, border: `1px solid ${C.border}`, padding: '6px 8px', textAlign: 'center' }}>
+              <div key={l} style={{ background: C.surface, border: `1px solid ${C.border}`, padding: '6px 8px', textAlign: 'center', borderRadius: isRacing ? 8 : 0 }}>
                 <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 2 }}>{l}</div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{v}</div>
               </div>
@@ -163,14 +286,24 @@ export function CharCard({ char, onOpen, onDelete }) {
           </div>
         </div>
 
-        <button
-          onClick={e => { e.stopPropagation(); if (confirm('Delete this character?')) onDelete(char.id) }}
-          style={{ background: 'transparent', border: 'none', color: C.textMuted, cursor: 'pointer', fontSize: 9, padding: 0, width: '100%', textAlign: 'right', fontFamily: 'inherit', letterSpacing: 2, transition: 'color 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.color = C.red}
-          onMouseLeave={e => e.currentTarget.style.color = C.textMuted}
-        >
-          [X] DELETE
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <button
+            onClick={e => { e.stopPropagation(); onExport?.() }}
+            style={{ background: 'transparent', border: 'none', color: C.textMuted, cursor: 'pointer', fontSize: 9, padding: 0, fontFamily: 'inherit', letterSpacing: 2, transition: 'color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.color = C.gold}
+            onMouseLeave={e => e.currentTarget.style.color = C.textMuted}
+          >
+            {isRacing ? '↓ export' : '[↓] EXPORT'}
+          </button>
+          <button
+            onClick={e => { e.stopPropagation(); if (confirm('Delete this character?')) onDelete(char.id) }}
+            style={{ background: 'transparent', border: 'none', color: C.textMuted, cursor: 'pointer', fontSize: 9, padding: 0, fontFamily: 'inherit', letterSpacing: 2, transition: 'color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.color = C.red}
+            onMouseLeave={e => e.currentTarget.style.color = C.textMuted}
+          >
+            {isRacing ? '✕ retire' : '[X] DELETE'}
+          </button>
+        </div>
       </div>
     </div>
   )
