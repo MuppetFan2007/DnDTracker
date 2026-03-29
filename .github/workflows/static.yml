@@ -9,17 +9,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # 1️⃣ Checkout your repo
       - uses: actions/checkout@v3
-      - name: Install Node.js
+
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "18"  # Node 18 is fine for most builds
+
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm ci
+
+      # 4️⃣ Build the project
       - name: Build
         run: npm run build
-      - name: Deploy to GitHub Pages
+
+      # 5️⃣ Deploy to GitHub Pages
+      - name: Deploy
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./dist   # Make sure this matches your actual build output folder
