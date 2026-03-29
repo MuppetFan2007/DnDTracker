@@ -114,38 +114,38 @@ export function GlobalCSS() {
         65%     { transform: skewY(-0.8deg) scaleY(0.88); opacity: 0.62; }
       }
 
-      /* ── Ringed Planet — top-right corner ── */
+      /* ── Ringed Planet — deep background, top-right ── */
       .moon-planet {
-        position: fixed; top: 18px; right: 80px;
-        width: 88px; height: 88px; border-radius: 50%;
+        position: fixed; top: 40px; right: 40px;
+        width: 60px; height: 60px; border-radius: 50%;
         background: radial-gradient(circle at 36% 34%,
-          #b8c8ee 0%, #6680cc 28%, #2a44a0 58%, #070f38 100%
+          #8898be 0%, #4458a0 28%, #182478 58%, #040c28 100%
         );
         box-shadow:
-          inset -14px -10px 28px rgba(0,0,25,0.88),
-          0 0 0 1.5px rgba(100,140,255,0.38),
-          0 0 38px 10px rgba(55,100,220,0.25),
-          0 0 100px 50px rgba(25,55,180,0.11);
-        pointer-events: none; z-index: 1;
+          inset -10px -8px 20px rgba(0,0,25,0.92),
+          0 0 0 1px rgba(80,110,200,0.22),
+          0 0 24px 6px rgba(40,70,180,0.14),
+          0 0 70px 30px rgba(20,40,140,0.07);
+        pointer-events: none; z-index: 0; opacity: 0.55;
       }
       /* Atmospheric band */
       .moon-planet::before {
         content: '';
         position: absolute; top: 30%; left: 8%; right: 8%; height: 16%;
-        border-radius: 50%; background: rgba(170,190,255,0.12);
-        filter: blur(4px);
+        border-radius: 50%; background: rgba(140,160,220,0.10);
+        filter: blur(3px);
       }
       /* Ring */
       .moon-planet::after {
         content: '';
         position: absolute; top: 50%; left: 50%;
-        width: 168px; height: 38px;
-        border: 2.5px solid rgba(120,160,255,0.38);
+        width: 116px; height: 26px;
+        border: 1.5px solid rgba(100,130,220,0.28);
         border-radius: 50%;
         transform: translate(-50%, -50%) rotateX(72deg);
         box-shadow:
-          0 0 0 1px rgba(120,160,255,0.12),
-          0 0 12px rgba(100,140,255,0.18);
+          0 0 0 1px rgba(100,130,220,0.08),
+          0 0 8px rgba(80,110,200,0.12);
       }
 
       /* ── Distant galaxy spiral — lower-right ── */

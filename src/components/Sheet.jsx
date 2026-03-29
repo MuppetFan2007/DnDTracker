@@ -8,6 +8,7 @@ import { SpellSlotsTab } from './SpellSlotsTab.jsx'
 import { CombatTab } from './CombatTab.jsx'
 import { DiceRoller, THEME_FX, useRollEngine } from './DiceRoller.jsx'
 import { FeaturesTab } from './FeaturesTab.jsx'
+import { SessionNotesTab } from './SessionNotesTab.jsx'
 
 export function Sheet({ char, onChange, onBack }) {
   const C   = useT()
@@ -30,7 +31,7 @@ export function Sheet({ char, onChange, onBack }) {
   const hpPct    = char.hp.max ? char.hp.current / char.hp.max * 100 : 0
   const hpColor  = hpPct > 60 ? C.green : hpPct > 30 ? C.yellow : C.red
 
-  const TABS = ['core', 'combat', 'spells', 'dice', 'features', 'encounter', 'character']
+  const TABS = ['core', 'combat', 'spells', 'dice', 'features', 'sessions', 'encounter', 'character']
 
   const updateClass = (idx, field, val) => {
     const cls = [...(char.classes || [])]
@@ -119,6 +120,7 @@ export function Sheet({ char, onChange, onBack }) {
           {tab === 'spells'    && <SpellSlotsTab char={char} onChange={onChange} />}
           {tab === 'dice'      && <DiceRoller   char={char} rollMode={rollMode} setRollMode={setRollMode} />}
           {tab === 'features'  && <FeaturesTab  char={char} onChange={onChange} />}
+          {tab === 'sessions'  && <SessionNotesTab char={char} onChange={onChange} />}
           {tab === 'encounter' && <TabEncounter char={char} C={C} />}
           {tab === 'character' && <TabCharacter char={char} set={set} setN={setN} editing={editing} inp={inp} updateClass={updateClass} C={C} />}
         </div>

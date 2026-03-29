@@ -1,41 +1,57 @@
 import React, { useState } from 'react'
 import { useT } from '../themes.js'
-import { DND } from '../data/dnd.js'
 import { mod, fmt, profB, totalLevel } from '../utils.js'
 import { SecHdr, useInp, Btn } from './UI.jsx'
 
+// MUI Icons
+import SwordIcon            from '@mui/icons-material/Construction'        // Attack
+import AutoFixHighIcon      from '@mui/icons-material/AutoFixHigh'          // Cast a Spell
+import DirectionsRunIcon    from '@mui/icons-material/DirectionsRun'        // Dash
+import ExitToAppIcon        from '@mui/icons-material/ExitToApp'            // Disengage
+import SecurityIcon         from '@mui/icons-material/Security'             // Dodge
+import GroupIcon            from '@mui/icons-material/Group'                // Help
+import VisibilityOffIcon    from '@mui/icons-material/VisibilityOff'        // Hide
+import RecordVoiceOverIcon  from '@mui/icons-material/RecordVoiceOver'      // Influence
+import AutoAwesomeIcon      from '@mui/icons-material/AutoAwesome'          // Magic
+import TimerIcon            from '@mui/icons-material/Timer'                // Ready
+import SearchIcon           from '@mui/icons-material/Search'               // Search
+import SchoolIcon           from '@mui/icons-material/School'               // Study
+import HandymanIcon         from '@mui/icons-material/Handyman'             // Utilize
+import BoltIcon             from '@mui/icons-material/Bolt'                 // Nick / Off-Hand, Opportunity Attack
+import PsychologyIcon       from '@mui/icons-material/Psychology'           // Cunning Action
+import MonitorHeartIcon     from '@mui/icons-material/MonitorHeart'         // Second Wind
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment' // Rage
+import PetsIcon             from '@mui/icons-material/Pets'                 // Wild Shape
+import ShieldIcon           from '@mui/icons-material/Shield'               // Shield spell
+import WaterDropIcon        from '@mui/icons-material/WaterDrop'            // Absorb Elements
+import VisibilityIcon       from '@mui/icons-material/Visibility'           // Uncanny Dodge
+import BlockIcon            from '@mui/icons-material/Block'                // Counterspell
+import SettingsIcon         from '@mui/icons-material/Settings'             // custom action fallback
+
 const BASE_ACTIONS = [
-  { id: 'attack',    name: 'Attack',       type: 'action',   icon: '⚔️', desc: 'Make one melee or ranged attack (or more with Extra Attack).' },
-  { id: 'cast',      name: 'Cast a Spell', type: 'action',   icon: '✨', desc: 'Cast a spell with a casting time of 1 Action.' },
-  { id: 'dash',      name: 'Dash',         type: 'action',   icon: '💨', desc: 'Gain extra movement equal to your Speed for the current turn.' },
-  { id: 'disengage', name: 'Disengage',    type: 'action',   icon: '🌀', desc: "Your movement doesn't provoke Opportunity Attacks for the rest of the turn." },
-  { id: 'dodge',     name: 'Dodge',        type: 'action',   icon: '🛡️', desc: "Attacks against you have Disadvantage; you have Advantage on Dex saves. Ends if you're Incapacitated or speed drops to 0." },
-  { id: 'help',      name: 'Help',         type: 'action',   icon: '🤝', desc: 'Give Advantage to an ally\'s next ability check or attack roll against a creature within 5 ft.' },
-  { id: 'hide',      name: 'Hide',         type: 'action',   icon: '👁️', desc: 'Make a Dexterity (Stealth) check to become hidden.' },
-  { id: 'influence', name: 'Influence',    type: 'action',   icon: '💬', desc: 'Use Charisma (Persuasion, Deception, or Intimidation) to shift a creature\'s attitude.' },
-  { id: 'magic',     name: 'Magic',        type: 'action',   icon: '🔮', desc: 'Use a magic item, activate a magical feature, or cast a cantrip.' },
-  { id: 'ready',     name: 'Ready',        type: 'action',   icon: '⏱️', desc: 'Choose a trigger and prepare a reaction for when it occurs.' },
-  { id: 'search',    name: 'Search',       type: 'action',   icon: '🔍', desc: 'Make a Perception or Investigation check to find something.' },
-  { id: 'study',     name: 'Study',        type: 'action',   icon: '📚', desc: 'Make an Arcana, History, or Nature check to recall lore.' },
-  { id: 'utilize',   name: 'Utilize',      type: 'action',   icon: '🖐️', desc: 'Interact with a second object or feature of the environment.' },
+  { id: 'attack',    name: 'Attack',       type: 'action',   Icon: SwordIcon,           desc: 'Make one melee or ranged attack (or more with Extra Attack).' },
+  { id: 'cast',      name: 'Cast a Spell', type: 'action',   Icon: AutoFixHighIcon,     desc: 'Cast a spell with a casting time of 1 Action.' },
+  { id: 'dash',      name: 'Dash',         type: 'action',   Icon: DirectionsRunIcon,   desc: 'Gain extra movement equal to your Speed for the current turn.' },
+  { id: 'disengage', name: 'Disengage',    type: 'action',   Icon: ExitToAppIcon,       desc: "Your movement doesn't provoke Opportunity Attacks for the rest of the turn." },
+  { id: 'dodge',     name: 'Dodge',        type: 'action',   Icon: SecurityIcon,        desc: "Attacks against you have Disadvantage; you have Advantage on Dex saves. Ends if you're Incapacitated or speed drops to 0." },
+  { id: 'help',      name: 'Help',         type: 'action',   Icon: GroupIcon,           desc: "Give Advantage to an ally's next ability check or attack roll against a creature within 5 ft." },
+  { id: 'hide',      name: 'Hide',         type: 'action',   Icon: VisibilityOffIcon,   desc: 'Make a Dexterity (Stealth) check to become hidden.' },
+  { id: 'influence', name: 'Influence',    type: 'action',   Icon: RecordVoiceOverIcon, desc: "Use Charisma (Persuasion, Deception, or Intimidation) to shift a creature's attitude." },
+  { id: 'magic',     name: 'Magic',        type: 'action',   Icon: AutoAwesomeIcon,     desc: 'Use a magic item, activate a magical feature, or cast a cantrip.' },
+  { id: 'ready',     name: 'Ready',        type: 'action',   Icon: TimerIcon,           desc: 'Choose a trigger and prepare a reaction for when it occurs.' },
+  { id: 'search',    name: 'Search',       type: 'action',   Icon: SearchIcon,          desc: 'Make a Perception or Investigation check to find something.' },
+  { id: 'study',     name: 'Study',        type: 'action',   Icon: SchoolIcon,          desc: 'Make an Arcana, History, or Nature check to recall lore.' },
+  { id: 'utilize',   name: 'Utilize',      type: 'action',   Icon: HandymanIcon,        desc: 'Interact with a second object or feature of the environment.' },
 ]
 
 const BASE_BONUS_ACTIONS = [
-  { id: 'offhand',     name: 'Nick / Off-Hand',  type: 'bonus', icon: '⚡', desc: 'When you take the Attack action with a Light weapon, make one extra attack with a different Light weapon.' },
-  { id: 'bonus-cast',  name: 'Cast a Spell',     type: 'bonus', icon: '✨', desc: 'Cast a spell with a casting time of 1 Bonus Action (e.g., Healing Word, Misty Step).' },
-  { id: 'cunning',     name: 'Cunning Action',   type: 'bonus', icon: '🗡️', desc: '(Rogue) Dash, Disengage, or Hide as a Bonus Action.' },
-  { id: 'second-wind', name: 'Second Wind',      type: 'bonus', icon: '💪', desc: '(Fighter) Regain 1d10 + Fighter level HP. Recharges on Short or Long Rest.' },
-  { id: 'fury',        name: 'Rage',             type: 'bonus', icon: '🔥', desc: '(Barbarian) Enter a Rage — resistance to B/P/S, Advantage on Str checks/saves, bonus damage.' },
-  { id: 'wildshape',   name: 'Wild Shape',       type: 'bonus', icon: '🐾', desc: '(Druid) Transform into a beast form. Uses vary by level.' },
+  { id: 'offhand',     name: 'Nick / Off-Hand',  type: 'bonus', Icon: BoltIcon,                   desc: 'When you take the Attack action with a Light weapon, make one extra attack with a different Light weapon.' },
+  { id: 'bonus-cast',  name: 'Cast a Spell',     type: 'bonus', Icon: AutoFixHighIcon,             desc: 'Cast a spell with a casting time of 1 Bonus Action (e.g., Healing Word, Misty Step).' },
 ]
 
 const BASE_REACTIONS = [
-  { id: 'opp-attack',   name: 'Opportunity Attack', type: 'reaction', icon: '⚡', desc: 'When a creature you can see leaves your reach, make one melee attack against it.' },
-  { id: 'readied',      name: 'Readied Action',     type: 'reaction', icon: '⏱️', desc: 'Trigger your Readied action when the specified trigger occurs.' },
-  { id: 'shield-spell', name: 'Shield',             type: 'reaction', icon: '🛡️', desc: '(Wizard/Sorcerer) Cast when hit by an attack — gain +5 AC until your next turn.' },
-  { id: 'absorb-elems', name: 'Absorb Elements',    type: 'reaction', icon: '💎', desc: '(Spellcaster) React to elemental damage, gaining resistance and bonus attack damage.' },
-  { id: 'uncanny',      name: 'Uncanny Dodge',      type: 'reaction', icon: '👁️', desc: '(Rogue 5+) When hit by an attacker you can see, halve the damage.' },
-  { id: 'counter',      name: 'Counterspell',       type: 'reaction', icon: '🚫', desc: '(Spellcaster) React to a creature casting a spell within 60 ft to interrupt it.' },
+  { id: 'opp-attack',   name: 'Opportunity Attack', type: 'reaction', Icon: BoltIcon,         desc: 'When a creature you can see leaves your reach, make one melee attack against it.' },
+  { id: 'readied',      name: 'Readied Action',     type: 'reaction', Icon: TimerIcon,         desc: 'Trigger your Readied action when the specified trigger occurs.' },
 ]
 
 const TYPE_CONFIG = {
@@ -67,7 +83,7 @@ export function CombatTab({ char, onChange }) {
 
   const addCustom = () => {
     if (!newAction.name.trim()) return
-    setCustoms([...customs, { id: 'c_' + Date.now(), name: newAction.name, desc: newAction.desc, type: addingType, icon: '⚙️' }])
+    setCustoms([...customs, { id: 'c_' + Date.now(), name: newAction.name, desc: newAction.desc, type: addingType, Icon: SettingsIcon }])
     setNewAction({ name: '', desc: '' })
     setAddingType(null)
   }
@@ -92,7 +108,6 @@ export function CombatTab({ char, onChange }) {
                 opacity: isUsed ? 0.45 : 1,
                 position: 'relative', overflow: 'hidden',
               }}>
-              {/* Glow bar at top */}
               {!isUsed && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: cfg.color, boxShadow: `0 0 8px ${cfg.color}` }} />}
               <div style={{ width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
                 background: isUsed ? C.textMuted : cfg.color,
@@ -133,7 +148,6 @@ export function CombatTab({ char, onChange }) {
       <div className="combat-cols" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16, alignItems: 'start' }}>
         {Object.entries(TYPE_CONFIG).map(([type, cfg]) => (
           <div key={type}>
-            {/* Column header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10,
               paddingBottom: 8, borderBottom: `2px solid ${cfg.color}44` }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.color,
@@ -146,7 +160,6 @@ export function CombatTab({ char, onChange }) {
               </span>
             </div>
 
-            {/* Cards */}
             {allByType(type).map(action => (
               <ActionCard key={action.id} action={action} cfg={cfg} C={C}
                 isCustom={action.id.startsWith('c_')}
@@ -154,7 +167,6 @@ export function CombatTab({ char, onChange }) {
               />
             ))}
 
-            {/* Add custom */}
             {addingType === type ? (
               <div style={{ background: C.card, border: `1px solid ${cfg.color}55`, padding: 12, marginTop: 6 }}>
                 <div style={{ fontSize: 9, color: cfg.color, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 }}>
@@ -188,6 +200,7 @@ export function CombatTab({ char, onChange }) {
 
 function ActionCard({ action, cfg, C, isCustom, onRemove }) {
   const [open, setOpen] = useState(false)
+  const { Icon } = action
   return (
     <div className="hov-btn" style={{
       background: open ? cfg.bg : C.card,
@@ -197,9 +210,10 @@ function ActionCard({ action, cfg, C, isCustom, onRemove }) {
       transition: 'all 0.15s',
       boxShadow: open ? `0 4px 16px ${cfg.color}1a` : 'none',
     }} onClick={() => setOpen(o => !o)}>
-      {/* Card row */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 10px' }}>
-        <span style={{ fontSize: 15, flexShrink: 0, lineHeight: 1 }}>{action.icon}</span>
+        {Icon && (
+          <Icon style={{ fontSize: 16, flexShrink: 0, color: open ? cfg.color : C.textMuted, transition: 'color 0.15s' }} />
+        )}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: open ? cfg.color : C.text,
             transition: 'color 0.15s', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -214,7 +228,7 @@ function ActionCard({ action, cfg, C, isCustom, onRemove }) {
         </div>
         {isCustom && (
           <span style={{ fontSize: 8, color: cfg.color, background: cfg.color + '22',
-            padding: '1px 4px', letterSpacing: 1, flexShrink: 0 }}>✎</span>
+            padding: '1px 4px', letterSpacing: 1, flexShrink: 0 }}>custom</span>
         )}
         {onRemove && (
           <button onClick={e => { e.stopPropagation(); onRemove() }}
@@ -226,7 +240,6 @@ function ActionCard({ action, cfg, C, isCustom, onRemove }) {
         <span style={{ fontSize: 9, color: C.textMuted, flexShrink: 0,
           transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>▾</span>
       </div>
-      {/* Expanded description */}
       {open && (
         <div style={{ padding: '0 10px 10px 34px', borderTop: `1px solid ${cfg.color}33` }}>
           <div style={{ fontSize: 11, color: C.textDim, lineHeight: 1.75, paddingTop: 8 }}>

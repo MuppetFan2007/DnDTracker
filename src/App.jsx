@@ -125,7 +125,7 @@ export default function App() {
 
         <footer className="app-footer" style={{ borderTop: `1px solid ${C.border}`, background: C.surface, color: C.textMuted }}>
           <span style={{ color: C.gold, fontWeight: 700 }}>⚔ D&D 2024 Manager</span>
-          <span className="app-footer-mid">May your rolls be ever in your favor</span>
+          <span className="app-footer-mid">GLHF :3 </span>
           <span>Characters saved locally</span>
         </footer>
       </div>
