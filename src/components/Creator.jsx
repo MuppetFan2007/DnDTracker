@@ -84,7 +84,7 @@ function StepIdentity({ draft, set, inp }) {
 function StepClass({ draft, set, inp }) {
   const C = useT()
   const updateClass  = (idx, field, val) => { const cls = [...draft.classes]; cls[idx] = { ...cls[idx], [field]: val }; set('classes', cls) }
-  const addClass     = () => set('classes', [...draft.classes, { name: 'Fighter', level: 1, subclass: '', subclassFeatures: '' }])
+  const addClass     = () => set('classes', [...draft.classes, { name: 'Fighter', level: 1, subclass: '', subclassFeatures: '', classFeats: [], subclassFeats: [] }])
   const removeClass  = (idx) => set('classes', draft.classes.filter((_, i) => i !== idx))
 
   return (

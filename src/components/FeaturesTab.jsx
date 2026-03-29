@@ -4,6 +4,7 @@ import { DND } from '../data/dnd.js'
 import { DND_ICONS } from './Icons.jsx'
 import { uid } from '../utils.js'
 import { useInp } from './UI.jsx'
+import { CLASS_FEATURES } from '../data/classFeatures.js'
 
 const emptyFeat = () => ({ id: uid(), name: '', desc: '', limited: false, usesMax: 1, usesLeft: 1 })
 
@@ -233,7 +234,7 @@ export function FeaturesTab({ char, onChange }) {
                   <span style={{ fontSize: 20, color: cc, lineHeight: 1 }}>
                     {DND_ICONS[cl.name] || '⚔'}
                   </span>
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: cc, letterSpacing: 1, textTransform: 'uppercase' }}>
                       {cl.name} {cl.level}
                     </div>
@@ -248,11 +249,39 @@ export function FeaturesTab({ char, onChange }) {
                     if (!limited.length) return null
                     const spent = limited.filter(f => f.usesLeft < f.usesMax).length
                     return (
-                      <div style={{ marginLeft: 'auto', fontSize: 9, color: spent ? C.yellow : C.green, letterSpacing: 1 }}>
+                      <div style={{ fontSize: 9, color: spent ? C.yellow : C.green, letterSpacing: 1 }}>
                         {spent ? `${spent} spent` : 'full'}
                       </div>
                     )
                   })()}
+                  {/* Load from class data */}
+                  {CLASS_FEATURES[cl.name] && (
+                    <button className="hov-btn" onClick={() => {
+                      const existing = cl.classFeats || []
+                      const existingNames = new Set(existing.map(f => f.name))
+                      const toAdd = CLASS_FEATURES[cl.name]
+                        .filter(f => f.level <= (cl.level || 1) && !existingNames.has(f.name))
+                        .map(f => ({
+                          id: uid(),
+                          name: f.name,
+                          desc: f.desc + (f.recharge ? ` [Recharge: ${f.recharge}]` : ''),
+                          limited: f.limited,
+                          usesMax: f.limited ? 1 : 1,
+                          usesLeft: f.limited ? 1 : 1,
+                        }))
+                      if (toAdd.length === 0) return
+                      updateClassFeats(idx, 'classFeats', [...existing, ...toAdd])
+                    }}
+                      style={{
+                        background: cc + '22', border: `1px solid ${cc}88`,
+                        color: cc, padding: '5px 10px', cursor: 'pointer',
+                        fontFamily: 'inherit', fontSize: 9, fontWeight: 700,
+                        letterSpacing: 1, textTransform: 'uppercase', whiteSpace: 'nowrap',
+                        boxShadow: `0 0 8px ${cc}33`,
+                      }}>
+                      ↓ Load Lv{cl.level || 1} Features
+                    </button>
+                  )}
                 </div>
 
                 {/* Base class features */}
