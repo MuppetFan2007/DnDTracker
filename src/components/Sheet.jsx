@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useRef, useCallback, useEffect } from 'react'
 import { useT, ThemeCtx, THEMES } from '../themes.js'
 import { DND } from '../data/dnd.js'
 import { mod, fmt, profB, totalLevel, uid } from '../utils.js'
@@ -6,12 +6,14 @@ import { DND_ICONS } from './Icons.jsx'
 import { CLabel, SecHdr, Btn, useInp, FullCircleHP } from './UI.jsx'
 import { SpellSlotsTab } from './SpellSlotsTab.jsx'
 import { CombatTab } from './CombatTab.jsx'
+import { DiceRoller, THEME_FX, useRollEngine } from './DiceRoller.jsx'
 
 export function Sheet({ char, onChange, onBack }) {
   const C   = useT()
   const inp = useInp()
-  const [tab,     setTab]     = useState('core')
-  const [editing, setEditing] = useState(false)
+  const [tab,      setTab]      = useState('core')
+  const [editing,  setEditing]  = useState(false)
+  const [rollMode, setRollMode] = useState('normal')
 
   // detect which theme is active
   const themeKey = Object.entries(THEMES).find(([, t]) => t.gold === C.gold)?.[0] || ''
@@ -27,7 +29,7 @@ export function Sheet({ char, onChange, onBack }) {
   const hpPct    = char.hp.max ? char.hp.current / char.hp.max * 100 : 0
   const hpColor  = hpPct > 60 ? C.green : hpPct > 30 ? C.yellow : C.red
 
-  const TABS = ['core', 'combat', 'spells', 'encounter', 'character']
+  const TABS = ['core', 'combat', 'spells', 'dice', 'encounter', 'character']
 
   const updateClass = (idx, field, val) => {
     const cls = [...(char.classes || [])]
@@ -111,9 +113,10 @@ export function Sheet({ char, onChange, onBack }) {
       {/* ── Tab content ── */}
       <div className="sheet-content" style={{ padding: '20px' }}>
         <div className="fade-up" key={tab}>
-          {tab === 'core'      && <TabCore      char={char} onChange={onChange} set={set} setN={setN} editing={editing} inp={inp} getSave={getSave} getSkill={getSkill} pb={pb} C={C} />}
+          {tab === 'core'      && <TabCore      char={char} onChange={onChange} set={set} setN={setN} editing={editing} inp={inp} getSave={getSave} getSkill={getSkill} pb={pb} C={C} rollMode={rollMode} setRollMode={setRollMode} themeKey={themeKey} />}
           {tab === 'combat'    && <CombatTab    char={char} onChange={onChange} />}
           {tab === 'spells'    && <SpellSlotsTab char={char} onChange={onChange} />}
+          {tab === 'dice'      && <DiceRoller   char={char} rollMode={rollMode} setRollMode={setRollMode} />}
           {tab === 'encounter' && <TabEncounter char={char} C={C} />}
           {tab === 'character' && <TabCharacter char={char} set={set} setN={setN} editing={editing} inp={inp} updateClass={updateClass} C={C} />}
         </div>
@@ -132,7 +135,7 @@ const STAT_GROUPS = [
   { stat: 'cha', skills: ['Deception', 'Intimidation', 'Performance', 'Persuasion'] },
 ]
 
-function TabCore({ char, onChange, set, setN, editing, inp, getSave, getSkill, pb, C }) {
+function TabCore({ char, onChange, set, setN, editing, inp, getSave, getSkill, pb, C, rollMode, setRollMode, themeKey }) {
   const cycleSkill = (sk) => {
     const prof   = char.skillProfs.includes(sk)
     const expert = (char.skillExpert || []).includes(sk)
@@ -148,8 +151,124 @@ function TabCore({ char, onChange, set, setN, editing, inp, getSave, getSkill, p
     }
   }
 
+  const fx = THEME_FX[themeKey] || THEME_FX.vcr
+  const { rolling, displayNum, result, particles, roll } = useRollEngine(rollMode, themeKey)
+
+  const rollCheck = useCallback((label, bonus) => {
+    roll('d20', bonus, label)
+  }, [roll])
+
+  const isCrit   = result && result.kept === 20
+  const isFumble = result && result.kept === 1
+  const rc = isCrit ? C.green : isFumble ? C.red : fx.color
+
   return (
     <div>
+      {/* Adv / disadv toggle + last roll result */}
+      <div style={{ display: 'grid', gridTemplateColumns: result || rolling ? '1fr 1fr' : '1fr', gap: 8, marginBottom: 12 }}>
+        {/* Mode toggle */}
+        <div style={{ display: 'flex', gap: 5 }}>
+          {[
+            { key: 'disadvantage', label: 'DISADV', color: C.red   },
+            { key: 'normal',       label: 'NORMAL', color: C.text  },
+            { key: 'advantage',    label: 'ADV',    color: C.green },
+          ].map(({ key, label, color }) => (
+            <button key={key} className="hov-btn" onClick={() => setRollMode(key)}
+              style={{
+                flex: 1, background: rollMode === key ? color + '1a' : 'transparent',
+                border: `1px solid ${rollMode === key ? color : C.border}`,
+                color: rollMode === key ? color : C.textMuted,
+                padding: '5px 4px', cursor: 'pointer', fontFamily: 'inherit',
+                fontSize: 9, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase',
+                transition: 'all 0.13s',
+              }}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Inline roll result */}
+        {(rolling || result) && (
+          <div style={{
+            background: C.card, border: `1px solid ${C.border}`,
+            borderLeft: `3px solid ${rc}`,
+            padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 10,
+            position: 'relative', overflow: 'hidden',
+          }}>
+            {/* VCR flicker */}
+            {themeKey === 'vcr' && rolling && (
+              <div className="dice-vcr-flicker" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} />
+            )}
+            {/* Particles */}
+            {particles.map(p => {
+              const rad = (p.angle * Math.PI) / 180
+              return (
+                <div key={p.id} className={`dice-particle dice-particle-${themeKey}`}
+                  style={{
+                    position: 'absolute', top: '50%', left: '30%',
+                    '--dx': `${Math.cos(rad) * p.dist * 0.6}px`,
+                    '--dy': `${Math.sin(rad) * p.dist * 0.6}px`,
+                    fontSize: 14, pointerEvents: 'none', zIndex: 2, color: fx.color,
+                  }}>{p.emoji}</div>
+              )
+            })}
+
+            {result?.label && (
+              <span style={{ fontSize: 9, color: C.textMuted, letterSpacing: 1, textTransform: 'uppercase', flexShrink: 0 }}>
+                {result.label}
+              </span>
+            )}
+
+            {rolling && displayNum !== null && (
+              Array.isArray(displayNum) ? (
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  {displayNum.map((n, i) => (
+                    <span key={i} className={`dice-rolling-num dice-rolling-${themeKey}`}
+                      style={{ fontSize: 26, fontWeight: 900, color: fx.color }}>{n}</span>
+                  ))}
+                </div>
+              ) : (
+                <span className={`dice-rolling-num dice-rolling-${themeKey}`}
+                  style={{ fontSize: 26, fontWeight: 900, color: fx.color }}>{displayNum}</span>
+              )
+            )}
+
+            {!rolling && result && (
+              <div className={`dice-result-${themeKey}`} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {result.die2 !== null ? (
+                  <>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      {[result.die1, result.die2].map((d, idx) => {
+                        const isKept = idx === result.keptIdx
+                        return (
+                          <span key={idx} style={{
+                            fontSize: isKept ? 26 : 14, fontWeight: 900,
+                            color: isKept ? rc : C.textMuted,
+                            textDecoration: !isKept ? 'line-through' : 'none',
+                            opacity: isKept ? 1 : 0.4,
+                          }}>{d}</span>
+                        )
+                      })}
+                    </div>
+                    <span style={{ fontSize: 22, fontWeight: 900, color: rc }}>= {result.total}</span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: 28, fontWeight: 900, color: rc,
+                    textShadow: `0 0 16px ${rc}88` }}>{result.total}</span>
+                )}
+                {result.mod !== 0 && (
+                  <span style={{ fontSize: 10, color: C.textDim }}>
+                    ({result.kept}{result.mod >= 0 ? `+${result.mod}` : result.mod})
+                  </span>
+                )}
+                {isCrit   && <span style={{ fontSize: 9, color: C.green, letterSpacing: 2 }}>CRIT ✦</span>}
+                {isFumble && <span style={{ fontSize: 9, color: C.red,   letterSpacing: 2 }}>FUMBLE</span>}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* 3×2 stat + skills grid */}
       <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 7, marginBottom: 10 }}>
         {STAT_GROUPS.map(({ stat, skills }) => (
@@ -162,36 +281,53 @@ function TabCore({ char, onChange, set, setN, editing, inp, getSave, getSkill, p
                   ? <input type="number" value={char.stats[stat]} min={1} max={30}
                       onChange={e => onChange({ ...char, stats: { ...char.stats, [stat]: +e.target.value } })}
                       style={{ ...inp, textAlign: 'center', fontSize: 18, padding: '2px 3px', width: 52 }} />
-                  : <div style={{ fontSize: 24, fontWeight: 700, color: C.text, lineHeight: 1 }}>{char.stats[stat]}</div>}
+                  : <div className="hov-btn" onClick={() => rollCheck(stat.toUpperCase(), mod(char.stats[stat]))}
+                      title={`Roll ${stat.toUpperCase()} check`}
+                      style={{ fontSize: 24, fontWeight: 700, color: C.text, lineHeight: 1, cursor: 'pointer' }}>
+                      {char.stats[stat]}
+                    </div>}
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: C.gold, marginBottom: 4 }}>{fmt(mod(char.stats[stat]))}</div>
+                <div className="hov-btn" onClick={() => !editing && rollCheck(stat.toUpperCase(), mod(char.stats[stat]))}
+                  style={{ fontSize: 15, fontWeight: 700, color: C.gold, marginBottom: 4, cursor: editing ? 'default' : 'pointer' }}>
+                  {fmt(mod(char.stats[stat]))}
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end' }}>
                   <div className="hov-btn"
                     onClick={() => onChange({ ...char, savingThrowProfs: char.savingThrowProfs.includes(stat) ? char.savingThrowProfs.filter(x => x !== stat) : [...char.savingThrowProfs, stat] })}
                     style={{ width: 8, height: 8, cursor: 'pointer', border: `1px solid ${C.textMuted}`, background: char.savingThrowProfs.includes(stat) ? C.gold : 'transparent', transition: 'all 0.15s', flexShrink: 0 }} />
-                  <span style={{ fontSize: 7, color: C.textMuted, whiteSpace: 'nowrap' }}>SAVE {fmt(getSave(stat))}</span>
+                  <span className="hov-btn" onClick={() => rollCheck(`${stat.toUpperCase()} Save`, getSave(stat))}
+                    title={`Roll ${stat.toUpperCase()} saving throw`}
+                    style={{ fontSize: 7, color: C.textMuted, whiteSpace: 'nowrap', cursor: 'pointer' }}>
+                    SAVE {fmt(getSave(stat))}
+                  </span>
                 </div>
               </div>
             </div>
-            {/* Skills — click cycles none → prof (●) → expertise (◆) → none */}
+            {/* Skills — dot cycles prof, name/bonus rolls */}
             {skills.map(sk => {
               const prof   = char.skillProfs.includes(sk)
               const expert = (char.skillExpert || []).includes(sk)
               const bonus  = getSkill(sk)
               const clr    = expert ? C.blue : prof ? C.gold : C.textMuted
               return (
-                <div key={sk} className="hov-btn" onClick={() => cycleSkill(sk)}
-                  title={expert ? 'Expertise — click to remove' : prof ? 'Proficient — click for Expertise' : 'Click to add proficiency'}
-                  style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 2px', cursor: 'pointer' }}>
-                  <div style={{
-                    width: 8, height: 8, flexShrink: 0, transition: 'all 0.15s',
-                    ...(expert
-                      ? { background: C.blue, border: `1.5px solid ${C.blue}`, transform: 'rotate(45deg)' }
-                      : { borderRadius: prof ? '50%' : 2, background: prof ? C.gold : 'transparent', border: `1.5px solid ${clr}` })
-                  }} />
-                  <span style={{ flex: 1, fontSize: 10, color: expert ? C.blue : prof ? C.text : C.textDim }}>{sk}</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: clr, minWidth: 22, textAlign: 'right' }}>{fmt(bonus)}</span>
+                <div key={sk} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '3px 2px' }}>
+                  {/* Dot — click to cycle proficiency */}
+                  <div className="hov-btn" onClick={() => cycleSkill(sk)}
+                    title={expert ? 'Expertise — click to remove' : prof ? 'Proficient — click for Expertise' : 'Click to add proficiency'}
+                    style={{
+                      width: 8, height: 8, flexShrink: 0, transition: 'all 0.15s', cursor: 'pointer',
+                      ...(expert
+                        ? { background: C.blue, border: `1.5px solid ${C.blue}`, transform: 'rotate(45deg)' }
+                        : { borderRadius: prof ? '50%' : 2, background: prof ? C.gold : 'transparent', border: `1.5px solid ${clr}` })
+                    }} />
+                  {/* Name + bonus — click to roll */}
+                  <div className="hov-btn" onClick={() => rollCheck(sk, bonus)}
+                    title={`Roll ${sk} (${fmt(bonus)})`}
+                    style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                    <span style={{ flex: 1, fontSize: 10, color: expert ? C.blue : prof ? C.text : C.textDim }}>{sk}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: clr, minWidth: 22, textAlign: 'right' }}>{fmt(bonus)}</span>
+                  </div>
                 </div>
               )
             })}

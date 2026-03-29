@@ -925,6 +925,173 @@ export function GlobalCSS() {
         .stat-grid { grid-template-columns: repeat(2,1fr) !important; }
         .roster-stats { grid-template-columns: repeat(2,1fr) !important; }
       }
+
+      /* ══════════════════════════════════════
+         ── Dice Roller Animations ──
+         ══════════════════════════════════════ */
+
+      /* Shared particle burst */
+      @keyframes dice-burst {
+        0%   { transform: translate(-50%,-50%) scale(1);   opacity: 1; }
+        100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2); opacity: 0; }
+      }
+      .dice-particle { animation: dice-burst 0.75s ease-out forwards; display: inline-block; }
+
+      /* Sakura — petals spin as they fly */
+      @keyframes dice-petal {
+        0%   { transform: translate(-50%,-50%) rotate(0deg) scale(1); opacity: 1; }
+        100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(540deg) scale(0.2); opacity: 0; }
+      }
+      .dice-particle-sakura    { animation: dice-petal   0.85s ease-out forwards; }
+      .dice-particle-mymelody  { animation: dice-petal   0.90s ease-out forwards; }
+
+      /* Moon — stars rotate and fade */
+      @keyframes dice-star {
+        0%   { transform: translate(-50%,-50%) scale(0) rotate(0deg); opacity: 1; }
+        60%  { opacity: 1; }
+        100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.7) rotate(360deg); opacity: 0; }
+      }
+      .dice-particle-moon { animation: dice-star 0.80s ease-out forwards; }
+
+      /* Kuromi — lightning zap */
+      @keyframes dice-zap {
+        0%   { transform: translate(-50%,-50%) scale(0.5); opacity: 1; }
+        30%  { transform: translate(calc(-50% + var(--dx)*0.4), calc(-50% + var(--dy)*0.4)) scale(1.4); opacity: 1; }
+        100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3); opacity: 0; }
+      }
+      .dice-particle-kuromi { animation: dice-zap 0.65s ease-out forwards; }
+
+      /* Racing — speed arrows shoot horizontally */
+      @keyframes dice-speed {
+        0%   { transform: translate(-50%,-50%) scaleX(0.5); opacity: 1; }
+        100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scaleX(1.5); opacity: 0; }
+      }
+      .dice-particle-racing { animation: dice-speed 0.55s ease-out forwards; font-weight: 900; }
+
+      /* ── Rolling number animations ── */
+
+      /* VCR: glitch skew */
+      @keyframes vcr-glitch-roll {
+        0%,100% { transform: skewX(0deg) scaleX(1);      color: #ff3c00; filter: none; }
+        15%     { transform: skewX(-8deg) scaleX(1.06);  color: #00ff88; filter: brightness(1.6); }
+        35%     { transform: skewX(5deg);                 color: #00ccff; }
+        55%     { transform: skewX(-4deg) scaleX(0.94);  color: #ff3c00; filter: brightness(0.7); }
+        75%     { transform: skewX(6deg) scaleX(1.03);   color: #ff3c00; }
+      }
+      .dice-rolling-vcr { animation: vcr-glitch-roll 0.11s steps(1) infinite; }
+
+      /* Moon: shimmer pulse */
+      @keyframes moon-roll-pulse {
+        0%,100% { text-shadow: 0 0 12px #7a6eff99; opacity: 0.75; }
+        50%     { text-shadow: 0 0 40px #c8b8ff, 0 0 80px #7a6eff88; opacity: 1; }
+      }
+      .dice-rolling-moon { animation: moon-roll-pulse 0.22s ease-in-out infinite; }
+
+      /* Sakura: gentle wobble */
+      @keyframes sakura-roll-wobble {
+        0%,100% { transform: rotate(-3deg); }
+        50%     { transform: rotate(3deg); }
+      }
+      .dice-rolling-sakura { animation: sakura-roll-wobble 0.18s ease-in-out infinite; }
+
+      /* Racing: rapid flash */
+      @keyframes racing-roll-flash {
+        0%,100% { transform: scaleX(1);    filter: brightness(1); }
+        50%     { transform: scaleX(1.06); filter: brightness(1.5); }
+      }
+      .dice-rolling-racing { animation: racing-roll-flash 0.09s ease-in-out infinite; }
+
+      /* Kuromi: dark pulse */
+      @keyframes kuromi-roll-dark {
+        0%,100% { text-shadow: 0 0 10px #c840ff; filter: brightness(1); }
+        50%     { text-shadow: 0 0 30px #c840ff, 0 0 60px #8800cc; filter: brightness(1.4); }
+      }
+      .dice-rolling-kuromi { animation: kuromi-roll-dark 0.15s ease-in-out infinite; }
+
+      /* My Melody: bouncy */
+      @keyframes melody-roll-bounce {
+        0%,100% { transform: scale(1) rotate(0deg); }
+        25%     { transform: scale(1.08) rotate(-4deg); }
+        75%     { transform: scale(0.94) rotate(4deg); }
+      }
+      .dice-rolling-mymelody { animation: melody-roll-bounce 0.20s ease-in-out infinite; }
+
+      /* ── Result reveal animations ── */
+
+      /* VCR: static-skew in */
+      @keyframes vcr-result-in {
+        0%  { opacity: 0; transform: skewX(-20deg) scaleX(0.6); filter: brightness(4); }
+        40% { opacity: 1; transform: skewX(6deg)   scaleX(1.04); }
+        70% { transform: skewX(-2deg); }
+        100%{ transform: skewX(0)    scaleX(1); filter: brightness(1); }
+      }
+      .dice-result-vcr { animation: vcr-result-in 0.38s ease-out forwards; }
+
+      /* Moon: blur-scale in */
+      @keyframes moon-result-in {
+        0%  { opacity: 0; transform: scale(0.5); filter: blur(12px); }
+        60% { opacity: 1; transform: scale(1.08); filter: blur(0); }
+        100%{ transform: scale(1); }
+      }
+      .dice-result-moon { animation: moon-result-in 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+      /* Sakura: rotate-bounce in */
+      @keyframes sakura-result-in {
+        0%  { opacity: 0; transform: scale(0.6) rotate(-8deg); }
+        65% { opacity: 1; transform: scale(1.1) rotate(2deg); }
+        100%{ transform: scale(1) rotate(0); }
+      }
+      .dice-result-sakura { animation: sakura-result-in 0.42s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+      /* Racing: slide from left */
+      @keyframes racing-result-in {
+        0%  { opacity: 0; transform: translateX(-40px) scaleX(0.8); }
+        60% { opacity: 1; transform: translateX(6px)   scaleX(1.02); }
+        100%{ transform: translateX(0) scaleX(1); }
+      }
+      .dice-result-racing { animation: racing-result-in 0.32s ease-out forwards; }
+
+      /* Kuromi: flash in with lightning */
+      @keyframes kuromi-result-in {
+        0%  { opacity: 0; transform: scale(1.5); filter: brightness(3); }
+        30% { opacity: 1; transform: scale(0.9); filter: brightness(1.2); }
+        60% { transform: scale(1.05); }
+        100%{ transform: scale(1); filter: brightness(1); }
+      }
+      .dice-result-kuromi { animation: kuromi-result-in 0.40s ease-out forwards; }
+
+      /* My Melody: spring pop */
+      @keyframes melody-result-in {
+        0%  { opacity: 0; transform: scale(0.4) rotate(15deg); }
+        55% { opacity: 1; transform: scale(1.18) rotate(-4deg); }
+        75% { transform: scale(0.94) rotate(2deg); }
+        100%{ transform: scale(1) rotate(0); }
+      }
+      .dice-result-mymelody { animation: melody-result-in 0.48s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+      /* VCR flickering overlay during roll */
+      @keyframes vcr-flicker {
+        0%,100% { opacity: 0; }
+        10%,30%,50%,70% { opacity: 0.06; }
+        20%,40%,60%,80% { opacity: 0; }
+      }
+      .dice-vcr-flicker {
+        background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,60,0,0.08) 2px, rgba(255,60,0,0.08) 4px);
+        animation: vcr-flicker 0.1s steps(1) infinite;
+      }
+
+      /* Racing speed lines overlay */
+      @keyframes speed-lines-anim {
+        0%   { opacity: 0.7; transform: scaleX(0) translateX(-20px); }
+        100% { opacity: 0;   transform: scaleX(1) translateX(0); }
+      }
+      .dice-speed-lines {
+        background: repeating-linear-gradient(
+          90deg, transparent, transparent 18px,
+          rgba(0,229,204,0.12) 18px, rgba(0,229,204,0.12) 20px
+        );
+        animation: speed-lines-anim 0.18s ease-out infinite;
+      }
     `}</style>
   )
 }
