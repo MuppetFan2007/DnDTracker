@@ -11,10 +11,12 @@ export default function App() {
     try { return localStorage.getItem('dnd_theme') || 'vcr' } catch { return 'vcr' }
   })
   const C        = THEMES[themeKey] || THEMES.vcr
-  const isVcr    = themeKey === 'vcr'
-  const isRacing = themeKey === 'racing'
-  const isMoon   = themeKey === 'moon'
-  const isSakura = themeKey === 'sakura'
+  const isVcr      = themeKey === 'vcr'
+  const isRacing   = themeKey === 'racing'
+  const isMoon     = themeKey === 'moon'
+  const isSakura   = themeKey === 'sakura'
+  const isKuromi   = themeKey === 'kuromi'
+  const isMyMelody = themeKey === 'mymelody'
 
   useEffect(() => {
     try { localStorage.setItem('dnd_theme', themeKey) } catch {}
@@ -32,11 +34,18 @@ export default function App() {
   const deleteChar = (id)   => setChars(cs => cs.filter(c => c.id !== id))
   const importChars = (newChars) => newChars.forEach(c => saveChar({ ...c, id: uid() }))
 
-  const rootClass = isVcr ? 'vcr-root' : isRacing ? 'racing-root' : isMoon ? 'moon-root' : isSakura ? 'sakura-root' : ''
-  const fontFamily = isVcr
-    ? "'Share Tech Mono', monospace"
-    : isRacing
-    ? "'Rajdhani', 'Segoe UI', sans-serif"
+  const rootClass = isVcr ? 'vcr-root'
+    : isRacing   ? 'racing-root'
+    : isMoon     ? 'moon-root'
+    : isSakura   ? 'sakura-root'
+    : isKuromi   ? 'kuromi-root'
+    : isMyMelody ? 'mymelody-root'
+    : ''
+  const fontFamily = isVcr     ? "'Share Tech Mono', monospace"
+    : isRacing   ? "'Rajdhani', 'Segoe UI', sans-serif"
+    : isMyMelody ? "'Nunito', 'Segoe UI', sans-serif"
+    : isKuromi   ? "'Share Tech Mono', monospace"
+    : isMoon     ? "'Cinzel', 'Georgia', serif"
     : "'Segoe UI', system-ui, sans-serif"
 
   return (
@@ -46,8 +55,14 @@ export default function App() {
       {/* VCR scanlines */}
       {isVcr && <div className="vcr-scanlines" />}
 
-      {/* Moon — star field only */}
+      {/* 月夜 Moon — nebula + stars + crescent + shooting stars + kanji + shimmer */}
+      {isMoon && <div className="moon-nebula" />}
       {isMoon && <div className="moon-stars" />}
+      {isMoon && <div className="moon-stars-lg" />}
+      {isMoon && <div className="moon-orb" />}
+      {isMoon && <div className="moon-shooting" />}
+      {isMoon && <div className="moon-shimmer" />}
+      {isMoon && <div className="moon-kanji">月</div>}
 
       {/* Sakura Miku — falling petals + sparkles + corner bloom */}
       {isSakura && <div className="sakura-petals" />}
@@ -57,6 +72,18 @@ export default function App() {
       {/* Racing Miku — speed lines + animated stripe */}
       {isRacing && <div className="racing-speedlines" />}
       {isRacing && <div className="racing-stripe" />}
+
+      {/* Kuromi — dark aura + particles + skull + lightning */}
+      {isKuromi && <div className="kuromi-aura" />}
+      {isKuromi && <div className="kuromi-particles" />}
+      {isKuromi && <div className="kuromi-skull">💀</div>}
+      {isKuromi && <div className="kuromi-lightning" />}
+
+      {/* My Melody — rainbow stripe + hearts + corner orbs + sparkles */}
+      {isMyMelody && <div className="mymelody-rainbow" />}
+      {isMyMelody && <div className="mymelody-hearts" />}
+      {isMyMelody && <div className="mymelody-orbs" />}
+      {isMyMelody && <div className="mymelody-sparkles" />}
 
       <div
         className={rootClass}

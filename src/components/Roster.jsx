@@ -16,8 +16,10 @@ function downloadJson(data, filename) {
 
 export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKey, onImport }) {
   const C        = useT()
-  const isVcr    = themeKey === 'vcr'
-  const isRacing = themeKey === 'racing'
+  const isVcr      = themeKey === 'vcr'
+  const isRacing   = themeKey === 'racing'
+  const isKuromi   = themeKey === 'kuromi'
+  const isMyMelody = themeKey === 'mymelody'
   const [search, setSearch] = useState('')
   const importRef = useRef(null)
 
@@ -54,6 +56,11 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
                 ◆ Racing Division — Character Registry ◆
               </div>
             )}
+            {isKuromi && (
+              <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, marginBottom: 6, textTransform: 'uppercase' }}>
+                ☆ dark magic activated ☆
+              </div>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
               {isVcr ? (
                 <div style={{ borderLeft: `3px solid ${C.gold}`, paddingLeft: 14 }}>
@@ -62,6 +69,10 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
                 </div>
               ) : isRacing ? (
                 <RacingHeader C={C} />
+              ) : isKuromi ? (
+                <KuomiHeader C={C} />
+              ) : isMyMelody ? (
+                <MyMelodyHeader C={C} />
               ) : (
                 <>
                   <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg,${C.gold},${C.goldDim})`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.bg, boxShadow: `0 4px 16px ${C.gold}44` }}>
@@ -80,7 +91,7 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
             {isVcr    && <VcrClock />}
             {isRacing && <RacingLapCounter C={C} />}
             {/* Theme switcher */}
-            <div style={{ display: 'flex', gap: 5, background: C.surface, border: `1px solid ${C.border}`, padding: '4px 6px', borderRadius: isRacing ? 20 : 0 }}>
+            <div style={{ display: 'flex', gap: 5, background: C.surface, border: `1px solid ${C.border}`, padding: '4px 6px', borderRadius: isRacing || isMyMelody ? 20 : 0 }}>
               {Object.entries(THEMES).map(([k, t]) => (
                 <button key={k} className="hov-btn" onClick={() => setThemeKey(k)} title={t.name}
                   style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${k === themeKey ? C.gold : 'transparent'}`, background: t.gold, padding: 0, boxShadow: k === themeKey ? `0 0 8px ${t.gold}` : 'none' }} />
@@ -89,8 +100,11 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
             <input type="file" accept=".json" style={{ display: 'none' }} ref={importRef} onChange={handleImportFile} />
             <Btn onClick={() => importRef.current.click()}>Import</Btn>
             {chars.length > 0 && <Btn onClick={() => downloadJson(chars, 'dnd-characters.json')}>Export All</Btn>}
-            <Btn variant="gold" onClick={onCreate} style={isRacing ? { borderRadius: 20, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1, padding: '8px 22px' } : {}}>
-              {isVcr ? '> NEW_CHAR.EXE' : isRacing ? '✦ New Character' : '+ New Character'}
+            <Btn variant="gold" onClick={onCreate} style={
+              isRacing   ? { borderRadius: 20, fontFamily: "'Rajdhani', sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: 1, padding: '8px 22px' }
+            : isMyMelody ? { borderRadius: 20, fontWeight: 800 }
+            : {}}>
+              {isVcr ? '> NEW_CHAR.EXE' : isRacing ? '✦ New Character' : isKuromi ? '★ Summon Character' : isMyMelody ? '♡ New Character' : '+ New Character'}
             </Btn>
           </div>
         </div>
@@ -105,8 +119,8 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
               ['Unique Classes', new Set(chars.flatMap(c => (c.classes || []).map(cl => cl.name))).size,        <Icons.Book key="b" />],
             ].map(([l, v, ic]) => (
               <div key={l}
-                className={isRacing ? 'racing-card-holo' : ''}
-                style={{ background: C.card, border: `1px solid ${C.border}`, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, borderRadius: isRacing ? 12 : 0, boxShadow: isRacing ? `0 0 0 1px ${C.border}, 0 4px 20px #00e5cc0a` : 'none' }}>
+                className={isRacing ? 'racing-card-holo' : isKuromi ? 'kuromi-shimmer' : isMyMelody ? 'mymelody-shimmer' : ''}
+                style={{ background: C.card, border: `1px solid ${C.border}`, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, borderRadius: isRacing || isMyMelody ? 12 : 0, boxShadow: isRacing ? `0 0 0 1px ${C.border}, 0 4px 20px #00e5cc0a` : isKuromi ? `0 0 16px #c840ff22` : 'none' }}>
                 <span style={{ color: C.gold, fontSize: 20 }}>{ic}</span>
                 <div>
                   <div className={isRacing ? 'miku-glow-text' : ''} style={{ fontSize: 22, fontWeight: 700, color: C.gold, lineHeight: 1 }}>{v}</div>
@@ -120,9 +134,9 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
         {/* ── Search ── */}
         {chars.length > 3 && (
           <input
-            placeholder={isVcr ? 'SEARCH_QUERY:_' : isRacing ? '✦ Search pilots...' : 'Search adventurers...'}
+            placeholder={isVcr ? 'SEARCH_QUERY:_' : isRacing ? '✦ Search pilots...' : isKuromi ? '☆ Search the darkness...' : isMyMelody ? '♡ Search adventurers...' : 'Search adventurers...'}
             value={search} onChange={e => setSearch(e.target.value)}
-            style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '9px 16px', fontSize: 13, width: '100%', marginBottom: 18, fontFamily: 'inherit', letterSpacing: 1, borderRadius: isRacing ? 24 : 0 }}
+            style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '9px 16px', fontSize: 13, width: '100%', marginBottom: 18, fontFamily: 'inherit', letterSpacing: 1, borderRadius: isRacing || isMyMelody ? 24 : 0 }}
           />
         )}
 
@@ -138,6 +152,10 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
               </>
             ) : isRacing ? (
               <RacingEmptyState C={C} onCreate={onCreate} />
+            ) : isKuromi ? (
+              <KuomiEmptyState C={C} onCreate={onCreate} />
+            ) : isMyMelody ? (
+              <MyMelodyEmptyState C={C} onCreate={onCreate} />
             ) : (
               <>
                 <div style={{ fontSize: 60, marginBottom: 16, opacity: 0.2, color: C.textDim }}><Icons.Map /></div>
@@ -149,7 +167,7 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(270px,1fr))', gap: 16 }}>
-            {filtered.map(c => <CharCard key={c.id} char={c} onOpen={onOpen} onDelete={onDelete} onExport={() => downloadJson(c, `${c.name || 'character'}.json`)} isRacing={isRacing} />)}
+            {filtered.map(c => <CharCard key={c.id} char={c} onOpen={onOpen} onDelete={onDelete} onExport={() => downloadJson(c, `${c.name || 'character'}.json`)} isRacing={isRacing} isKuromi={isKuromi} isMyMelody={isMyMelody} />)}
           </div>
         )}
       </div>
@@ -216,7 +234,71 @@ function RacingEmptyState({ C, onCreate }) {
   )
 }
 
-export function CharCard({ char, onOpen, onDelete, onExport, isRacing }) {
+/* ── Kuromi header ── */
+function KuomiHeader({ C }) {
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ position: 'absolute', top: -4, left: -16, width: 4, height: '120%', background: `linear-gradient(180deg, #c840ff, #8a18cc)`, borderRadius: 2, boxShadow: '0 0 14px #c840ff88' }} />
+      <div style={{ paddingLeft: 8 }}>
+        <div style={{ fontSize: 26, fontWeight: 900, color: C.gold, letterSpacing: 3, lineHeight: 1, textShadow: `0 0 18px ${C.gold}88, 0 0 40px ${C.gold}44` }}>
+          D&amp;D 2024 <span style={{ fontSize: 18, opacity: 0.7 }}>☆</span>
+        </div>
+        <div style={{ fontSize: 10, color: C.textMuted, letterSpacing: 3, marginTop: 3, textTransform: 'uppercase' }}>
+          Kuromi — Dark Magic Character Manager
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Kuromi empty state ── */
+function KuomiEmptyState({ C, onCreate }) {
+  return (
+    <div>
+      <div style={{ fontSize: 72, marginBottom: 8, lineHeight: 1, filter: `drop-shadow(0 0 22px ${C.gold})`, animation: 'kuromi-skull-haunt 14s ease-in-out infinite' }}>💀</div>
+      <div style={{ fontSize: 32, fontWeight: 900, color: C.gold, letterSpacing: 4, marginBottom: 6, textShadow: `0 0 18px ${C.gold}88` }}>
+        NO SOULS FOUND
+      </div>
+      <div style={{ fontSize: 11, color: C.textMuted, letterSpacing: 2, marginBottom: 4 }}>The ritual circle is empty</div>
+      <div style={{ fontSize: 10, color: C.textMuted, letterSpacing: 1, marginBottom: 32 }}>Summon your first character to begin the dark adventure</div>
+      <Btn variant="gold" onClick={onCreate} style={{ letterSpacing: 3 }}>★ Begin the Ritual</Btn>
+    </div>
+  )
+}
+
+/* ── My Melody header ── */
+function MyMelodyHeader({ C }) {
+  return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ position: 'absolute', top: -4, left: -16, width: 4, height: '120%', background: `linear-gradient(180deg, #ff6b9d, #d82858)`, borderRadius: 2, boxShadow: '0 0 12px #d8285866' }} />
+      <div style={{ paddingLeft: 8 }}>
+        <div style={{ fontSize: 26, fontWeight: 800, color: C.gold, letterSpacing: 1, lineHeight: 1, fontFamily: "'Nunito', sans-serif" }}>
+          D&amp;D 2024 <span style={{ fontSize: 20 }}>♡</span>
+        </div>
+        <div style={{ fontSize: 11, color: C.textMuted, letterSpacing: 2, marginTop: 3 }}>
+          My Melody — Character Manager
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── My Melody empty state ── */
+function MyMelodyEmptyState({ C, onCreate }) {
+  return (
+    <div>
+      <div style={{ fontSize: 72, marginBottom: 8, lineHeight: 1 }}>🎀</div>
+      <div style={{ fontSize: 30, fontWeight: 800, color: C.gold, letterSpacing: 1, marginBottom: 6, fontFamily: "'Nunito', sans-serif" }}>
+        No adventurers yet! ♡
+      </div>
+      <div style={{ fontSize: 13, color: C.textMuted, marginBottom: 4 }}>The meadow is quiet and waiting~</div>
+      <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 32 }}>Create your first character to start your sweet adventure</div>
+      <Btn variant="gold" onClick={onCreate} style={{ borderRadius: 20, fontWeight: 800, fontFamily: "'Nunito', sans-serif" }}>♡ Create Character</Btn>
+    </div>
+  )
+}
+
+export function CharCard({ char, onOpen, onDelete, onExport, isRacing, isKuromi, isMyMelody }) {
   const C = useT()
   const lvl = totalLevel(char)
   const hpPct = char.hp.max ? char.hp.current / char.hp.max * 100 : 0
@@ -225,40 +307,61 @@ export function CharCard({ char, onOpen, onDelete, onExport, isRacing }) {
   const cc = DND.classColors[mainClass] || C.gold
   const isMulti = (char.classes || []).length > 1
 
+  const rounded = isRacing || isMyMelody ? 14 : 0
+  const cardClass = isRacing ? 'hov-card racing-card-holo'
+    : isKuromi   ? 'hov-card kuromi-shimmer'
+    : isMyMelody ? 'hov-card mymelody-shimmer'
+    : 'hov-card'
+
   return (
     <div
-      className={`hov-card${isRacing ? ' racing-card-holo' : ''}`}
+      className={cardClass}
       onClick={() => onOpen(char.id)}
       style={{
         background: C.card,
-        border: `1px solid ${isRacing ? C.border : C.border}`,
+        border: `1px solid ${C.border}`,
         overflow: 'hidden', cursor: 'pointer',
-        borderRadius: isRacing ? 14 : 0,
-        boxShadow: isRacing ? `0 0 0 1px ${C.border}, 0 4px 20px #00e5cc08` : 'none',
+        borderRadius: rounded,
+        boxShadow: isRacing  ? `0 0 0 1px ${C.border}, 0 4px 20px #00e5cc08`
+          : isKuromi   ? `0 0 18px #c840ff1a`
+          : 'none',
       }}
     >
       {/* Top accent bar */}
       <div style={{
-        height: isRacing ? 3 : 2,
-        background: isRacing
-          ? `linear-gradient(90deg, ${cc}, #00e5cc, #ff4fa3)`
+        height: isRacing || isMyMelody ? 4 : isKuromi ? 3 : 2,
+        background: isRacing   ? `linear-gradient(90deg, ${cc}, #00e5cc, #ff4fa3)`
+          : isKuromi   ? `linear-gradient(90deg, #8a18cc, #c840ff, #ff40cc)`
+          : isMyMelody ? `linear-gradient(90deg, #ff6b9d, #ffb347, #ffd700, #98fb98, #87ceeb, #da70d6)`
           : cc,
-        boxShadow: `0 0 ${isRacing ? 10 : 8}px ${cc}88`,
+        boxShadow: isKuromi ? `0 0 12px #c840ff88` : `0 0 8px ${cc}88`,
       }} />
 
       <div style={{ padding: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 700, color: C.gold, letterSpacing: isRacing ? 0.5 : 1, marginBottom: 2, textShadow: isRacing ? `0 0 10px ${C.gold}66` : 'none' }}>
-              {char.name || (isRacing ? 'UNNAMED PILOT' : 'UNNAMED')}
-              {isRacing && <span className="miku-sparkle" style={{ marginLeft: 6, fontSize: 8, color: '#ff4fa3' }}>✦</span>}
+            <div style={{
+              fontSize: 15, fontWeight: isMyMelody ? 800 : 700, color: C.gold, marginBottom: 2,
+              letterSpacing: isRacing ? 0.5 : 1,
+              textShadow: isRacing  ? `0 0 10px ${C.gold}66`
+                : isKuromi ? `0 0 12px ${C.gold}99`
+                : 'none',
+              fontFamily: isMyMelody ? "'Nunito', sans-serif" : 'inherit',
+            }}>
+              {char.name || (isRacing ? 'UNNAMED PILOT' : isKuromi ? 'UNNAMED SOUL' : isMyMelody ? 'Unnamed ♡' : 'UNNAMED')}
+              {isRacing   && <span className="miku-sparkle" style={{ marginLeft: 6, fontSize: 8, color: '#ff4fa3' }}>✦</span>}
+              {isKuromi   && <span style={{ marginLeft: 5, fontSize: 9, color: '#c840ff', filter: 'drop-shadow(0 0 4px #c840ff)' }}>☆</span>}
+              {isMyMelody && <span style={{ marginLeft: 4, fontSize: 11 }}>♡</span>}
             </div>
             <div style={{ fontSize: 10, color: C.textDim, letterSpacing: 1 }}>
               {char.customSpecies || char.species} // LV.{lvl}
-              {isMulti && <span style={{ marginLeft: 6, fontSize: 9, color: C.gold, border: `1px solid ${C.gold}55`, padding: '1px 4px', borderRadius: isRacing ? 6 : 0 }}>MULTI</span>}
+              {isMulti && <span style={{ marginLeft: 6, fontSize: 9, color: C.gold, border: `1px solid ${C.gold}55`, padding: '1px 4px', borderRadius: rounded > 0 ? 6 : 0 }}>MULTI</span>}
             </div>
           </div>
-          <span style={{ color: cc, opacity: 0.8, fontSize: 18, filter: isRacing ? `drop-shadow(0 0 6px ${cc})` : 'none' }}>
+          <span style={{
+            color: cc, opacity: 0.8, fontSize: 18,
+            filter: isRacing ? `drop-shadow(0 0 6px ${cc})` : isKuromi ? `drop-shadow(0 0 8px ${C.gold})` : 'none',
+          }}>
             {DND_ICONS[mainClass]}
           </span>
         </div>
@@ -267,7 +370,7 @@ export function CharCard({ char, onOpen, onDelete, onExport, isRacing }) {
           {(char.classes || []).map((cl, i) => {
             const clc = DND.classColors[cl.name] || C.gold
             return (
-              <span key={i} style={{ fontSize: 9, background: clc + '22', border: `1px solid ${clc}44`, padding: '2px 7px', color: clc, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 3, borderRadius: isRacing ? 8 : 0 }}>
+              <span key={i} style={{ fontSize: 9, background: clc + '22', border: `1px solid ${clc}44`, padding: '2px 7px', color: clc, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 3, borderRadius: rounded > 0 ? 8 : 0 }}>
                 {DND_ICONS[cl.name]} {cl.name} {cl.level}
               </span>
             )
@@ -278,7 +381,7 @@ export function CharCard({ char, onOpen, onDelete, onExport, isRacing }) {
           <FullCircleHP current={char.hp.current} max={char.hp.max} color={hpColor} size={62} temp={char.hp.temp || 0} />
           <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
             {[['AC', char.ac], ['SPD', `${char.speed}ft`]].map(([l, v]) => (
-              <div key={l} style={{ background: C.surface, border: `1px solid ${C.border}`, padding: '6px 8px', textAlign: 'center', borderRadius: isRacing ? 8 : 0 }}>
+              <div key={l} style={{ background: C.surface, border: `1px solid ${C.border}`, padding: '6px 8px', textAlign: 'center', borderRadius: rounded > 0 ? 8 : 0 }}>
                 <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 2 }}>{l}</div>
                 <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{v}</div>
               </div>
@@ -293,7 +396,7 @@ export function CharCard({ char, onOpen, onDelete, onExport, isRacing }) {
             onMouseEnter={e => e.currentTarget.style.color = C.gold}
             onMouseLeave={e => e.currentTarget.style.color = C.textMuted}
           >
-            {isRacing ? '↓ export' : '[↓] EXPORT'}
+            {isRacing ? '↓ export' : isKuromi ? '↓ extract' : isMyMelody ? '↓ save ♡' : '[↓] EXPORT'}
           </button>
           <button
             onClick={e => { e.stopPropagation(); if (confirm('Delete this character?')) onDelete(char.id) }}
@@ -301,7 +404,7 @@ export function CharCard({ char, onOpen, onDelete, onExport, isRacing }) {
             onMouseEnter={e => e.currentTarget.style.color = C.red}
             onMouseLeave={e => e.currentTarget.style.color = C.textMuted}
           >
-            {isRacing ? '✕ retire' : '[X] DELETE'}
+            {isRacing ? '✕ retire' : isKuromi ? '☆ banish' : isMyMelody ? '✕ goodbye' : '[X] DELETE'}
           </button>
         </div>
       </div>

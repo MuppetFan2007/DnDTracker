@@ -3,7 +3,7 @@ import React from 'react'
 export function GlobalCSS() {
   return (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Rajdhani:wght@500;700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Rajdhani:wght@500;700&family=Nunito:wght@400;600;700;800&family=Cinzel:wght@400;600;700&display=swap');
 
       *, *::before, *::after { box-sizing: border-box; }
       body { margin: 0; }
@@ -28,64 +28,228 @@ export function GlobalCSS() {
         pointer-events: none; z-index: 9999;
       }
 
-      /* ── Moon theme ── */
-      .moon-root::-webkit-scrollbar-thumb { background: #f0e4c033; }
+      /* ══════════════════════════════════════
+         ── 月夜 Tsukiyo · Moon/Space theme ──
+         ══════════════════════════════════════ */
+      .moon-root { font-family: 'Cinzel', 'Georgia', serif !important; letter-spacing: 0.04em; }
+      .moon-root input, .moon-root select, .moon-root textarea, .moon-root button {
+        font-family: 'Cinzel', 'Georgia', serif !important;
+      }
+      .moon-root::-webkit-scrollbar-thumb { background: #7a6eff44; }
 
-      /* Simple yellow crescent — two overlapping circles */
+      /* Neon-purple card hover */
+      .moon-root .hov-card:hover {
+        box-shadow:
+          0 0 0 1px #7a6eff,
+          0 0 28px #7a6eff44,
+          0 10px 44px rgba(0,0,0,0.90) !important;
+        border-color: #7a6eff !important;
+        transform: translateY(-4px) !important;
+      }
+      .moon-root input:focus, .moon-root select:focus, .moon-root textarea:focus {
+        border-color: #7a6eff !important;
+        box-shadow: 0 0 0 2px #7a6eff22, 0 0 18px #7a6eff44 !important;
+      }
+
+      /* ── 月 Kanji watermark — enormous, spectral ── */
+      .moon-kanji {
+        position: fixed; bottom: -40px; right: -30px;
+        font-size: 480px; line-height: 1;
+        color: rgba(122,110,255,0.040);
+        pointer-events: none; z-index: 0; user-select: none;
+        font-family: 'Georgia', serif;
+        animation: moon-kanji-breathe 26s ease-in-out infinite;
+        filter: blur(1px);
+      }
+      @keyframes moon-kanji-breathe {
+        0%,100% { opacity: 0.7;  transform: scale(1.00) rotate(-2deg); }
+        40%     { opacity: 1.0;  transform: scale(1.04) rotate(-1deg); }
+        70%     { opacity: 0.55; transform: scale(0.97) rotate(-3deg); }
+      }
+
+      /* ── Nebula aurora — drifting colour clouds ── */
+      .moon-nebula {
+        position: fixed; inset: 0;
+        pointer-events: none; z-index: 0;
+        background:
+          radial-gradient(ellipse 58% 38% at  6% 10%, rgba(70,50,200,0.28) 0%, transparent 68%),
+          radial-gradient(ellipse 42% 32% at 94%  6%, rgba(110,70,220,0.20) 0%, transparent 65%),
+          radial-gradient(ellipse 50% 30% at 78% 90%, rgba(50,100,210,0.18) 0%, transparent 65%),
+          radial-gradient(ellipse 38% 42% at 14% 85%, rgba(90,50,190,0.15) 0%, transparent 65%),
+          radial-gradient(ellipse 28% 22% at 48% 44%, rgba(80,90,230,0.10) 0%, transparent 60%);
+        animation: nebula-drift 30s ease-in-out infinite;
+      }
+      @keyframes nebula-drift {
+        0%,100% { opacity: 0.65; transform: scale(1.00); }
+        33%     { opacity: 1.00; transform: scale(1.03) translateX(8px);  }
+        66%     { opacity: 0.75; transform: scale(0.98) translateX(-6px); }
+      }
+
+      /* ── Crescent moon — top right ── */
       .moon-orb {
-        position: fixed; top: 30px; right: 110px;
-        width: 130px; height: 130px;
-        border-radius: 50%;
-        background: #f0dc78;
+        position: fixed; top: 22px; right: 100px;
+        width: 110px; height: 110px; border-radius: 50%;
+        background: #d0ccff;
+        box-shadow: 0 0 0 1.5px rgba(200,185,255,0.55),
+                    0 0 50px 14px rgba(122,110,255,0.28),
+                    0 0 120px 60px rgba(80,60,200,0.12);
         pointer-events: none; z-index: 1;
       }
-      /* Dark circle offset to cut the crescent shape */
       .moon-orb::after {
         content: '';
-        position: absolute;
-        top: -6px; left: 22px;
-        width: 122px; height: 122px;
-        border-radius: 50%;
-        background: #010915;
+        position: absolute; top: -5px; left: 20px;
+        width: 104px; height: 104px; border-radius: 50%;
+        background: #01020e;
       }
 
-      /* Star field — plain static dots, no animation */
+      /* ── Large bright foreground stars ── */
+      .moon-stars-lg {
+        position: fixed; top: 0; left: 0;
+        width: 2px; height: 2px; border-radius: 50%;
+        background: rgba(255,255,255,0.95);
+        pointer-events: none; z-index: 0;
+        animation: star-twinkle-lg 7s ease-in-out infinite;
+        box-shadow:
+          120px  55px 0 1px  rgba(200,185,255,0.95),
+          340px  30px 0 1.5px rgba(255,255,255,0.90),
+          580px  80px 0 1px  rgba(200,185,255,0.88),
+          900px  42px 0 1.5px rgba(255,255,255,0.92),
+         1180px  65px 0 1px  rgba(200,185,255,0.90),
+         1460px  38px 0 1.5px rgba(255,255,255,0.88),
+         1740px  72px 0 1px  rgba(200,185,255,0.85),
+          200px 180px 0 1.5px rgba(255,255,255,0.82),
+          470px 210px 0 1px  rgba(200,185,255,0.88),
+          750px 160px 0 1.5px rgba(255,255,255,0.85),
+         1020px 195px 0 1px  rgba(200,185,255,0.80),
+         1340px 170px 0 1.5px rgba(255,255,255,0.88),
+         1620px 200px 0 1px  rgba(200,185,255,0.82),
+           80px 350px 0 1.5px rgba(255,255,255,0.80),
+          410px 390px 0 1px  rgba(200,185,255,0.85),
+          700px 320px 0 1.5px rgba(255,255,255,0.82),
+          980px 370px 0 1px  rgba(200,185,255,0.78),
+         1260px 340px 0 1.5px rgba(255,255,255,0.85),
+         1560px 380px 0 1px  rgba(200,185,255,0.80),
+         1800px 310px 0 1.5px rgba(255,255,255,0.75);
+      }
+      @keyframes star-twinkle-lg {
+        0%,100% { opacity: 0.45; transform: scale(1.0); }
+        28%     { opacity: 1.00; transform: scale(1.5); }
+        55%     { opacity: 0.60; transform: scale(0.9); }
+        80%     { opacity: 0.95; transform: scale(1.3); }
+      }
+
+      /* ── Small background star field ── */
       .moon-stars {
         position: fixed; top: 0; left: 0;
         width: 1px; height: 1px;
         background: transparent;
         pointer-events: none; z-index: 0;
         box-shadow:
-          65px  180px 0 1px rgba(240,228,192,0.65),
-          155px  95px 0 1px rgba(240,228,192,0.55),
-          240px 310px 0 1px rgba(240,228,192,0.60),
-          380px  88px 0 1px rgba(240,228,192,0.70),
-          490px 460px 0 1px rgba(240,228,192,0.50),
-          565px 220px 0 1px rgba(240,228,192,0.60),
-          680px 530px 0 1px rgba(240,228,192,0.55),
-          815px 145px 0 1px rgba(240,228,192,0.70),
-          930px 600px 0 1px rgba(240,228,192,0.50),
-          1040px 285px 0 1px rgba(240,228,192,0.60),
-          1160px 410px 0 1px rgba(240,228,192,0.65),
-          1290px 195px 0 1px rgba(240,228,192,0.55),
-          1410px 565px 0 1px rgba(240,228,192,0.50),
-          1550px  95px 0 1px rgba(240,228,192,0.60),
-          1660px 430px 0 1px rgba(240,228,192,0.55),
-          1740px 270px 0 1px rgba(240,228,192,0.65),
-          1810px 590px 0 1px rgba(240,228,192,0.45),
-          40px   690px 0 1px rgba(240,228,192,0.55),
-          175px  810px 0 1px rgba(240,228,192,0.45),
-          310px  680px 0 1px rgba(240,228,192,0.60),
-          455px  880px 0 1px rgba(240,228,192,0.50),
-          610px  740px 0 1px rgba(240,228,192,0.55),
-          770px  840px 0 1px rgba(240,228,192,0.45),
-          940px  770px 0 1px rgba(240,228,192,0.60),
-          1110px 910px 0 1px rgba(240,228,192,0.45),
-          1270px 665px 0 1px rgba(240,228,192,0.55),
-          1420px 790px 0 1px rgba(240,228,192,0.50),
-          1600px 710px 0 1px rgba(240,228,192,0.55),
-          1790px 880px 0 1px rgba(240,228,192,0.45),
-          330px   50px 0 1px rgba(240,228,192,0.65);
+           65px 180px 0 0.5px rgba(180,170,255,0.70),
+          155px  95px 0 1px   rgba(210,200,255,0.60),
+          240px 310px 0 0.5px rgba(180,170,255,0.65),
+          380px  88px 0 1px   rgba(220,215,255,0.72),
+          490px 460px 0 0.5px rgba(180,170,255,0.55),
+          565px 220px 0 1px   rgba(210,200,255,0.62),
+          680px 530px 0 0.5px rgba(180,170,255,0.58),
+          815px 145px 0 1px   rgba(220,215,255,0.70),
+          930px 600px 0 0.5px rgba(180,170,255,0.52),
+         1040px 285px 0 1px   rgba(210,200,255,0.62),
+         1160px 410px 0 0.5px rgba(180,170,255,0.65),
+         1290px 195px 0 1px   rgba(220,215,255,0.58),
+         1410px 565px 0 0.5px rgba(180,170,255,0.52),
+         1550px  95px 0 1px   rgba(210,200,255,0.62),
+         1660px 430px 0 0.5px rgba(180,170,255,0.58),
+         1740px 270px 0 1px   rgba(220,215,255,0.65),
+         1810px 590px 0 0.5px rgba(180,170,255,0.48),
+           40px 690px 0 1px   rgba(210,200,255,0.55),
+          175px 810px 0 0.5px rgba(180,170,255,0.48),
+          310px 680px 0 1px   rgba(220,215,255,0.60),
+          455px 880px 0 0.5px rgba(180,170,255,0.52),
+          610px 740px 0 1px   rgba(210,200,255,0.55),
+          770px 840px 0 0.5px rgba(180,170,255,0.48),
+          940px 770px 0 1px   rgba(220,215,255,0.60),
+         1110px 910px 0 0.5px rgba(180,170,255,0.48),
+         1270px 665px 0 1px   rgba(210,200,255,0.55),
+         1420px 790px 0 0.5px rgba(180,170,255,0.52),
+         1600px 710px 0 1px   rgba(220,215,255,0.55),
+         1790px 880px 0 0.5px rgba(180,170,255,0.45),
+          330px  50px 0 1px   rgba(210,200,255,0.65),
+          720px 480px 0 0.5px rgba(180,170,255,0.50),
+          860px 260px 0 1px   rgba(210,200,255,0.58),
+         1070px 640px 0 0.5px rgba(180,170,255,0.52),
+         1380px 490px 0 1px   rgba(220,215,255,0.55),
+         1700px 155px 0 0.5px rgba(180,170,255,0.48),
+          520px 380px 0 1px   rgba(210,200,255,0.60),
+          190px 540px 0 0.5px rgba(180,170,255,0.52),
+         1490px 720px 0 1px   rgba(220,215,255,0.50),
+          630px 930px 0 0.5px rgba(180,170,255,0.42);
+      }
+
+      /* ── Shooting stars ── */
+      .moon-shooting {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none; z-index: 1; overflow: hidden;
+      }
+      .moon-shooting::before {
+        content: '';
+        position: absolute; top: 7%; left: -8%;
+        width: 320px; height: 1.5px;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.92) 50%, rgba(200,185,255,0.70) 75%, transparent 100%);
+        border-radius: 2px;
+        opacity: 0;
+        filter: drop-shadow(0 0 4px rgba(200,185,255,0.8));
+        animation: shoot1 16s ease-in-out infinite 1s;
+      }
+      .moon-shooting::after {
+        content: '';
+        position: absolute; top: 22%; right: 100%;
+        width: 220px; height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(180,170,255,0.88) 55%, rgba(140,130,255,0.60) 80%, transparent 100%);
+        border-radius: 2px;
+        opacity: 0;
+        filter: drop-shadow(0 0 3px rgba(180,170,255,0.8));
+        animation: shoot2 16s ease-in-out infinite 9.5s;
+      }
+      @keyframes shoot1 {
+        0%,100% { opacity:0; transform: translateX(0)    rotate(18deg); }
+        1%      { opacity:1; }
+        10%     { opacity:0; transform: translateX(115vw) rotate(18deg); }
+      }
+      @keyframes shoot2 {
+        0%,100% { opacity:0; transform: translateX(0)    rotate(15deg); }
+        1%      { opacity:1; }
+        8%      { opacity:0; transform: translateX(110vw) rotate(15deg); }
+      }
+
+      /* ── 星雲 (Nebula) particle shimmer ── */
+      .moon-shimmer {
+        position: fixed; top: 0; left: 0;
+        width: 1.5px; height: 1.5px; border-radius: 50%;
+        background: rgba(140,130,255,0.80);
+        pointer-events: none; z-index: 0;
+        animation: moon-shimmer-pulse 18s ease-in-out infinite;
+        box-shadow:
+           88px 240px 0 1px  rgba(140,130,255,0.70),
+          280px 110px 0 1.5px rgba(170,160,255,0.65),
+          510px 320px 0 1px  rgba(140,130,255,0.60),
+          750px 180px 0 1.5px rgba(170,160,255,0.68),
+          980px 450px 0 1px  rgba(140,130,255,0.62),
+         1200px 280px 0 1.5px rgba(170,160,255,0.60),
+         1480px 390px 0 1px  rgba(140,130,255,0.58),
+         1720px 130px 0 1.5px rgba(170,160,255,0.65),
+          160px 580px 0 1px  rgba(140,130,255,0.55),
+          430px 700px 0 1.5px rgba(170,160,255,0.60),
+          680px 650px 0 1px  rgba(140,130,255,0.58),
+          920px 750px 0 1.5px rgba(170,160,255,0.55),
+         1150px 620px 0 1px  rgba(140,130,255,0.52),
+         1400px 680px 0 1.5px rgba(170,160,255,0.55),
+         1680px 730px 0 1px  rgba(140,130,255,0.50);
+      }
+      @keyframes moon-shimmer-pulse {
+        0%,100% { opacity: 0.20; }
+        40%     { opacity: 0.80; }
+        70%     { opacity: 0.35; }
       }
 
       /* ── Sakura Miku theme — magical girl light mode ── */
@@ -227,6 +391,326 @@ export function GlobalCSS() {
       @keyframes bloom-pulse {
         0%,100% { transform: scale(1);    opacity: 0.7; }
         50%     { transform: scale(1.12); opacity: 1.0; }
+      }
+
+      /* ══════════════════════════════════════
+         ── Kuromi theme ──
+         ══════════════════════════════════════ */
+      .kuromi-root { font-family: 'Share Tech Mono', monospace !important; }
+      .kuromi-root input,
+      .kuromi-root select,
+      .kuromi-root textarea,
+      .kuromi-root button { font-family: 'Share Tech Mono', monospace !important; }
+      .kuromi-root::-webkit-scrollbar-thumb { background: #c840ff55; }
+
+      /* Neon purple card glow */
+      .kuromi-root .hov-card:hover {
+        box-shadow:
+          0 0 0 1.5px #c840ff,
+          0 0 22px #c840ff55,
+          0 8px 36px rgba(0,0,0,0.90) !important;
+        border-color: #c840ff !important;
+        transform: translateY(-4px) !important;
+      }
+
+      /* Input focus neon ring */
+      .kuromi-root input:focus,
+      .kuromi-root select:focus,
+      .kuromi-root textarea:focus {
+        border-color: #c840ff !important;
+        box-shadow: 0 0 0 2px #c840ff22, 0 0 14px #c840ff44 !important;
+      }
+
+      /* Dark magic shimmer — sweep on hover */
+      .kuromi-shimmer { position: relative; overflow: hidden; }
+      .kuromi-shimmer::before {
+        content: '';
+        position: absolute; top: -200%; left: -60%;
+        width: 35%; height: 600%;
+        background: linear-gradient(108deg,
+          transparent 38%,
+          rgba(200,64,255,0.11) 43%,
+          rgba(255,64,180,0.07) 50%,
+          rgba(138,24,204,0.11) 57%,
+          transparent 62%
+        );
+        transform: rotate(12deg);
+        transition: left 0.65s ease;
+        pointer-events: none;
+      }
+      .kuromi-shimmer:hover::before { left: 130%; }
+
+      /* Pulsing dark-magic aura in all four corners */
+      .kuromi-aura {
+        position: fixed; inset: 0;
+        pointer-events: none; z-index: 0;
+        background:
+          radial-gradient(ellipse 52% 44% at   0%   0%, rgba(120,0,200,0.34) 0%, transparent 70%),
+          radial-gradient(ellipse 52% 44% at 100% 100%, rgba(90,0,160,0.28)  0%, transparent 70%),
+          radial-gradient(ellipse 36% 30% at 100%   0%, rgba(200,64,255,0.15) 0%, transparent 65%),
+          radial-gradient(ellipse 36% 30% at   0% 100%, rgba(160,0,255,0.13) 0%, transparent 65%);
+        animation: kuromi-aura-breathe 9s ease-in-out infinite;
+      }
+      @keyframes kuromi-aura-breathe {
+        0%,100% { opacity: 0.52; }
+        50%     { opacity: 1.00; }
+      }
+
+      /* Floating neon-purple particle field */
+      .kuromi-particles {
+        position: fixed; top: 0; left: 0;
+        width: 2px; height: 2px; border-radius: 50%;
+        background: rgba(200,64,255,0.90);
+        pointer-events: none; z-index: 0;
+        animation: kuromi-float-pulse 10s ease-in-out infinite;
+        box-shadow:
+           90px  150px 0 1px   rgba(200,64,255,0.85),
+          280px   80px 0 1.5px rgba(220,80,255,0.75),
+          450px  240px 0 1px   rgba(180,40,240,0.80),
+          680px   60px 0 2px   rgba(200,64,255,0.70),
+          880px  310px 0 1px   rgba(255,64,200,0.75),
+         1100px  140px 0 1.5px rgba(200,64,255,0.80),
+         1350px  250px 0 1px   rgba(220,80,255,0.70),
+         1600px   90px 0 2px   rgba(180,40,240,0.75),
+         1820px  200px 0 1px   rgba(200,64,255,0.65),
+           50px  420px 0 1.5px rgba(255,64,200,0.70),
+          220px  540px 0 1px   rgba(200,64,255,0.75),
+          420px  380px 0 2px   rgba(220,80,255,0.65),
+          650px  490px 0 1px   rgba(180,40,240,0.70),
+          840px  440px 0 1.5px rgba(200,64,255,0.75),
+         1060px  510px 0 1px   rgba(255,64,200,0.65),
+         1300px  370px 0 2px   rgba(200,64,255,0.70),
+         1520px  450px 0 1px   rgba(220,80,255,0.65),
+         1780px  330px 0 1.5px rgba(180,40,240,0.60),
+           35px  700px 0 1px   rgba(200,64,255,0.65),
+          190px  770px 0 1.5px rgba(255,64,200,0.60),
+          370px  630px 0 1px   rgba(200,64,255,0.70),
+          600px  730px 0 2px   rgba(220,80,255,0.60),
+          800px  670px 0 1px   rgba(180,40,240,0.65),
+         1000px  750px 0 1.5px rgba(200,64,255,0.60),
+         1200px  610px 0 1px   rgba(255,64,200,0.65);
+      }
+      @keyframes kuromi-float-pulse {
+        0%,100% { opacity: 0.22; }
+        35%     { opacity: 0.85; }
+        65%     { opacity: 0.42; }
+      }
+
+      /* Haunting faint skull — bottom-right corner */
+      .kuromi-skull {
+        position: fixed; bottom: 58px; right: 42px;
+        font-size: 145px; line-height: 1;
+        pointer-events: none; z-index: 0;
+        opacity: 0.05;
+        filter: drop-shadow(0 0 24px #c840ff) drop-shadow(0 0 50px #c840ff66);
+        animation: kuromi-skull-haunt 14s ease-in-out infinite;
+        user-select: none;
+      }
+      @keyframes kuromi-skull-haunt {
+        0%,100% { opacity: 0.04; transform: scale(1.00) rotate(-3deg); }
+        30%     { opacity: 0.10; transform: scale(1.06) rotate( 2deg); }
+        60%     { opacity: 0.06; transform: scale(0.97) rotate(-1deg); }
+      }
+
+      /* Lightning bolt pair — double-flash every ~22s */
+      .kuromi-lightning {
+        position: fixed; inset: 0;
+        pointer-events: none; z-index: 1;
+      }
+      .kuromi-lightning::before {
+        content: '';
+        position: absolute; top: 4%; left: 9%;
+        width: 58px; height: 265px;
+        background: linear-gradient(180deg, rgba(200,64,255,0.95) 0%, #ffffff 40%, rgba(200,64,255,0.95) 100%);
+        clip-path: polygon(56% 0%,68% 0%,46% 41%,74% 41%,24% 100%,38% 100%,58% 58%,28% 58%,56% 0%);
+        filter: drop-shadow(0 0 10px #c840ff) drop-shadow(0 0 28px #c840ff88);
+        opacity: 0;
+        animation: kuromi-bolt 22s ease-in-out infinite 1s;
+      }
+      .kuromi-lightning::after {
+        content: '';
+        position: absolute; top: 3%; right: 13%;
+        width: 46px; height: 210px;
+        background: linear-gradient(180deg, rgba(255,64,200,0.95) 0%, #ffffffcc 40%, rgba(200,64,255,0.95) 100%);
+        clip-path: polygon(56% 0%,68% 0%,46% 41%,74% 41%,24% 100%,38% 100%,58% 58%,28% 58%,56% 0%);
+        filter: drop-shadow(0 0 8px #ff40cc) drop-shadow(0 0 22px #c840ff77);
+        opacity: 0;
+        animation: kuromi-bolt 22s ease-in-out infinite 12s;
+      }
+      @keyframes kuromi-bolt {
+        0%,   88.0% { opacity: 0;   }
+        88.5%        { opacity: 1.0; }
+        89.0%        { opacity: 0.1; }
+        89.5%        { opacity: 0.8; }
+        90.0%        { opacity: 0.0; }
+        100%         { opacity: 0;   }
+      }
+
+      /* ══════════════════════════════════════
+         ── My Melody theme ──
+         ══════════════════════════════════════ */
+      .mymelody-root { font-family: 'Nunito', 'Segoe UI', sans-serif !important; font-weight: 600; }
+      .mymelody-root input,
+      .mymelody-root select,
+      .mymelody-root textarea,
+      .mymelody-root button { font-family: 'Nunito', 'Segoe UI', sans-serif !important; }
+      .mymelody-root::-webkit-scrollbar { background: #ffe0ec; }
+      .mymelody-root::-webkit-scrollbar-thumb { background: #d82858; }
+
+      /* Rosy card hover */
+      .mymelody-root .hov-card:hover {
+        box-shadow:
+          0 0 0 1.5px #d82858,
+          0 6px 24px rgba(216,40,88,0.22),
+          0 12px 42px rgba(255,120,160,0.14) !important;
+        border-color: #d82858 !important;
+      }
+
+      /* Input focus */
+      .mymelody-root input:focus,
+      .mymelody-root select:focus,
+      .mymelody-root textarea:focus {
+        border-color: #d82858 !important;
+        box-shadow: 0 0 0 2px rgba(216,40,88,0.20) !important;
+      }
+
+      /* Warm pink shimmer sweep */
+      .mymelody-shimmer { position: relative; overflow: hidden; }
+      .mymelody-shimmer::before {
+        content: '';
+        position: absolute; top: -200%; left: -60%;
+        width: 35%; height: 600%;
+        background: linear-gradient(108deg,
+          transparent 38%,
+          rgba(255,160,190,0.15) 43%,
+          rgba(255,200,220,0.10) 50%,
+          rgba(220,40,88,0.10) 57%,
+          transparent 62%
+        );
+        transform: rotate(12deg);
+        transition: left 0.65s ease;
+        pointer-events: none;
+      }
+      .mymelody-shimmer:hover::before { left: 130%; }
+
+      /* Rainbow stripe — top of viewport */
+      .mymelody-rainbow {
+        position: fixed; top: 0; left: 0; right: 0; height: 5px;
+        background: linear-gradient(90deg, #ff6b9d, #ffb347, #ffd700, #98fb98, #87ceeb, #da70d6, #ff6b9d);
+        background-size: 300% 100%;
+        animation: melody-rainbow 7s linear infinite;
+        pointer-events: none; z-index: 9999;
+      }
+      @keyframes melody-rainbow {
+        0%   { background-position:   0% 50%; }
+        100% { background-position: 300% 50%; }
+      }
+
+      /* Rising hearts — float slowly from bottom to top */
+      .mymelody-hearts {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none; z-index: 0; overflow: hidden;
+      }
+      .mymelody-hearts::before,
+      .mymelody-hearts::after {
+        content: '';
+        position: absolute;
+        bottom: -5%; left: 0; right: 0; height: 100vh;
+        background-image:
+          radial-gradient(ellipse 10px 13px at 10% 98%, rgba(216,40,88,0.62) 0%, transparent 100%),
+          radial-gradient(ellipse  8px 10px at 24% 95%, rgba(255,100,140,0.54) 0%, transparent 100%),
+          radial-gradient(ellipse 12px 15px at 38% 97%, rgba(200,30,70,0.58) 0%, transparent 100%),
+          radial-gradient(ellipse  7px  9px at 52% 99%, rgba(240,80,120,0.52) 0%, transparent 100%),
+          radial-gradient(ellipse 11px 14px at 66% 96%, rgba(216,40,88,0.60) 0%, transparent 100%),
+          radial-gradient(ellipse  8px 11px at 80% 98%, rgba(255,110,150,0.50) 0%, transparent 100%),
+          radial-gradient(ellipse  9px 12px at 92% 97%, rgba(200,30,70,0.54) 0%, transparent 100%),
+          radial-gradient(ellipse  6px  8px at 46% 94%, rgba(240,80,120,0.46) 0%, transparent 100%);
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        animation: hearts-rise 38s ease-in-out infinite;
+      }
+      .mymelody-hearts::after {
+        animation: hearts-rise 50s ease-in-out infinite 14s;
+        background-image:
+          radial-gradient(ellipse  9px 12px at  7% 97%, rgba(255,100,140,0.58) 0%, transparent 100%),
+          radial-gradient(ellipse 11px 14px at 20% 99%, rgba(216,40,88,0.54) 0%, transparent 100%),
+          radial-gradient(ellipse  7px  9px at 33% 96%, rgba(240,80,120,0.52) 0%, transparent 100%),
+          radial-gradient(ellipse 10px 13px at 48% 98%, rgba(200,30,70,0.56) 0%, transparent 100%),
+          radial-gradient(ellipse  8px 11px at 62% 97%, rgba(255,110,150,0.50) 0%, transparent 100%),
+          radial-gradient(ellipse 13px 16px at 76% 95%, rgba(216,40,88,0.58) 0%, transparent 100%),
+          radial-gradient(ellipse  6px  8px at 88% 99%, rgba(240,80,120,0.46) 0%, transparent 100%);
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+      }
+      @keyframes hearts-rise {
+        0%   { transform: translateY(0)       rotate(0deg); opacity: 0; }
+        5%   { opacity: 1; }
+        92%  { opacity: 0.65; }
+        100% { transform: translateY(-108vh) rotate(4deg); opacity: 0; }
+      }
+
+      /* Soft corner orbs — top-right + bottom-left */
+      .mymelody-orbs {
+        position: fixed; top: -100px; right: -100px;
+        width: 460px; height: 460px; border-radius: 50%;
+        background: radial-gradient(circle,
+          rgba(255,160,200,0.34) 0%,
+          rgba(255,120,170,0.16) 38%,
+          transparent 65%
+        );
+        pointer-events: none; z-index: 0;
+        animation: bloom-pulse 16s ease-in-out infinite;
+      }
+      .mymelody-orbs::after {
+        content: '';
+        position: fixed; bottom: -80px; left: -80px;
+        width: 380px; height: 380px; border-radius: 50%;
+        background: radial-gradient(circle,
+          rgba(220,130,200,0.26) 0%,
+          rgba(255,160,200,0.14) 38%,
+          transparent 65%
+        );
+        animation: bloom-pulse 16s ease-in-out infinite 8s;
+      }
+
+      /* Scattered red-pink sparkle dots */
+      .mymelody-sparkles {
+        position: fixed; top: 0; left: 0;
+        width: 2px; height: 2px; border-radius: 50%;
+        background: rgba(216,40,88,0.88);
+        pointer-events: none; z-index: 0;
+        animation: mymelody-glitter 16s ease-in-out infinite;
+        box-shadow:
+          110px  200px 0 1.5px rgba(216,40,88,0.80),
+          300px   90px 0 1px   rgba(255,100,140,0.70),
+          480px  260px 0 1.5px rgba(200,30,70,0.75),
+          700px   80px 0 2px   rgba(216,40,88,0.65),
+          900px  330px 0 1px   rgba(255,100,140,0.70),
+         1120px  160px 0 1.5px rgba(200,30,70,0.75),
+         1380px  270px 0 1px   rgba(216,40,88,0.65),
+         1620px  110px 0 2px   rgba(255,100,140,0.60),
+         1840px  220px 0 1px   rgba(200,30,70,0.65),
+           70px  440px 0 1.5px rgba(216,40,88,0.70),
+          240px  560px 0 1px   rgba(255,100,140,0.65),
+          440px  400px 0 2px   rgba(200,30,70,0.60),
+          670px  510px 0 1px   rgba(216,40,88,0.65),
+          860px  460px 0 1.5px rgba(255,100,140,0.60),
+         1080px  530px 0 1px   rgba(200,30,70,0.65),
+         1320px  390px 0 2px   rgba(216,40,88,0.60),
+         1540px  470px 0 1px   rgba(255,100,140,0.55),
+         1800px  350px 0 1.5px rgba(200,30,70,0.55),
+           55px  720px 0 1px   rgba(216,40,88,0.60),
+          210px  790px 0 1.5px rgba(255,100,140,0.55),
+          390px  650px 0 1px   rgba(200,30,70,0.60),
+          620px  750px 0 2px   rgba(216,40,88,0.55),
+          820px  690px 0 1px   rgba(255,100,140,0.58),
+         1020px  770px 0 1.5px rgba(200,30,70,0.55),
+         1220px  630px 0 1px   rgba(216,40,88,0.60);
+      }
+      @keyframes mymelody-glitter {
+        0%,100% { opacity: 0.28; }
+        38%     { opacity: 0.72; }
+        65%     { opacity: 0.44; }
       }
 
       /* ── Racing Miku theme ── */
@@ -429,6 +913,7 @@ export function GlobalCSS() {
         .stat-grid    { grid-template-columns: repeat(2,1fr) !important; }
         .char-tab-grid { grid-template-columns: 1fr !important; }
         .features-grid { grid-template-columns: 1fr !important; }
+        .combat-cols  { grid-template-columns: 1fr !important; }
 
         .sheet-content { padding: 12px !important; }
 
