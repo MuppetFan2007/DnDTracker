@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(for cls:*)",
-      "Bash(do echo:*)"
+      "Bash(do echo:*)",
+      "WebFetch(domain:dnd2024.wikidot.com)",
+      "Bash(curl -s -L \"http://dnd2024.wikidot.com/barbarian:path-of-the-berserker\")",
+      "Bash(for page:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

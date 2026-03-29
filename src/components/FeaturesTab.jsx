@@ -5,6 +5,7 @@ import { DND_ICONS } from './Icons.jsx'
 import { uid } from '../utils.js'
 import { useInp } from './UI.jsx'
 import { CLASS_FEATURES } from '../data/classFeatures.js'
+import { SUBCLASS_FEATURES } from '../data/subclassFeatures.js'
 
 const emptyFeat = () => ({ id: uid(), name: '', desc: '', limited: false, usesMax: 1, usesLeft: 1 })
 
@@ -296,13 +297,44 @@ export function FeaturesTab({ char, onChange }) {
                 {/* Subclass features */}
                 <div style={{ marginTop: 16 }}>
                   {cl.subclass ? (
-                    <FeatureSection
-                      title={`${cl.subclass}`}
-                      feats={cl.subclassFeats || []}
-                      onUpdate={feats => updateClassFeats(idx, 'subclassFeats', feats)}
-                      accentColor={cc + 'cc'}
-                      C={C} inp={inp}
-                    />
+                    <>
+                      {SUBCLASS_FEATURES[cl.name]?.[cl.subclass] && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
+                          <button className="hov-btn" onClick={() => {
+                            const existing = cl.subclassFeats || []
+                            const existingNames = new Set(existing.map(f => f.name))
+                            const toAdd = SUBCLASS_FEATURES[cl.name][cl.subclass]
+                              .filter(f => f.level <= (cl.level || 1) && !existingNames.has(f.name))
+                              .map(f => ({
+                                id: uid(),
+                                name: f.name,
+                                desc: f.desc + (f.recharge ? ` [Recharge: ${f.recharge}]` : ''),
+                                limited: f.limited,
+                                usesMax: f.limited ? 1 : 1,
+                                usesLeft: f.limited ? 1 : 1,
+                              }))
+                            if (toAdd.length === 0) return
+                            updateClassFeats(idx, 'subclassFeats', [...existing, ...toAdd])
+                          }}
+                            style={{
+                              background: cc + '22', border: `1px solid ${cc}88`,
+                              color: cc, padding: '5px 10px', cursor: 'pointer',
+                              fontFamily: 'inherit', fontSize: 9, fontWeight: 700,
+                              letterSpacing: 1, textTransform: 'uppercase', whiteSpace: 'nowrap',
+                              boxShadow: `0 0 8px ${cc}33`,
+                            }}>
+                            ↓ Load Subclass Features
+                          </button>
+                        </div>
+                      )}
+                      <FeatureSection
+                        title={`${cl.subclass}`}
+                        feats={cl.subclassFeats || []}
+                        onUpdate={feats => updateClassFeats(idx, 'subclassFeats', feats)}
+                        accentColor={cc + 'cc'}
+                        C={C} inp={inp}
+                      />
+                    </>
                   ) : (
                     <div style={{ border: `1px dashed ${C.border}`, padding: '10px', textAlign: 'center' }}>
                       <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 1 }}>
