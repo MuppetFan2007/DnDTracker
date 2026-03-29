@@ -29,7 +29,7 @@ export function GlobalCSS() {
       }
 
       /* ══════════════════════════════════════
-         ── 月夜 Tsukiyo · Moon/Space theme ──
+         ── ✦ Galaxy / Deep Space theme ──
          ══════════════════════════════════════ */
       .moon-root { font-family: 'Cinzel', 'Georgia', serif !important; letter-spacing: 0.04em; }
       .moon-root input, .moon-root select, .moon-root textarea, .moon-root button {
@@ -37,219 +37,314 @@ export function GlobalCSS() {
       }
       .moon-root::-webkit-scrollbar-thumb { background: #7a6eff44; }
 
-      /* Neon-purple card hover */
+      /* Card hover — deep space glow */
       .moon-root .hov-card:hover {
         box-shadow:
           0 0 0 1px #7a6eff,
-          0 0 28px #7a6eff44,
-          0 10px 44px rgba(0,0,0,0.90) !important;
+          0 0 30px #7a6eff55,
+          0 12px 50px rgba(0,0,0,0.95) !important;
         border-color: #7a6eff !important;
         transform: translateY(-4px) !important;
       }
       .moon-root input:focus, .moon-root select:focus, .moon-root textarea:focus {
         border-color: #7a6eff !important;
-        box-shadow: 0 0 0 2px #7a6eff22, 0 0 18px #7a6eff44 !important;
+        box-shadow: 0 0 0 2px #7a6eff22, 0 0 20px #7a6eff55 !important;
       }
 
-      /* ── 月 Kanji watermark — enormous, spectral ── */
-      .moon-kanji {
-        position: fixed; bottom: -40px; right: -30px;
-        font-size: 480px; line-height: 1;
-        color: rgba(122,110,255,0.040);
-        pointer-events: none; z-index: 0; user-select: none;
-        font-family: 'Georgia', serif;
-        animation: moon-kanji-breathe 26s ease-in-out infinite;
-        filter: blur(1px);
-      }
-      @keyframes moon-kanji-breathe {
-        0%,100% { opacity: 0.7;  transform: scale(1.00) rotate(-2deg); }
-        40%     { opacity: 1.0;  transform: scale(1.04) rotate(-1deg); }
-        70%     { opacity: 0.55; transform: scale(0.97) rotate(-3deg); }
-      }
-
-      /* ── Nebula aurora — drifting colour clouds ── */
+      /* ── Galaxy Nebula — multi-color cosmic clouds ── */
       .moon-nebula {
         position: fixed; inset: 0;
         pointer-events: none; z-index: 0;
         background:
-          radial-gradient(ellipse 58% 38% at  6% 10%, rgba(70,50,200,0.28) 0%, transparent 68%),
-          radial-gradient(ellipse 42% 32% at 94%  6%, rgba(110,70,220,0.20) 0%, transparent 65%),
-          radial-gradient(ellipse 50% 30% at 78% 90%, rgba(50,100,210,0.18) 0%, transparent 65%),
-          radial-gradient(ellipse 38% 42% at 14% 85%, rgba(90,50,190,0.15) 0%, transparent 65%),
-          radial-gradient(ellipse 28% 22% at 48% 44%, rgba(80,90,230,0.10) 0%, transparent 60%);
-        animation: nebula-drift 30s ease-in-out infinite;
+          radial-gradient(ellipse 55% 40% at  5% 10%, rgba(55,35,215,0.42) 0%, transparent 65%),
+          radial-gradient(ellipse 40% 30% at 94%  8%, rgba(200,50,150,0.22) 0%, transparent 62%),
+          radial-gradient(ellipse 50% 35% at 78% 94%, rgba(0,190,190,0.18) 0%, transparent 62%),
+          radial-gradient(ellipse 42% 46% at 10% 86%, rgba(100,35,210,0.22) 0%, transparent 63%),
+          radial-gradient(ellipse 30% 24% at 50% 46%, rgba(55,110,240,0.14) 0%, transparent 58%),
+          radial-gradient(ellipse 24% 20% at 65% 20%, rgba(180,55,230,0.13) 0%, transparent 56%),
+          radial-gradient(ellipse 20% 16% at 28% 68%, rgba(0,170,230,0.10) 0%, transparent 54%),
+          radial-gradient(ellipse 16% 12% at 82% 55%, rgba(255,120,80,0.06) 0%, transparent 50%);
+        animation: nebula-drift 38s ease-in-out infinite;
       }
       @keyframes nebula-drift {
-        0%,100% { opacity: 0.65; transform: scale(1.00); }
-        33%     { opacity: 1.00; transform: scale(1.03) translateX(8px);  }
-        66%     { opacity: 0.75; transform: scale(0.98) translateX(-6px); }
+        0%,100% { opacity: 0.70; transform: scale(1.00); }
+        33%     { opacity: 1.00; transform: scale(1.04) translateX(10px);  }
+        66%     { opacity: 0.78; transform: scale(0.97) translateX(-8px); }
       }
 
-      /* ── Crescent moon — top right ── */
-      .moon-orb {
-        position: fixed; top: 22px; right: 100px;
-        width: 110px; height: 110px; border-radius: 50%;
-        background: #d0ccff;
-        box-shadow: 0 0 0 1.5px rgba(200,185,255,0.55),
-                    0 0 50px 14px rgba(122,110,255,0.28),
-                    0 0 120px 60px rgba(80,60,200,0.12);
+      /* ── Milky Way — diagonal galactic band ── */
+      .moon-milkyway {
+        position: fixed; inset: 0;
+        pointer-events: none; z-index: 0;
+        background: linear-gradient(
+          108deg,
+          transparent 5%,
+          rgba(80,65,190,0.03)  18%,
+          rgba(120,105,230,0.06) 28%,
+          rgba(150,135,255,0.09) 40%,
+          rgba(130,115,240,0.07) 52%,
+          rgba(90,75,200,0.04)  62%,
+          transparent 75%
+        );
+        filter: blur(28px);
+        animation: milkyway-pulse 55s ease-in-out infinite;
+      }
+      @keyframes milkyway-pulse {
+        0%,100% { opacity: 0.65; }
+        50%     { opacity: 1.00; }
+      }
+
+      /* ── Space Aurora — shifting colour curtains at top ── */
+      .moon-aurora {
+        position: fixed; top: 0; left: 0; right: 0; height: 45vh;
+        pointer-events: none; z-index: 0;
+        background:
+          linear-gradient(180deg,
+            rgba(0,230,180,0.06)  0%,
+            rgba(40,120,255,0.05) 22%,
+            rgba(120,50,220,0.04) 46%,
+            transparent 100%
+          );
+        filter: blur(14px);
+        animation: aurora-wave 28s ease-in-out infinite;
+      }
+      @keyframes aurora-wave {
+        0%,100% { transform: skewY(-1.5deg) scaleY(1.00); opacity: 0.55; }
+        30%     { transform: skewY( 0.8deg) scaleY(1.18); opacity: 1.00; }
+        65%     { transform: skewY(-0.8deg) scaleY(0.88); opacity: 0.62; }
+      }
+
+      /* ── Ringed Planet — top-right corner ── */
+      .moon-planet {
+        position: fixed; top: 18px; right: 80px;
+        width: 88px; height: 88px; border-radius: 50%;
+        background: radial-gradient(circle at 36% 34%,
+          #b8c8ee 0%, #6680cc 28%, #2a44a0 58%, #070f38 100%
+        );
+        box-shadow:
+          inset -14px -10px 28px rgba(0,0,25,0.88),
+          0 0 0 1.5px rgba(100,140,255,0.38),
+          0 0 38px 10px rgba(55,100,220,0.25),
+          0 0 100px 50px rgba(25,55,180,0.11);
         pointer-events: none; z-index: 1;
       }
-      .moon-orb::after {
+      /* Atmospheric band */
+      .moon-planet::before {
         content: '';
-        position: absolute; top: -5px; left: 20px;
-        width: 104px; height: 104px; border-radius: 50%;
-        background: #01020e;
+        position: absolute; top: 30%; left: 8%; right: 8%; height: 16%;
+        border-radius: 50%; background: rgba(170,190,255,0.12);
+        filter: blur(4px);
+      }
+      /* Ring */
+      .moon-planet::after {
+        content: '';
+        position: absolute; top: 50%; left: 50%;
+        width: 168px; height: 38px;
+        border: 2.5px solid rgba(120,160,255,0.38);
+        border-radius: 50%;
+        transform: translate(-50%, -50%) rotateX(72deg);
+        box-shadow:
+          0 0 0 1px rgba(120,160,255,0.12),
+          0 0 12px rgba(100,140,255,0.18);
       }
 
-      /* ── Large bright foreground stars ── */
+      /* ── Distant galaxy spiral — lower-right ── */
+      .moon-galaxy-spiral {
+        position: fixed; bottom: 60px; right: 30px;
+        width: 130px; height: 130px; border-radius: 50%;
+        pointer-events: none; z-index: 0;
+        background:
+          radial-gradient(ellipse 28% 28% at 50% 50%, rgba(210,200,255,0.14) 0%, transparent 60%),
+          conic-gradient(from 0deg,
+            transparent 0deg,   rgba(140,130,255,0.07) 50deg,
+            transparent 90deg,  rgba(130,120,245,0.06) 140deg,
+            transparent 180deg, rgba(140,130,255,0.07) 230deg,
+            transparent 270deg, rgba(130,120,245,0.05) 320deg,
+            transparent 360deg
+          );
+        animation: galaxy-spin 140s linear infinite;
+        filter: blur(2.5px);
+      }
+      @keyframes galaxy-spin {
+        from { transform: rotate(0deg) scale(1); }
+        50%  { transform: rotate(180deg) scale(1.08); }
+        to   { transform: rotate(360deg) scale(1); }
+      }
+
+      /* ── Large bright foreground stars — with colour variety ── */
       .moon-stars-lg {
         position: fixed; top: 0; left: 0;
         width: 2px; height: 2px; border-radius: 50%;
-        background: rgba(255,255,255,0.95);
+        background: rgba(255,255,255,0.96);
         pointer-events: none; z-index: 0;
-        animation: star-twinkle-lg 7s ease-in-out infinite;
+        animation: star-twinkle-lg 8s ease-in-out infinite;
         box-shadow:
-          120px  55px 0 1px  rgba(200,185,255,0.95),
-          340px  30px 0 1.5px rgba(255,255,255,0.90),
-          580px  80px 0 1px  rgba(200,185,255,0.88),
-          900px  42px 0 1.5px rgba(255,255,255,0.92),
-         1180px  65px 0 1px  rgba(200,185,255,0.90),
-         1460px  38px 0 1.5px rgba(255,255,255,0.88),
-         1740px  72px 0 1px  rgba(200,185,255,0.85),
-          200px 180px 0 1.5px rgba(255,255,255,0.82),
-          470px 210px 0 1px  rgba(200,185,255,0.88),
-          750px 160px 0 1.5px rgba(255,255,255,0.85),
-         1020px 195px 0 1px  rgba(200,185,255,0.80),
-         1340px 170px 0 1.5px rgba(255,255,255,0.88),
-         1620px 200px 0 1px  rgba(200,185,255,0.82),
-           80px 350px 0 1.5px rgba(255,255,255,0.80),
-          410px 390px 0 1px  rgba(200,185,255,0.85),
-          700px 320px 0 1.5px rgba(255,255,255,0.82),
-          980px 370px 0 1px  rgba(200,185,255,0.78),
-         1260px 340px 0 1.5px rgba(255,255,255,0.85),
-         1560px 380px 0 1px  rgba(200,185,255,0.80),
-         1800px 310px 0 1.5px rgba(255,255,255,0.75);
+          120px  55px 0 1px   rgba(200,190,255,0.96),
+          340px  30px 0 1.5px rgba(255,255,255,0.92),
+          580px  80px 0 1px   rgba(180,220,255,0.90),
+          900px  42px 0 1.5px rgba(255,255,255,0.94),
+         1180px  65px 0 1px   rgba(200,190,255,0.92),
+         1460px  38px 0 1.5px rgba(255,240,200,0.88),
+         1740px  72px 0 1px   rgba(200,190,255,0.86),
+          200px 180px 0 1.5px rgba(255,255,255,0.84),
+          470px 210px 0 1px   rgba(180,220,255,0.90),
+          750px 160px 0 1.5px rgba(255,255,255,0.86),
+         1020px 195px 0 1px   rgba(200,190,255,0.82),
+         1340px 170px 0 1.5px rgba(255,240,200,0.88),
+         1620px 200px 0 1px   rgba(200,190,255,0.84),
+           80px 350px 0 1.5px rgba(255,255,255,0.82),
+          410px 390px 0 1px   rgba(180,220,255,0.86),
+          700px 320px 0 1.5px rgba(255,255,255,0.84),
+          980px 370px 0 1px   rgba(200,190,255,0.80),
+         1260px 340px 0 1.5px rgba(255,255,255,0.86),
+         1560px 380px 0 1px   rgba(255,240,200,0.82),
+         1800px 310px 0 1.5px rgba(200,190,255,0.78),
+          300px 510px 0 1px   rgba(180,220,255,0.80),
+          820px 490px 0 1.5px rgba(255,255,255,0.82),
+         1100px 520px 0 1px   rgba(200,190,255,0.76),
+         1450px 480px 0 1.5px rgba(255,240,200,0.80);
       }
       @keyframes star-twinkle-lg {
-        0%,100% { opacity: 0.45; transform: scale(1.0); }
-        28%     { opacity: 1.00; transform: scale(1.5); }
-        55%     { opacity: 0.60; transform: scale(0.9); }
-        80%     { opacity: 0.95; transform: scale(1.3); }
+        0%,100% { opacity: 0.40; transform: scale(1.0); }
+        22%     { opacity: 1.00; transform: scale(1.6); }
+        50%     { opacity: 0.55; transform: scale(0.9); }
+        78%     { opacity: 0.92; transform: scale(1.35); }
       }
 
-      /* ── Small background star field ── */
+      /* ── Dense background star field ── */
       .moon-stars {
         position: fixed; top: 0; left: 0;
         width: 1px; height: 1px;
         background: transparent;
         pointer-events: none; z-index: 0;
         box-shadow:
-           65px 180px 0 0.5px rgba(180,170,255,0.70),
-          155px  95px 0 1px   rgba(210,200,255,0.60),
-          240px 310px 0 0.5px rgba(180,170,255,0.65),
-          380px  88px 0 1px   rgba(220,215,255,0.72),
-          490px 460px 0 0.5px rgba(180,170,255,0.55),
-          565px 220px 0 1px   rgba(210,200,255,0.62),
-          680px 530px 0 0.5px rgba(180,170,255,0.58),
-          815px 145px 0 1px   rgba(220,215,255,0.70),
-          930px 600px 0 0.5px rgba(180,170,255,0.52),
-         1040px 285px 0 1px   rgba(210,200,255,0.62),
-         1160px 410px 0 0.5px rgba(180,170,255,0.65),
-         1290px 195px 0 1px   rgba(220,215,255,0.58),
-         1410px 565px 0 0.5px rgba(180,170,255,0.52),
-         1550px  95px 0 1px   rgba(210,200,255,0.62),
-         1660px 430px 0 0.5px rgba(180,170,255,0.58),
-         1740px 270px 0 1px   rgba(220,215,255,0.65),
-         1810px 590px 0 0.5px rgba(180,170,255,0.48),
-           40px 690px 0 1px   rgba(210,200,255,0.55),
-          175px 810px 0 0.5px rgba(180,170,255,0.48),
-          310px 680px 0 1px   rgba(220,215,255,0.60),
-          455px 880px 0 0.5px rgba(180,170,255,0.52),
-          610px 740px 0 1px   rgba(210,200,255,0.55),
-          770px 840px 0 0.5px rgba(180,170,255,0.48),
-          940px 770px 0 1px   rgba(220,215,255,0.60),
-         1110px 910px 0 0.5px rgba(180,170,255,0.48),
-         1270px 665px 0 1px   rgba(210,200,255,0.55),
-         1420px 790px 0 0.5px rgba(180,170,255,0.52),
-         1600px 710px 0 1px   rgba(220,215,255,0.55),
-         1790px 880px 0 0.5px rgba(180,170,255,0.45),
-          330px  50px 0 1px   rgba(210,200,255,0.65),
-          720px 480px 0 0.5px rgba(180,170,255,0.50),
-          860px 260px 0 1px   rgba(210,200,255,0.58),
-         1070px 640px 0 0.5px rgba(180,170,255,0.52),
-         1380px 490px 0 1px   rgba(220,215,255,0.55),
-         1700px 155px 0 0.5px rgba(180,170,255,0.48),
-          520px 380px 0 1px   rgba(210,200,255,0.60),
-          190px 540px 0 0.5px rgba(180,170,255,0.52),
-         1490px 720px 0 1px   rgba(220,215,255,0.50),
-          630px 930px 0 0.5px rgba(180,170,255,0.42);
+           65px 180px 0 0.5px rgba(185,175,255,0.72),
+          155px  95px 0 1px   rgba(210,205,255,0.62),
+          240px 310px 0 0.5px rgba(185,175,255,0.66),
+          380px  88px 0 1px   rgba(220,215,255,0.74),
+          490px 460px 0 0.5px rgba(185,175,255,0.56),
+          565px 220px 0 1px   rgba(210,205,255,0.64),
+          680px 530px 0 0.5px rgba(185,175,255,0.60),
+          815px 145px 0 1px   rgba(220,215,255,0.72),
+          930px 600px 0 0.5px rgba(185,175,255,0.54),
+         1040px 285px 0 1px   rgba(210,205,255,0.64),
+         1160px 410px 0 0.5px rgba(185,175,255,0.66),
+         1290px 195px 0 1px   rgba(220,215,255,0.60),
+         1410px 565px 0 0.5px rgba(185,175,255,0.54),
+         1550px  95px 0 1px   rgba(210,205,255,0.64),
+         1660px 430px 0 0.5px rgba(185,175,255,0.60),
+         1740px 270px 0 1px   rgba(220,215,255,0.66),
+         1810px 590px 0 0.5px rgba(185,175,255,0.50),
+           40px 690px 0 1px   rgba(210,205,255,0.56),
+          175px 810px 0 0.5px rgba(185,175,255,0.50),
+          310px 680px 0 1px   rgba(220,215,255,0.62),
+          455px 880px 0 0.5px rgba(185,175,255,0.54),
+          610px 740px 0 1px   rgba(210,205,255,0.56),
+          770px 840px 0 0.5px rgba(185,175,255,0.50),
+          940px 770px 0 1px   rgba(220,215,255,0.62),
+         1110px 910px 0 0.5px rgba(185,175,255,0.50),
+         1270px 665px 0 1px   rgba(210,205,255,0.56),
+         1420px 790px 0 0.5px rgba(185,175,255,0.54),
+         1600px 710px 0 1px   rgba(220,215,255,0.56),
+         1790px 880px 0 0.5px rgba(185,175,255,0.46),
+          330px  50px 0 1px   rgba(210,205,255,0.66),
+          720px 480px 0 0.5px rgba(185,175,255,0.52),
+          860px 260px 0 1px   rgba(210,205,255,0.60),
+         1070px 640px 0 0.5px rgba(185,175,255,0.54),
+         1380px 490px 0 1px   rgba(220,215,255,0.56),
+         1700px 155px 0 0.5px rgba(185,175,255,0.50),
+          520px 380px 0 1px   rgba(210,205,255,0.62),
+          190px 540px 0 0.5px rgba(185,175,255,0.54),
+         1490px 720px 0 1px   rgba(220,215,255,0.52),
+          630px 930px 0 0.5px rgba(185,175,255,0.44),
+          88px  420px 0 1px   rgba(255,240,200,0.42),
+         1340px 350px 0 0.5px rgba(200,240,255,0.44),
+          450px 150px 0 1px   rgba(255,220,180,0.38),
+          970px 700px 0 0.5px rgba(200,240,255,0.40);
       }
 
-      /* ── Shooting stars ── */
+      /* ── Shooting stars — three tracks ── */
       .moon-shooting {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
         pointer-events: none; z-index: 1; overflow: hidden;
       }
       .moon-shooting::before {
         content: '';
-        position: absolute; top: 7%; left: -8%;
-        width: 320px; height: 1.5px;
-        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.92) 50%, rgba(200,185,255,0.70) 75%, transparent 100%);
-        border-radius: 2px;
-        opacity: 0;
-        filter: drop-shadow(0 0 4px rgba(200,185,255,0.8));
-        animation: shoot1 16s ease-in-out infinite 1s;
+        position: absolute; top: 6%; left: -10%;
+        width: 340px; height: 1.5px;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.95) 45%, rgba(200,190,255,0.72) 72%, transparent 100%);
+        border-radius: 2px; opacity: 0;
+        filter: drop-shadow(0 0 5px rgba(200,190,255,0.85));
+        animation: shoot1 18s ease-in-out infinite 2s;
       }
       .moon-shooting::after {
         content: '';
-        position: absolute; top: 22%; right: 100%;
-        width: 220px; height: 1px;
-        background: linear-gradient(90deg, transparent 0%, rgba(180,170,255,0.88) 55%, rgba(140,130,255,0.60) 80%, transparent 100%);
-        border-radius: 2px;
-        opacity: 0;
-        filter: drop-shadow(0 0 3px rgba(180,170,255,0.8));
-        animation: shoot2 16s ease-in-out infinite 9.5s;
+        position: absolute; top: 20%; right: 100%;
+        width: 240px; height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(180,220,255,0.90) 50%, rgba(140,190,255,0.62) 78%, transparent 100%);
+        border-radius: 2px; opacity: 0;
+        filter: drop-shadow(0 0 4px rgba(180,220,255,0.82));
+        animation: shoot2 18s ease-in-out infinite 10s;
       }
       @keyframes shoot1 {
-        0%,100% { opacity:0; transform: translateX(0)    rotate(18deg); }
+        0%,100% { opacity:0; transform: translateX(0)    rotate(20deg); }
         1%      { opacity:1; }
-        10%     { opacity:0; transform: translateX(115vw) rotate(18deg); }
+        9%      { opacity:0; transform: translateX(118vw) rotate(20deg); }
       }
       @keyframes shoot2 {
-        0%,100% { opacity:0; transform: translateX(0)    rotate(15deg); }
+        0%,100% { opacity:0; transform: translateX(0)    rotate(16deg); }
         1%      { opacity:1; }
-        8%      { opacity:0; transform: translateX(110vw) rotate(15deg); }
+        7%      { opacity:0; transform: translateX(112vw) rotate(16deg); }
       }
 
-      /* ── 星雲 (Nebula) particle shimmer ── */
+      /* Third shooting star track */
+      .moon-shooting2 {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none; z-index: 1; overflow: hidden;
+      }
+      .moon-shooting2::before {
+        content: '';
+        position: absolute; top: 38%; left: -6%;
+        width: 180px; height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(200,180,255,0.85) 50%, rgba(160,140,255,0.55) 80%, transparent 100%);
+        border-radius: 2px; opacity: 0;
+        filter: drop-shadow(0 0 3px rgba(200,180,255,0.75));
+        animation: shoot3 22s ease-in-out infinite 6s;
+      }
+      @keyframes shoot3 {
+        0%,100% { opacity:0; transform: translateX(0)    rotate(14deg); }
+        1%      { opacity:0.8; }
+        6%      { opacity:0; transform: translateX(108vw) rotate(14deg); }
+      }
+
+      /* ── Nebula particle shimmer ── */
       .moon-shimmer {
         position: fixed; top: 0; left: 0;
         width: 1.5px; height: 1.5px; border-radius: 50%;
-        background: rgba(140,130,255,0.80);
+        background: rgba(140,130,255,0.82);
         pointer-events: none; z-index: 0;
-        animation: moon-shimmer-pulse 18s ease-in-out infinite;
+        animation: moon-shimmer-pulse 20s ease-in-out infinite;
         box-shadow:
-           88px 240px 0 1px  rgba(140,130,255,0.70),
-          280px 110px 0 1.5px rgba(170,160,255,0.65),
-          510px 320px 0 1px  rgba(140,130,255,0.60),
-          750px 180px 0 1.5px rgba(170,160,255,0.68),
-          980px 450px 0 1px  rgba(140,130,255,0.62),
-         1200px 280px 0 1.5px rgba(170,160,255,0.60),
-         1480px 390px 0 1px  rgba(140,130,255,0.58),
-         1720px 130px 0 1.5px rgba(170,160,255,0.65),
-          160px 580px 0 1px  rgba(140,130,255,0.55),
-          430px 700px 0 1.5px rgba(170,160,255,0.60),
-          680px 650px 0 1px  rgba(140,130,255,0.58),
-          920px 750px 0 1.5px rgba(170,160,255,0.55),
-         1150px 620px 0 1px  rgba(140,130,255,0.52),
-         1400px 680px 0 1.5px rgba(170,160,255,0.55),
-         1680px 730px 0 1px  rgba(140,130,255,0.50);
+           88px 240px 0 1px   rgba(140,130,255,0.72),
+          280px 110px 0 1.5px rgba(170,160,255,0.66),
+          510px 320px 0 1px   rgba(0,200,200,0.40),
+          750px 180px 0 1.5px rgba(170,160,255,0.70),
+          980px 450px 0 1px   rgba(200,60,160,0.35),
+         1200px 280px 0 1.5px rgba(170,160,255,0.62),
+         1480px 390px 0 1px   rgba(140,130,255,0.60),
+         1720px 130px 0 1.5px rgba(170,160,255,0.66),
+          160px 580px 0 1px   rgba(0,180,220,0.38),
+          430px 700px 0 1.5px rgba(170,160,255,0.62),
+          680px 650px 0 1px   rgba(140,130,255,0.58),
+          920px 750px 0 1.5px rgba(200,60,160,0.32),
+         1150px 620px 0 1px   rgba(140,130,255,0.54),
+         1400px 680px 0 1.5px rgba(170,160,255,0.56),
+         1680px 730px 0 1px   rgba(0,200,200,0.36);
       }
       @keyframes moon-shimmer-pulse {
-        0%,100% { opacity: 0.20; }
-        40%     { opacity: 0.80; }
-        70%     { opacity: 0.35; }
+        0%,100% { opacity: 0.18; }
+        40%     { opacity: 0.85; }
+        70%     { opacity: 0.32; }
       }
 
       /* ── Sakura Miku theme — magical girl light mode ── */

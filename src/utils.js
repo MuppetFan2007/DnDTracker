@@ -12,7 +12,7 @@ export const saveLS = (cs) => localStorage.setItem(STORE, JSON.stringify(cs))
 
 export const blank = () => ({
   id: uid(), name: '', species: 'Human',
-  classes: [{ name: 'Fighter', level: 1, subclass: '', subclassFeatures: '' }],
+  classes: [{ name: 'Fighter', level: 1, subclass: '', subclassFeatures: '', classFeats: [], subclassFeats: [] }],
   background: 'Soldier', alignment: 'True Neutral', xp: 0,
   stats: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 },
   hp: { current: 10, max: 10, temp: 0 },
@@ -29,5 +29,6 @@ export const blank = () => ({
   combatUsed: {},
   customActions: [],
   currency: { cp: 0, sp: 0, gp: 0, pp: 0 },
+  speciesFeats: [], bgFeats: [], otherFeats: [],
   notes: '', createdAt: Date.now(),
 })

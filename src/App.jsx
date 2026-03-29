@@ -55,14 +55,17 @@ export default function App() {
       {/* VCR scanlines */}
       {isVcr && <div className="vcr-scanlines" />}
 
-      {/* 月夜 Moon — nebula + stars + crescent + shooting stars + kanji + shimmer */}
+      {/* ✦ Galaxy — nebula + milkyway + aurora + stars + planet + spiral + shooting stars + shimmer */}
       {isMoon && <div className="moon-nebula" />}
+      {isMoon && <div className="moon-milkyway" />}
+      {isMoon && <div className="moon-aurora" />}
       {isMoon && <div className="moon-stars" />}
       {isMoon && <div className="moon-stars-lg" />}
-      {isMoon && <div className="moon-orb" />}
+      {isMoon && <div className="moon-planet" />}
+      {isMoon && <div className="moon-galaxy-spiral" />}
       {isMoon && <div className="moon-shooting" />}
+      {isMoon && <div className="moon-shooting2" />}
       {isMoon && <div className="moon-shimmer" />}
-      {isMoon && <div className="moon-kanji">月</div>}
 
       {/* Sakura Miku — falling petals + sparkles + corner bloom */}
       {isSakura && <div className="sakura-petals" />}

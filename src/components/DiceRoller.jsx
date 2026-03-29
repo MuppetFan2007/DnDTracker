@@ -3,14 +3,12 @@ import { useT, THEMES } from '../themes.js'
 import { mod, fmt, profB, totalLevel } from '../utils.js'
 import { SecHdr } from './UI.jsx'
 
-const DICE = [
-  { name: 'd4',   max: 4   },
-  { name: 'd6',   max: 6   },
-  { name: 'd8',   max: 8   },
-  { name: 'd10',  max: 10  },
-  { name: 'd12',  max: 12  },
-  { name: 'd20',  max: 20  },
-  { name: 'd100', max: 100 },
+const DAMAGE_DICE = [
+  { name: 'd4',  max: 4  },
+  { name: 'd6',  max: 6  },
+  { name: 'd8',  max: 8  },
+  { name: 'd10', max: 10 },
+  { name: 'd12', max: 12 },
 ]
 
 export const THEME_FX = {
@@ -22,12 +20,12 @@ export const THEME_FX = {
   mymelody: { color: '#d82858', particles: ['♥','♡','♥','✿','♥','♡','♥'],  label: 'ROLL' },
 }
 
-// Shared hook for rolling logic — used by DiceRoller and TabCore
+// Shared hook — d20 rolling with adv/disadv, used by DiceRoller and TabCore
 export function useRollEngine(rollMode, themeKey) {
   const fx = THEME_FX[themeKey] || THEME_FX.vcr
 
   const [rolling,    setRolling]    = useState(false)
-  const [displayNum, setDisplayNum] = useState(null)   // number | [n,n]
+  const [displayNum, setDisplayNum] = useState(null)
   const [result,     setResult]     = useState(null)
   const [particles,  setParticles]  = useState([])
   const timerRef  = useRef(null)
@@ -40,9 +38,7 @@ export function useRollEngine(rollMode, themeKey) {
 
   const roll = useCallback((dieName, modVal, label = null) => {
     if (rolling) return
-    const max = DICE.find(d => d.name === dieName)?.max
-    if (!max) return
-
+    const max = dieName === 'd20' ? 20 : (DAMAGE_DICE.find(d => d.name === dieName)?.max ?? 20)
     const useTwo = dieName === 'd20' && rollMode !== 'normal'
 
     setRolling(true)
@@ -73,13 +69,8 @@ export function useRollEngine(rollMode, themeKey) {
       const die2 = useTwo ? Math.floor(Math.random() * max) + 1 : null
       let keptIdx = 0, kept = die1
       if (useTwo) {
-        if (rollMode === 'advantage') {
-          keptIdx = die1 >= die2 ? 0 : 1
-          kept = Math.max(die1, die2)
-        } else {
-          keptIdx = die1 <= die2 ? 0 : 1
-          kept = Math.min(die1, die2)
-        }
+        if (rollMode === 'advantage') { keptIdx = die1 >= die2 ? 0 : 1; kept = Math.max(die1, die2) }
+        else                          { keptIdx = die1 <= die2 ? 0 : 1; kept = Math.min(die1, die2) }
       }
       const total = kept + Number(modVal)
       setDisplayNum(null)
@@ -105,7 +96,7 @@ function ModeToggle({ rollMode, setRollMode, C }) {
             flex: 1, background: rollMode === key ? color + '1a' : 'transparent',
             border: `1px solid ${rollMode === key ? color : C.border}`,
             color: rollMode === key ? color : C.textMuted,
-            padding: '6px 4px', cursor: 'pointer', fontFamily: 'inherit',
+            padding: '7px 4px', cursor: 'pointer', fontFamily: 'inherit',
             fontSize: 9, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase',
             transition: 'all 0.13s',
             boxShadow: rollMode === key ? `0 0 8px ${color}33` : 'none',
@@ -117,134 +108,26 @@ function ModeToggle({ rollMode, setRollMode, C }) {
   )
 }
 
-export function RollDisplay({ result, rolling, displayNum, particles, themeKey, C, fx, compact = false }) {
-  if (!result && !rolling) return null
-  const isCrit   = result && result.die === 'd20' && result.kept === 20
-  const isFumble = result && result.die === 'd20' && result.kept === 1
-  const resultColor = isCrit ? C.green : isFumble ? C.red : fx.color
-
-  return (
-    <div style={{
-      background: C.card, border: `1px solid ${compact ? C.border : fx.color + '44'}`,
-      borderLeft: `3px solid ${resultColor}`,
-      padding: compact ? '10px 14px' : '18px',
-      position: 'relative', overflow: 'hidden',
-      marginBottom: compact ? 0 : 14,
-    }}>
-      {/* Racing/VCR overlays */}
-      {themeKey === 'racing' && rolling && (
-        <div className="dice-speed-lines" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />
-      )}
-      {themeKey === 'vcr' && rolling && (
-        <div className="dice-vcr-flicker" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />
-      )}
-
-      {/* Particles */}
-      {particles.map(p => {
-        const rad = (p.angle * Math.PI) / 180
-        return (
-          <div key={p.id}
-            className={`dice-particle dice-particle-${themeKey}`}
-            style={{
-              position: 'absolute', top: '50%', left: '50%',
-              '--dx': `${Math.cos(rad) * p.dist}px`,
-              '--dy': `${Math.sin(rad) * p.dist}px`,
-              fontSize: themeKey === 'racing' ? 16 : 20,
-              pointerEvents: 'none', zIndex: 2, color: fx.color, lineHeight: 1,
-            }}
-          >{p.emoji}</div>
-        )
-      })}
-
-      <div style={{ textAlign: 'center', position: 'relative' }}>
-        {/* Label */}
-        {result?.label && (
-          <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6 }}>
-            {result.label}
-          </div>
-        )}
-
-        {/* Rolling */}
-        {rolling && displayNum !== null && (
-          Array.isArray(displayNum) ? (
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
-              {displayNum.map((n, i) => (
-                <div key={i} className={`dice-rolling-num dice-rolling-${themeKey}`}
-                  style={{ fontSize: compact ? 48 : 64, fontWeight: 900, color: fx.color, lineHeight: 1, textShadow: `0 0 20px ${fx.color}88` }}>
-                  {n}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className={`dice-rolling-num dice-rolling-${themeKey}`}
-              style={{ fontSize: compact ? 56 : 80, fontWeight: 900, color: fx.color, lineHeight: 1, textShadow: `0 0 24px ${fx.color}88` }}>
-              {displayNum}
-            </div>
-          )
-        )}
-
-        {/* Result */}
-        {!rolling && result && (
-          <div className={`dice-result-${themeKey}`}>
-            {result.die2 !== null ? (
-              /* Two dice (adv/disadv) */
-              <>
-                <div style={{ display: 'flex', gap: compact ? 12 : 20, justifyContent: 'center', alignItems: 'center', marginBottom: 8 }}>
-                  {[result.die1, result.die2].map((d, idx) => {
-                    const isKept = idx === result.keptIdx
-                    return (
-                      <div key={idx} style={{
-                        fontSize: isKept ? (compact ? 52 : 72) : (compact ? 26 : 36),
-                        fontWeight: 900, lineHeight: 1,
-                        color: isKept ? resultColor : C.textMuted,
-                        textDecoration: !isKept ? 'line-through' : 'none',
-                        opacity: isKept ? 1 : 0.35,
-                        textShadow: isKept ? `0 0 24px ${resultColor}77` : 'none',
-                        transition: 'all 0.2s',
-                      }}>{d}</div>
-                    )
-                  })}
-                </div>
-                <div style={{ fontSize: compact ? 22 : 30, fontWeight: 700, color: resultColor }}>
-                  {result.total}
-                </div>
-                {result.mod !== 0 && (
-                  <div style={{ fontSize: 10, color: C.textDim, marginTop: 3 }}>
-                    {result.kept} {result.mod > 0 ? `+${result.mod}` : result.mod} = {result.total}
-                  </div>
-                )}
-                <div style={{ fontSize: 8, color: result.mode === 'advantage' ? C.green : C.red, letterSpacing: 2, marginTop: 4, textTransform: 'uppercase' }}>
-                  {result.mode}
-                </div>
-              </>
-            ) : (
-              /* Single die */
-              <>
-                <div style={{
-                  fontSize: compact ? 56 : 80, fontWeight: 900, lineHeight: 1,
-                  color: resultColor,
-                  textShadow: `0 0 30px ${resultColor}88, 0 0 60px ${resultColor}33`,
-                }}>
-                  {result.total}
-                </div>
-                {result.mod !== 0 && (
-                  <div style={{ fontSize: 11, color: C.textDim, marginTop: 6 }}>
-                    {result.die1} {result.mod > 0 ? `+${result.mod}` : result.mod} = {result.total}
-                  </div>
-                )}
-                {isCrit   && <div style={{ fontSize: 11, color: C.green, letterSpacing: 4, textTransform: 'uppercase', marginTop: 5, textShadow: `0 0 10px ${C.green}` }}>✦ Critical! ✦</div>}
-                {isFumble && <div style={{ fontSize: 11, color: C.red,   letterSpacing: 4, textTransform: 'uppercase', marginTop: 5 }}>Fumble!</div>}
-                <div style={{ fontSize: 9, color: C.textMuted, marginTop: 5, letterSpacing: 1 }}>
-                  {result.die}{result.mod !== 0 ? ` ${result.mod >= 0 ? '+' : ''}${result.mod}` : ''}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  )
+function Particles({ particles, themeKey, fx }) {
+  return particles.map(p => {
+    const rad = (p.angle * Math.PI) / 180
+    return (
+      <div key={p.id}
+        className={`dice-particle dice-particle-${themeKey}`}
+        style={{
+          position: 'absolute', top: '50%', left: '50%',
+          '--dx': `${Math.cos(rad) * p.dist}px`,
+          '--dy': `${Math.sin(rad) * p.dist}px`,
+          fontSize: themeKey === 'racing' ? 16 : 20,
+          pointerEvents: 'none', zIndex: 2, color: fx.color, lineHeight: 1,
+        }}
+      >{p.emoji}</div>
+    )
+  })
 }
+
+// ── exported so TabCore can use it ──────────────────────────────────────────
+export function RollDisplay() { return null } // kept for import compat
 
 export function DiceRoller({ char, rollMode, setRollMode }) {
   const C        = useT()
@@ -258,242 +141,405 @@ export function DiceRoller({ char, rollMode, setRollMode }) {
   const spellAtk = pb + spellMod
   const spellDC  = 8 + pb + spellMod
 
-  const [selectedDie, setSelectedDie] = useState('d20')
-  const [modifier,    setModifier]    = useState(0)
-  const [history,     setHistory]     = useState([])
-
+  // ── d20 engine ──────────────────────────────────────────────────────────
   const { rolling, displayNum, result, particles, roll, setResult, fx } =
     useRollEngine(rollMode, themeKey)
+  const [d20Mod, setD20Mod] = useState(0)
 
-  const doRoll = (dieName, modVal) => {
-    roll(dieName, modVal)
-    setHistory(prev => {
-      // history updated after roll finishes — use a deferred update via effect below
-      return prev
-    })
-  }
+  // ── Damage multi-dice state ─────────────────────────────────────────────
+  const [dmgDie,     setDmgDie]     = useState('d6')
+  const [dmgCount,   setDmgCount]   = useState(1)
+  const [dmgMod,     setDmgMod]     = useState(0)
+  const [dmgRolling, setDmgRolling] = useState(false)
+  const [dmgDisplay, setDmgDisplay] = useState(null)   // array during flicker
+  const [dmgResult,  setDmgResult]  = useState(null)
+  const [dmgParticles, setDmgParticles] = useState([])
+  const dmgTimerRef  = useRef(null)
+  const dmgGlitchRef = useRef(null)
 
-  // Sync finished rolls into history
+  useEffect(() => () => {
+    clearTimeout(dmgTimerRef.current)
+    clearInterval(dmgGlitchRef.current)
+  }, [])
+
+  // ── Combined history ────────────────────────────────────────────────────
+  const [history, setHistory] = useState([])
   const prevResult = useRef(null)
   useEffect(() => {
     if (result && result !== prevResult.current) {
       prevResult.current = result
-      setHistory(prev => [{ ...result, id: Date.now() }, ...prev].slice(0, 8))
+      setHistory(prev => [{ type: 'd20', ...result, id: Date.now() }, ...prev].slice(0, 10))
     }
   }, [result])
 
-  const quickRoll = (m, die = 'd20') => {
-    setSelectedDie(die)
-    setModifier(m)
-    roll(die, m)
+  // ── Quick-roll (attack buttons → d20) ───────────────────────────────────
+  const quickRoll = (m) => {
+    setDmgResult(null)
+    setD20Mod(m)
+    roll('d20', m)
   }
+
+  // ── Damage roll ─────────────────────────────────────────────────────────
+  const rollDamage = () => {
+    if (dmgRolling || rolling) return
+    const max = DAMAGE_DICE.find(d => d.name === dmgDie)?.max ?? 6
+    const count = Math.max(1, dmgCount)
+
+    setResult(null)      // clear d20 display
+    setDmgRolling(true)
+    setDmgResult(null)
+
+    if (fx.particles.length > 0) {
+      const pList = fx.particles.slice(0, Math.min(count + 2, 8))
+      setDmgParticles(pList.map((emoji, i) => ({
+        id: i + Date.now(), emoji,
+        angle: (i / pList.length) * 360 + Math.random() * 30 - 15,
+        dist: 50 + Math.random() * 30,
+      })))
+    }
+
+    clearInterval(dmgGlitchRef.current)
+    const flickerMs = themeKey === 'vcr' ? 55 : themeKey === 'racing' ? 65 : 90
+    dmgGlitchRef.current = setInterval(() => {
+      setDmgDisplay(Array.from({ length: count }, () => Math.floor(Math.random() * max) + 1))
+    }, flickerMs)
+
+    clearTimeout(dmgTimerRef.current)
+    dmgTimerRef.current = setTimeout(() => {
+      clearInterval(dmgGlitchRef.current)
+      const dice = Array.from({ length: count }, () => Math.floor(Math.random() * max) + 1)
+      const total = dice.reduce((a, b) => a + b, 0) + dmgMod
+      setDmgDisplay(null)
+      setDmgResult({ dice, total, dieType: dmgDie, count, mod: dmgMod })
+      setDmgRolling(false)
+      setDmgParticles([])
+      setHistory(prev => [{ type: 'dmg', dice, total, dieType: dmgDie, count, mod: dmgMod, id: Date.now() }, ...prev].slice(0, 10))
+    }, 700)
+  }
+
+  const stepper = (val, set, min = -20, max = 20, label = 'MOD') => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+      <span style={{ fontSize: 8, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase', minWidth: 28 }}>{label}</span>
+      <button onClick={() => set(v => Math.max(min, v - 1))}
+        style={{ background: 'transparent', border: `1px solid ${C.border}`, color: C.text, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, lineHeight: 1 }}>−</button>
+      <div style={{ fontSize: 18, fontWeight: 700, color: C.gold, minWidth: 38, textAlign: 'center' }}>
+        {label === 'MOD' ? fmt(val) : val}
+      </div>
+      <button onClick={() => set(v => Math.min(max, v + 1))}
+        style={{ background: 'transparent', border: `1px solid ${C.border}`, color: C.text, padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 15, lineHeight: 1 }}>+</button>
+    </div>
+  )
+
+  // d20 result colors
+  const isCrit   = result?.die === 'd20' && result?.kept === 20
+  const isFumble = result?.die === 'd20' && result?.kept === 1
+  const d20Color = isCrit ? C.green : isFumble ? C.red : fx.color
+
+  // damage: highlight max rolls
+  const dmgMax = DAMAGE_DICE.find(d => d.name === dmgDie)?.max ?? 6
 
   return (
     <div>
-      <SecHdr>Spell to Hit</SecHdr>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 22 }}>
+      {/* ── Attack Quick-Roll Buttons ───────────────────────────────────── */}
+      <SecHdr>Attack Rolls</SecHdr>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 24 }}>
         {[
-          { label: 'SPELL ATK', val: spellAtk, sub: `+${pb} · +${spellMod} cast` },
-          { label: 'STR ATK',   val: pb + strMod, sub: `+${pb} · +${strMod} str`   },
-          { label: 'DEX ATK',   val: pb + dexMod, sub: `+${pb} · +${dexMod} dex`   },
-          { label: 'SPELL DC',  val: spellDC,  sub: `8+${pb}+${spellMod}`, noRoll: true },
-        ].map(({ label, val, sub, noRoll }) => (
+          { label: 'SPELL ATK', val: spellAtk,     sub: `+${pb} prof · +${spellMod} cast` },
+          { label: 'STR ATK',   val: pb + strMod,  sub: `+${pb} prof · +${strMod} str`    },
+          { label: 'DEX ATK',   val: pb + dexMod,  sub: `+${pb} prof · +${dexMod} dex`    },
+          { label: 'SPELL DC',  val: spellDC,       sub: `8 + ${pb} + ${spellMod}`, dc: true },
+        ].map(({ label, val, sub, dc }) => (
           <div key={label}
-            onClick={noRoll ? undefined : () => quickRoll(val)}
-            className={noRoll ? '' : 'hov-btn'}
+            onClick={dc ? undefined : () => quickRoll(val)}
+            className={dc ? '' : 'hov-btn'}
             style={{
               background: C.card, border: `1px solid ${C.border}`,
-              borderTop: `3px solid ${noRoll ? C.blue : fx.color}`,
+              borderTop: `3px solid ${dc ? C.blue : fx.color}`,
               padding: '10px 12px', textAlign: 'center',
-              cursor: noRoll ? 'default' : 'pointer',
+              cursor: dc ? 'default' : 'pointer',
             }}>
             <div style={{ fontSize: 8, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 4 }}>{label}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: noRoll ? C.blue : fx.color }}>{noRoll ? val : fmt(val)}</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: dc ? C.blue : fx.color }}>{dc ? val : fmt(val)}</div>
             <div style={{ fontSize: 8, color: C.textMuted, marginTop: 3 }}>{sub}</div>
-            {!noRoll && <div style={{ fontSize: 8, color: fx.color + '88', marginTop: 3, letterSpacing: 1 }}>click to roll</div>}
+            {!dc && <div style={{ fontSize: 8, color: fx.color + '88', marginTop: 3, letterSpacing: 1 }}>click to roll</div>}
           </div>
         ))}
       </div>
 
-      <SecHdr>Dice Roller</SecHdr>
+      {/* ── d20 Roller ─────────────────────────────────────────────────── */}
+      <SecHdr>d20 Check</SecHdr>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '18px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
+        {themeKey === 'racing' && rolling && <div className="dice-speed-lines" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
+        {themeKey === 'vcr'    && rolling && <div className="dice-vcr-flicker" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
 
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '18px', marginBottom: 14, position: 'relative', overflow: 'hidden' }}>
-        {/* Racing/VCR overlays */}
-        {themeKey === 'racing' && rolling && (
-          <div className="dice-speed-lines" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />
-        )}
-        {themeKey === 'vcr' && rolling && (
-          <div className="dice-vcr-flicker" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />
-        )}
+        {/* Adv/disadv */}
+        <ModeToggle rollMode={rollMode} setRollMode={setRollMode} C={C} />
 
-        {/* Die selector */}
-        <div style={{ display: 'flex', gap: 5, marginBottom: 12, flexWrap: 'wrap' }}>
-          {DICE.map(({ name }) => (
-            <button key={name} onClick={() => { setSelectedDie(name); setResult(null) }}
+        {/* Result area */}
+        <div style={{ position: 'relative', minHeight: 110, textAlign: 'center', marginBottom: 16 }}>
+          <Particles particles={particles} themeKey={themeKey} fx={fx} />
+
+          {/* Flickering */}
+          {rolling && displayNum !== null && (
+            Array.isArray(displayNum) ? (
+              <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'center', paddingTop: 10 }}>
+                {displayNum.map((n, i) => (
+                  <div key={i} className={`dice-rolling-num dice-rolling-${themeKey}`}
+                    style={{ fontSize: 72, fontWeight: 900, color: fx.color, lineHeight: 1, textShadow: `0 0 22px ${fx.color}88` }}>
+                    {n}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className={`dice-rolling-num dice-rolling-${themeKey}`}
+                style={{ fontSize: 90, fontWeight: 900, color: fx.color, lineHeight: 1, textShadow: `0 0 28px ${fx.color}88`, paddingTop: 6 }}>
+                {displayNum}
+              </div>
+            )
+          )}
+
+          {/* Result */}
+          {!rolling && result && (
+            <div className={`dice-result-${themeKey}`} style={{ paddingTop: 6 }}>
+              {result.label && (
+                <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6 }}>
+                  {result.label}
+                </div>
+              )}
+              {result.die2 !== null ? (
+                /* Adv/disadv — two dice */
+                <>
+                  <div style={{ display: 'flex', gap: 24, justifyContent: 'center', alignItems: 'center', marginBottom: 8 }}>
+                    {[result.die1, result.die2].map((d, idx) => {
+                      const kept = idx === result.keptIdx
+                      return (
+                        <div key={idx} style={{
+                          fontSize: kept ? 80 : 40, fontWeight: 900, lineHeight: 1,
+                          color: kept ? d20Color : C.textMuted,
+                          textDecoration: !kept ? 'line-through' : 'none',
+                          opacity: kept ? 1 : 0.35,
+                          textShadow: kept ? `0 0 28px ${d20Color}77` : 'none',
+                        }}>{d}</div>
+                      )
+                    })}
+                  </div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: d20Color }}>{result.total}</div>
+                  {result.mod !== 0 && (
+                    <div style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>
+                      {result.kept} {result.mod >= 0 ? `+${result.mod}` : result.mod} = {result.total}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 9, color: result.mode === 'advantage' ? C.green : C.red, letterSpacing: 2, marginTop: 5, textTransform: 'uppercase' }}>
+                    {result.mode}
+                  </div>
+                </>
+              ) : (
+                /* Normal — one die */
+                <>
+                  <div style={{ fontSize: 90, fontWeight: 900, lineHeight: 1, color: d20Color, textShadow: `0 0 36px ${d20Color}88, 0 0 70px ${d20Color}33` }}>
+                    {result.total}
+                  </div>
+                  {result.mod !== 0 && (
+                    <div style={{ fontSize: 12, color: C.textDim, marginTop: 6 }}>
+                      {result.die1} {result.mod >= 0 ? `+${result.mod}` : result.mod} = {result.total}
+                    </div>
+                  )}
+                  {isCrit   && <div style={{ fontSize: 13, color: C.green, letterSpacing: 4, textTransform: 'uppercase', marginTop: 6, textShadow: `0 0 14px ${C.green}` }}>✦ Critical! ✦</div>}
+                  {isFumble && <div style={{ fontSize: 13, color: C.red,   letterSpacing: 4, textTransform: 'uppercase', marginTop: 6 }}>Fumble!</div>}
+                </>
+              )}
+            </div>
+          )}
+
+          {!rolling && !result && (
+            <div style={{ fontSize: 64, color: C.textMuted, opacity: 0.15, paddingTop: 10, userSelect: 'none' }}>20</div>
+          )}
+        </div>
+
+        {/* Modifier + Roll */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          {stepper(d20Mod, setD20Mod, -20, 30)}
+          <button className="hov-btn" onClick={() => roll('d20', d20Mod)} disabled={rolling}
+            style={{
+              flex: 1, background: rolling ? 'transparent' : fx.color + '1a',
+              border: `2px solid ${rolling ? C.border : fx.color}`,
+              color: rolling ? C.textMuted : fx.color,
+              padding: '14px', cursor: rolling ? 'default' : 'pointer',
+              fontFamily: 'inherit', fontSize: 13, fontWeight: 700,
+              letterSpacing: 3, textTransform: 'uppercase', transition: 'all 0.18s',
+              boxShadow: rolling ? 'none' : `0 0 20px ${fx.color}33`,
+            }}>
+            {rolling ? '· · ·' : `${fx.label} D20`}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Damage / Multi-Dice Roller ──────────────────────────────────── */}
+      <SecHdr>Damage Dice</SecHdr>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '18px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
+        {themeKey === 'racing' && dmgRolling && <div className="dice-speed-lines" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
+        {themeKey === 'vcr'    && dmgRolling && <div className="dice-vcr-flicker" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
+
+        {/* Die type selector */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+          {DAMAGE_DICE.map(({ name }) => (
+            <button key={name} className="hov-btn" onClick={() => { setDmgDie(name); setDmgResult(null) }}
               style={{
-                background: selectedDie === name ? fx.color + '1a' : 'transparent',
-                border: `1px solid ${selectedDie === name ? fx.color : C.border}`,
-                color: selectedDie === name ? fx.color : C.textMuted,
-                padding: '5px 11px', cursor: 'pointer', fontFamily: 'inherit',
+                flex: 1, background: dmgDie === name ? fx.color + '1a' : 'transparent',
+                border: `1px solid ${dmgDie === name ? fx.color : C.border}`,
+                color: dmgDie === name ? fx.color : C.textMuted,
+                padding: '7px 4px', cursor: 'pointer', fontFamily: 'inherit',
                 fontSize: 11, fontWeight: 700, letterSpacing: 1, transition: 'all 0.13s',
-                boxShadow: selectedDie === name ? `0 0 10px ${fx.color}33` : 'none',
+                boxShadow: dmgDie === name ? `0 0 10px ${fx.color}33` : 'none',
               }}>
               {name}
             </button>
           ))}
         </div>
 
-        {/* Adv / disadv toggle */}
-        <ModeToggle rollMode={rollMode} setRollMode={setRollMode} C={C} />
+        {/* Count + mod steppers */}
+        <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
+          {stepper(dmgCount, setDmgCount, 1, 20, 'DICE')}
+          {stepper(dmgMod,   setDmgMod,  -20, 30, 'MOD')}
+          {/* formula preview */}
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: 13, color: C.textMuted, letterSpacing: 2, fontWeight: 700 }}>
+              {dmgCount}{dmgDie}{dmgMod !== 0 ? ` ${dmgMod >= 0 ? '+' : ''}${dmgMod}` : ''}
+            </span>
+          </div>
+        </div>
 
         {/* Result area */}
-        <div style={{ position: 'relative', minHeight: 120, marginBottom: 14 }}>
-          {particles.map(p => {
-            const rad = (p.angle * Math.PI) / 180
-            return (
-              <div key={p.id}
-                className={`dice-particle dice-particle-${themeKey}`}
-                style={{
-                  position: 'absolute', top: '50%', left: '50%',
-                  '--dx': `${Math.cos(rad) * p.dist}px`,
-                  '--dy': `${Math.sin(rad) * p.dist}px`,
-                  fontSize: themeKey === 'racing' ? 16 : 20,
-                  pointerEvents: 'none', zIndex: 2, color: fx.color, lineHeight: 1,
-                }}
-              >{p.emoji}</div>
-            )
-          })}
+        <div style={{ position: 'relative', minHeight: 90, textAlign: 'center', marginBottom: 14 }}>
+          <Particles particles={dmgParticles} themeKey={themeKey} fx={fx} />
 
-          <div style={{ textAlign: 'center', paddingTop: 10 }}>
-            {rolling && displayNum !== null && (
-              Array.isArray(displayNum) ? (
-                <div style={{ display: 'flex', gap: 16, justifyContent: 'center', alignItems: 'center' }}>
-                  {displayNum.map((n, i) => (
-                    <div key={i} className={`dice-rolling-num dice-rolling-${themeKey}`}
-                      style={{ fontSize: 64, fontWeight: 900, color: fx.color, lineHeight: 1, textShadow: `0 0 20px ${fx.color}88` }}>
-                      {n}
-                    </div>
-                  ))}
+          {/* Flickering multiple dice */}
+          {dmgRolling && dmgDisplay && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', paddingTop: 8 }}>
+              {dmgDisplay.map((n, i) => (
+                <div key={i} className={`dice-rolling-num dice-rolling-${themeKey}`}
+                  style={{
+                    fontSize: dmgCount > 6 ? 24 : dmgCount > 3 ? 32 : 48,
+                    fontWeight: 900, color: fx.color, lineHeight: 1,
+                    textShadow: `0 0 16px ${fx.color}88`,
+                    minWidth: dmgCount > 6 ? 28 : 36, textAlign: 'center',
+                  }}>
+                  {n}
                 </div>
-              ) : (
-                <div className={`dice-rolling-num dice-rolling-${themeKey}`}
-                  style={{ fontSize: 80, fontWeight: 900, color: fx.color, lineHeight: 1, textShadow: `0 0 24px ${fx.color}88` }}>
-                  {displayNum}
-                </div>
-              )
-            )}
+              ))}
+            </div>
+          )}
 
-            {!rolling && result && (() => {
-              const isCrit   = result.die === 'd20' && result.kept === 20
-              const isFumble = result.die === 'd20' && result.kept === 1
-              const rc = isCrit ? C.green : isFumble ? C.red : fx.color
-              return (
-                <div className={`dice-result-${themeKey}`}>
-                  {result.die2 !== null ? (
-                    <>
-                      <div style={{ display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'center', marginBottom: 8 }}>
-                        {[result.die1, result.die2].map((d, idx) => {
-                          const isKept = idx === result.keptIdx
-                          return (
-                            <div key={idx} style={{
-                              fontSize: isKept ? 72 : 36, fontWeight: 900, lineHeight: 1,
-                              color: isKept ? rc : C.textMuted,
-                              textDecoration: !isKept ? 'line-through' : 'none',
-                              opacity: isKept ? 1 : 0.35,
-                              textShadow: isKept ? `0 0 24px ${rc}77` : 'none',
-                            }}>{d}</div>
-                          )
-                        })}
-                      </div>
-                      <div style={{ fontSize: 30, fontWeight: 700, color: rc }}>{result.total}</div>
-                      {result.mod !== 0 && (
-                        <div style={{ fontSize: 11, color: C.textDim, marginTop: 4 }}>
-                          {result.kept} {result.mod >= 0 ? `+${result.mod}` : result.mod} = {result.total}
-                        </div>
-                      )}
-                      <div style={{ fontSize: 8, color: result.mode === 'advantage' ? C.green : C.red, letterSpacing: 2, marginTop: 4, textTransform: 'uppercase' }}>
-                        {result.mode}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div style={{ fontSize: 80, fontWeight: 900, lineHeight: 1, color: rc, textShadow: `0 0 30px ${rc}88, 0 0 60px ${rc}33` }}>
-                        {result.total}
-                      </div>
-                      {result.mod !== 0 && (
-                        <div style={{ fontSize: 12, color: C.textDim, marginTop: 6 }}>
-                          {result.die1} {result.mod >= 0 ? `+${result.mod}` : result.mod} = {result.total}
-                        </div>
-                      )}
-                      {isCrit   && <div style={{ fontSize: 11, color: C.green, letterSpacing: 4, textTransform: 'uppercase', marginTop: 5, textShadow: `0 0 10px ${C.green}` }}>✦ Critical! ✦</div>}
-                      {isFumble && <div style={{ fontSize: 11, color: C.red,   letterSpacing: 4, textTransform: 'uppercase', marginTop: 5 }}>Fumble!</div>}
-                      <div style={{ fontSize: 9, color: C.textMuted, marginTop: 5, letterSpacing: 1 }}>
-                        {result.die}{result.mod !== 0 ? ` ${result.mod >= 0 ? '+' : ''}${result.mod}` : ''}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )
-            })()}
+          {/* Result: individual dice chips + total */}
+          {!dmgRolling && dmgResult && (
+            <div className={`dice-result-${themeKey}`}>
+              {/* Individual die chips */}
+              <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 10 }}>
+                {dmgResult.dice.map((d, i) => {
+                  const isMax = d === dmgMax
+                  const isMin = d === 1
+                  return (
+                    <div key={i} style={{
+                      background: isMax ? fx.color + '22' : isMin ? C.red + '11' : C.surface,
+                      border: `1px solid ${isMax ? fx.color : isMin ? C.red + '66' : C.border}`,
+                      padding: '5px 10px', fontSize: 18, fontWeight: 700, lineHeight: 1,
+                      color: isMax ? fx.color : isMin ? C.red : C.text,
+                      minWidth: 36, textAlign: 'center',
+                      boxShadow: isMax ? `0 0 8px ${fx.color}44` : 'none',
+                    }}>{d}</div>
+                  )
+                })}
+              </div>
+              {/* Total */}
+              <div style={{
+                fontSize: 60, fontWeight: 900, lineHeight: 1,
+                color: fx.color, textShadow: `0 0 24px ${fx.color}88, 0 0 50px ${fx.color}33`,
+              }}>
+                {dmgResult.total}
+              </div>
+              {/* Breakdown */}
+              <div style={{ fontSize: 11, color: C.textDim, marginTop: 6 }}>
+                {dmgResult.dice.join(' + ')}
+                {dmgResult.mod !== 0 ? ` ${dmgResult.mod >= 0 ? '+' : ''}${dmgResult.mod}` : ''} = {dmgResult.total}
+              </div>
+            </div>
+          )}
 
-            {!rolling && !result && (
-              <div style={{ fontSize: 56, color: C.textMuted, opacity: 0.2 }}>{selectedDie}</div>
-            )}
-          </div>
+          {!dmgRolling && !dmgResult && (
+            <div style={{ fontSize: 32, color: C.textMuted, opacity: 0.18, paddingTop: 12, userSelect: 'none', letterSpacing: 4 }}>
+              {dmgCount}{dmgDie}
+            </div>
+          )}
         </div>
 
-        {/* Modifier + Roll button */}
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 9, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase' }}>MOD</span>
-            <button onClick={() => setModifier(m => m - 1)}
-              style={{ background: 'transparent', border: `1px solid ${C.border}`, color: C.text, padding: '5px 11px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 16, lineHeight: 1 }}>−</button>
-            <div style={{ fontSize: 20, fontWeight: 700, color: C.gold, minWidth: 44, textAlign: 'center' }}>{fmt(modifier)}</div>
-            <button onClick={() => setModifier(m => m + 1)}
-              style={{ background: 'transparent', border: `1px solid ${C.border}`, color: C.text, padding: '5px 11px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 16, lineHeight: 1 }}>+</button>
-          </div>
-          <button className="hov-btn" onClick={() => doRoll(selectedDie, modifier)} disabled={rolling}
-            style={{
-              flex: 1, background: rolling ? 'transparent' : fx.color + '1a',
-              border: `2px solid ${rolling ? C.border : fx.color}`,
-              color: rolling ? C.textMuted : fx.color,
-              padding: '13px', cursor: rolling ? 'default' : 'pointer',
-              fontFamily: 'inherit', fontSize: 12, fontWeight: 700,
-              letterSpacing: 3, textTransform: 'uppercase', transition: 'all 0.18s',
-              boxShadow: rolling ? 'none' : `0 0 18px ${fx.color}33`,
-            }}>
-            {rolling ? '· · ·' : `${fx.label} ${selectedDie}`}
-          </button>
-        </div>
+        {/* Roll button */}
+        <button className="hov-btn" onClick={rollDamage} disabled={dmgRolling || rolling}
+          style={{
+            width: '100%',
+            background: (dmgRolling || rolling) ? 'transparent' : fx.color + '1a',
+            border: `2px solid ${(dmgRolling || rolling) ? C.border : fx.color}`,
+            color: (dmgRolling || rolling) ? C.textMuted : fx.color,
+            padding: '13px', cursor: (dmgRolling || rolling) ? 'default' : 'pointer',
+            fontFamily: 'inherit', fontSize: 13, fontWeight: 700,
+            letterSpacing: 3, textTransform: 'uppercase', transition: 'all 0.18s',
+            boxShadow: (dmgRolling || rolling) ? 'none' : `0 0 18px ${fx.color}33`,
+          }}>
+          {dmgRolling ? '· · ·' : `${fx.label} ${dmgCount}${dmgDie}${dmgMod !== 0 ? (dmgMod > 0 ? ` + ${dmgMod}` : ` − ${Math.abs(dmgMod)}`) : ''}`}
+        </button>
       </div>
 
-      {/* History */}
+      {/* ── Roll History ────────────────────────────────────────────────── */}
       {history.length > 0 && (
         <div>
           <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 }}>History</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {history.map((h, i) => {
-              const hCrit   = h.die === 'd20' && h.kept === 20
-              const hFumble = h.die === 'd20' && h.kept === 1
+              if (h.type === 'd20') {
+                const hCrit   = h.kept === 20
+                const hFumble = h.kept === 1
+                return (
+                  <div key={h.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '6px 12px', background: C.card, opacity: 1 - i * 0.08,
+                    border: `1px solid ${hCrit ? C.green + '44' : hFumble ? C.red + '44' : C.border}`,
+                    borderLeft: `3px solid ${hCrit ? C.green : hFumble ? C.red : fx.color + '66'}`,
+                  }}>
+                    <span style={{ fontSize: 9, color: C.textMuted, minWidth: 26, letterSpacing: 1 }}>d20</span>
+                    {h.die2 !== null && (
+                      <span style={{ fontSize: 9, color: C.textMuted }}>
+                        [{h.keptIdx === 0 ? <b style={{ color: C.text }}>{h.die1}</b> : h.die1}/
+                         {h.keptIdx === 1 ? <b style={{ color: C.text }}>{h.die2}</b> : h.die2}]
+                      </span>
+                    )}
+                    <span style={{ fontSize: 16, fontWeight: 700, color: hCrit ? C.green : hFumble ? C.red : C.text }}>{h.total}</span>
+                    {h.mod !== 0 && <span style={{ fontSize: 10, color: C.textDim }}>({h.kept} {h.mod >= 0 ? `+${h.mod}` : h.mod})</span>}
+                    {h.label && <span style={{ fontSize: 9, color: C.textMuted }}>{h.label}</span>}
+                    {h.mode !== 'normal' && <span style={{ fontSize: 8, color: h.mode === 'advantage' ? C.green : C.red, letterSpacing: 1, textTransform: 'uppercase' }}>{h.mode.slice(0,3)}</span>}
+                    {hCrit   && <span style={{ fontSize: 9, color: C.green, letterSpacing: 2, marginLeft: 'auto' }}>CRIT ✦</span>}
+                    {hFumble && <span style={{ fontSize: 9, color: C.red,   letterSpacing: 2, marginLeft: 'auto' }}>FUMBLE</span>}
+                  </div>
+                )
+              }
+              // damage roll
               return (
                 <div key={h.id} style={{
                   display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '6px 12px', background: C.card, opacity: 1 - i * 0.1,
-                  border: `1px solid ${hCrit ? C.green + '44' : hFumble ? C.red + '44' : C.border}`,
-                  borderLeft: `3px solid ${hCrit ? C.green : hFumble ? C.red : fx.color + '55'}`,
+                  padding: '6px 12px', background: C.card, opacity: 1 - i * 0.08,
+                  border: `1px solid ${C.border}`,
+                  borderLeft: `3px solid ${C.yellow}66`,
                 }}>
-                  <span style={{ fontSize: 9, color: C.textMuted, minWidth: 32, letterSpacing: 1 }}>{h.die}</span>
-                  {h.die2 !== null && (
-                    <span style={{ fontSize: 9, color: C.textMuted }}>
-                      [{h.keptIdx === 0 ? <b style={{ color: C.text }}>{h.die1}</b> : h.die1}/{h.keptIdx === 1 ? <b style={{ color: C.text }}>{h.die2}</b> : h.die2}]
-                    </span>
-                  )}
-                  <span style={{ fontSize: 16, fontWeight: 700, color: hCrit ? C.green : hFumble ? C.red : C.text }}>{h.total}</span>
-                  {h.mod !== 0 && <span style={{ fontSize: 10, color: C.textDim }}>({h.kept} {h.mod >= 0 ? `+${h.mod}` : h.mod})</span>}
-                  {h.mode !== 'normal' && <span style={{ fontSize: 8, color: h.mode === 'advantage' ? C.green : C.red, letterSpacing: 1, textTransform: 'uppercase' }}>{h.mode.slice(0,3)}</span>}
-                  {hCrit   && <span style={{ fontSize: 9, color: C.green, letterSpacing: 2, marginLeft: 'auto' }}>CRIT ✦</span>}
-                  {hFumble && <span style={{ fontSize: 9, color: C.red,   letterSpacing: 2, marginLeft: 'auto' }}>FUMBLE</span>}
+                  <span style={{ fontSize: 9, color: C.textMuted, minWidth: 36, letterSpacing: 1 }}>
+                    {h.count}{h.dieType}{h.mod !== 0 ? (h.mod > 0 ? `+${h.mod}` : h.mod) : ''}
+                  </span>
+                  <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                    {h.dice.map((d, di) => (
+                      <span key={di} style={{ fontSize: 10, color: d === (DAMAGE_DICE.find(x => x.name === h.dieType)?.max ?? 0) ? fx.color : C.textDim,
+                        fontWeight: d === (DAMAGE_DICE.find(x => x.name === h.dieType)?.max ?? 0) ? 700 : 400 }}>
+                        {d}{di < h.dice.length - 1 ? '+' : ''}
+                      </span>
+                    ))}
+                  </div>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: C.yellow, marginLeft: 4 }}>{h.total}</span>
                 </div>
               )
             })}
