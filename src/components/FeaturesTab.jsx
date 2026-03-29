@@ -68,13 +68,23 @@ function FeatCard({ feat, onUpdate, onRemove, accentColor, C, inp }) {
             style={{ ...inp, fontSize: 11, padding: '6px 8px', marginTop: 8, marginBottom: 7 }}
           />
 
-          {/* Description */}
+          {/* Description — auto-height */}
           <textarea
             value={feat.desc}
-            onChange={e => onUpdate({ ...feat, desc: e.target.value })}
+            onChange={e => {
+              const el = e.target
+              el.style.height = 'auto'
+              el.style.height = el.scrollHeight + 'px'
+              onUpdate({ ...feat, desc: e.target.value })
+            }}
+            onFocus={e => {
+              const el = e.target
+              el.style.height = 'auto'
+              el.style.height = el.scrollHeight + 'px'
+            }}
             placeholder="Description, mechanics, source..."
-            rows={3}
-            style={{ ...inp, fontSize: 11, resize: 'vertical', marginBottom: 9 }}
+            rows={2}
+            style={{ ...inp, fontSize: 11, resize: 'none', marginBottom: 9, overflow: 'hidden', minHeight: 48 }}
           />
 
           {/* Options row */}

@@ -13,9 +13,10 @@ import { SessionNotesTab } from './SessionNotesTab.jsx'
 export function Sheet({ char, onChange, onBack }) {
   const C   = useT()
   const inp = useInp()
-  const [tab,      setTab]      = useState('core')
-  const [editing,  setEditing]  = useState(false)
-  const [rollMode, setRollMode] = useState('normal')
+  const [tab,         setTab]         = useState('core')
+  const [editing,     setEditing]     = useState(false)
+  const [rollMode,    setRollMode]    = useState('normal')
+  const [combatOpen,  setCombatOpen]  = useState(false)
 
   // detect which theme is active
   const themeKey = Object.entries(THEMES).find(([, t]) => t.gold === C.gold)?.[0] || ''
@@ -31,7 +32,7 @@ export function Sheet({ char, onChange, onBack }) {
   const hpPct    = char.hp.max ? char.hp.current / char.hp.max * 100 : 0
   const hpColor  = hpPct > 60 ? C.green : hpPct > 30 ? C.yellow : C.red
 
-  const TABS = ['core', 'combat', 'spells', 'dice', 'features', 'sessions', 'encounter', 'character']
+  const TABS = ['core', 'combat', 'spells', 'dice', 'features', 'sessions', 'character']
 
   const updateClass = (idx, field, val) => {
     const cls = [...(char.classes || [])]
@@ -61,6 +62,17 @@ export function Sheet({ char, onChange, onBack }) {
           <Btn variant={editing ? 'gold' : 'default'} onClick={() => setEditing(e => !e)} style={isRacing ? { borderRadius: 20 } : {}}>
             {editing ? '✓ Done' : '✎ Edit'}
           </Btn>
+          <button onClick={() => setCombatOpen(true)} className="hov-btn"
+            style={{
+              background: '#ef444418', border: `2px solid #ef4444`,
+              color: '#ef4444', padding: '7px 14px', cursor: 'pointer',
+              fontFamily: 'inherit', fontSize: 10, fontWeight: 700,
+              letterSpacing: 2, textTransform: 'uppercase',
+              boxShadow: '0 0 12px #ef444433',
+              ...(isRacing ? { borderRadius: 20 } : {}),
+            }}>
+            ⚔ Combat
+          </button>
         </div>
       </div>
 
@@ -121,8 +133,42 @@ export function Sheet({ char, onChange, onBack }) {
           {tab === 'dice'      && <DiceRoller   char={char} rollMode={rollMode} setRollMode={setRollMode} />}
           {tab === 'features'  && <FeaturesTab  char={char} onChange={onChange} />}
           {tab === 'sessions'  && <SessionNotesTab char={char} onChange={onChange} />}
-          {tab === 'encounter' && <TabEncounter char={char} C={C} />}
           {tab === 'character' && <TabCharacter char={char} set={set} setN={setN} editing={editing} inp={inp} updateClass={updateClass} C={C} />}
+        </div>
+      </div>
+
+      {/* ── Combat Side Panel ── */}
+      {combatOpen && (
+        <div onClick={() => setCombatOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, backdropFilter: 'blur(2px)' }}
+        />
+      )}
+      <div style={{
+        position: 'fixed', top: 0, right: 0, bottom: 0, width: 340,
+        background: C.surface, borderLeft: `2px solid #ef444466`,
+        boxShadow: combatOpen ? '-8px 0 40px rgba(0,0,0,0.5)' : 'none',
+        zIndex: 201, display: 'flex', flexDirection: 'column',
+        transform: combatOpen ? 'translateX(0)' : 'translateX(100%)',
+        transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
+        overflowY: 'auto',
+      }}>
+        {/* Panel header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10,
+          padding: '14px 16px', borderBottom: `1px solid ${C.border}`,
+          background: C.card, flexShrink: 0, position: 'sticky', top: 0, zIndex: 1 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#ef4444', letterSpacing: 3, textTransform: 'uppercase' }}>
+              ⚔ Combat
+            </div>
+            <div style={{ fontSize: 9, color: C.textMuted, marginTop: 1 }}>{char.name}</div>
+          </div>
+          <button onClick={() => setCombatOpen(false)}
+            style={{ background: 'transparent', border: `1px solid ${C.border}`, color: C.textMuted,
+              padding: '5px 10px', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12 }}>✕</button>
+        </div>
+        {/* Panel body */}
+        <div style={{ padding: '16px', flex: 1 }}>
+          <CombatPanel char={char} onChange={onChange} onClose={() => setCombatOpen(false)} C={C} />
         </div>
       </div>
     </div>
@@ -488,8 +534,28 @@ const CONDITIONS = [
   'Prone','Restrained','Stunned','Unconscious',
 ]
 
-function TabEncounter({ char, C }) {
+function CombatPanel({ char, onChange, onClose, C }) {
+  const inp = useInp()
+  const lvl = totalLevel(char)
+  const pb  = profB(lvl)
   const dexMod = mod(char.stats.dex) + (char.initiative || 0)
+
+  // ── Turn resources (persisted on char) ──
+  const used    = char.combatUsed || {}
+  const setUsed = (patch) => onChange({ ...char, combatUsed: { ...used, ...patch } })
+
+  const RESOURCES = [
+    { key: 'action',   label: 'Action',   color: '#4ade80' },
+    { key: 'bonus',    label: 'Bonus',    color: '#60a5fa' },
+    { key: 'reaction', label: 'Reaction', color: '#f472b6' },
+  ]
+
+  // ── HP quick adjust ──
+  const hpPct   = char.hp.max ? char.hp.current / char.hp.max * 100 : 0
+  const hpColor = hpPct > 60 ? C.green : hpPct > 30 ? C.yellow : C.red
+  const setHp   = (v) => onChange({ ...char, hp: { ...char.hp, current: Math.max(0, Math.min(char.hp.max, v)) } })
+
+  // ── Encounter tracker (local — session only) ──
   const [round,      setRound]      = useState(1)
   const [activeId,   setActiveId]   = useState(char.id)
   const [combatants, setCombatants] = useState([{
@@ -536,115 +602,174 @@ function TabEncounter({ char, C }) {
   }
 
   const ghost = { background: 'transparent', border: 'none', fontFamily: 'inherit', padding: 0, outline: 'none' }
+  const sec = (label) => (
+    <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, textTransform: 'uppercase',
+      paddingBottom: 6, marginBottom: 10, borderBottom: `1px solid ${C.border}` }}>
+      {label}
+    </div>
+  )
 
   return (
     <div>
-      {/* Round bar */}
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', background: C.card, border: `1px solid ${C.border}`, padding: '10px 16px', marginBottom: 14 }}>
-        <Btn onClick={prevTurn}>◀ Prev</Btn>
+      {/* ── Turn Resources ── */}
+      {sec('Turn Resources')}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
+        {RESOURCES.map(({ key, label, color }) => {
+          const isUsed = !!used[key]
+          return (
+            <div key={key} className="hov-btn" onClick={() => setUsed({ [key]: !isUsed })}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '10px 14px', cursor: 'pointer', transition: 'all 0.18s',
+                background: isUsed ? 'transparent' : color + '18',
+                border: `2px solid ${isUsed ? C.border : color}`,
+                opacity: isUsed ? 0.45 : 1, position: 'relative', overflow: 'hidden',
+              }}>
+              {!isUsed && <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: color, boxShadow: `0 0 8px ${color}` }} />}
+              <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                background: isUsed ? C.textMuted : color,
+                boxShadow: isUsed ? 'none' : `0 0 8px ${color}` }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: isUsed ? C.textMuted : color,
+                textTransform: 'uppercase', letterSpacing: 2, flex: 1,
+                textDecoration: isUsed ? 'line-through' : 'none' }}>
+                {label}
+              </span>
+              <span style={{ fontSize: 9, color: isUsed ? C.textMuted : color + '88' }}>
+                {isUsed ? 'used' : 'available'}
+              </span>
+            </div>
+          )
+        })}
+        <button className="hov-btn" onClick={() => onChange({ ...char, combatUsed: {} })}
+          style={{ background: 'transparent', border: `1px solid ${C.border}`, color: C.textDim,
+            padding: '8px', fontSize: 10, fontFamily: 'inherit', letterSpacing: 2,
+            textTransform: 'uppercase', cursor: 'pointer', marginTop: 2 }}>
+          ↺ New Turn
+        </button>
+      </div>
+
+      {/* ── HP Quick Adjust ── */}
+      {sec('Hit Points')}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+        <button onClick={() => setHp(char.hp.current - 1)}
+          style={{ ...ghost, width: 34, height: 34, border: `1px solid ${C.border}`, color: C.red,
+            fontSize: 20, cursor: 'pointer', textAlign: 'center', lineHeight: '34px' }}>−</button>
         <div style={{ flex: 1, textAlign: 'center' }}>
-          <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, textTransform: 'uppercase' }}>Round</div>
-          <div style={{ fontSize: 30, fontWeight: 700, color: C.gold, lineHeight: 1 }}>{round}</div>
+          <div style={{ fontSize: 28, fontWeight: 900, color: hpColor, lineHeight: 1 }}>{char.hp.current}</div>
+          <div style={{ fontSize: 10, color: C.textMuted }}>/ {char.hp.max}{char.hp.temp ? ` · +${char.hp.temp} temp` : ''}</div>
         </div>
-        <div style={{ textAlign: 'center', maxWidth: 160 }}>
-          <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Active</div>
-          <div style={{ fontSize: 13, color: C.text, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <button onClick={() => setHp(char.hp.current + 1)}
+          style={{ ...ghost, width: 34, height: 34, border: `1px solid ${C.border}`, color: C.green,
+            fontSize: 20, cursor: 'pointer', textAlign: 'center', lineHeight: '34px' }}>+</button>
+      </div>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
+        {[1,5,10].map(n => (
+          <React.Fragment key={n}>
+            <button className="hov-btn" onClick={() => setHp(char.hp.current - n)}
+              style={{ flex: 1, background: C.red + '11', border: `1px solid ${C.red}44`, color: C.red,
+                padding: '6px', fontSize: 10, fontFamily: 'inherit', cursor: 'pointer', fontWeight: 700 }}>
+              −{n}
+            </button>
+            <button className="hov-btn" onClick={() => setHp(char.hp.current + n)}
+              style={{ flex: 1, background: C.green + '11', border: `1px solid ${C.green}44`, color: C.green,
+                padding: '6px', fontSize: 10, fontFamily: 'inherit', cursor: 'pointer', fontWeight: 700 }}>
+              +{n}
+            </button>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* ── Initiative Tracker ── */}
+      {sec('Initiative Tracker')}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
+        <Btn onClick={prevTurn}>◀</Btn>
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 8, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase' }}>Round</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: C.gold, lineHeight: 1 }}>{round}</div>
+        </div>
+        <div style={{ flex: 2, textAlign: 'center', overflow: 'hidden' }}>
+          <div style={{ fontSize: 8, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>Active</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: C.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {sorted[activeIdx]?.name || '—'}
           </div>
         </div>
-        <Btn variant="gold" onClick={nextTurn}>Next ▶</Btn>
+        <Btn variant="gold" onClick={nextTurn}>▶</Btn>
       </div>
 
       {/* Combatant rows */}
-      <div style={{ marginBottom: 14 }}>
+      <div style={{ marginBottom: 10 }}>
         {sorted.map((c) => {
           const isActive = c.id === activeId
-          const hpPct = c.maxHp ? c.hp / c.maxHp * 100 : 0
-          const hpClr = hpPct > 60 ? C.green : hpPct > 30 ? C.yellow : C.red
+          const hPct = c.maxHp ? c.hp / c.maxHp * 100 : 0
+          const hClr = hPct > 60 ? C.green : hPct > 30 ? C.yellow : C.red
           return (
             <div key={c.id} style={{
-              display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap',
-              background: isActive ? C.activeSkill : C.card,
-              border: `1px solid ${isActive ? C.gold : C.border}`,
+              display: 'flex', gap: 6, alignItems: 'center',
+              background: isActive ? C.gold + '0f' : C.card,
+              border: `1px solid ${isActive ? C.gold + '55' : C.border}`,
               borderLeft: `3px solid ${isActive ? C.gold : 'transparent'}`,
-              padding: '8px 12px', marginBottom: 4, transition: 'all 0.15s',
-              boxShadow: isActive ? `0 0 10px ${C.gold}22` : 'none',
+              padding: '6px 8px', marginBottom: 3, transition: 'all 0.15s',
             }}>
-              <div style={{ width: 38, textAlign: 'center', flexShrink: 0 }}>
-                <div style={{ fontSize: 8, color: C.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>Init</div>
-                <input type="number" value={c.initiative} onChange={e => upd(c.id, 'initiative', +e.target.value)}
-                  style={{ ...ghost, color: C.gold, fontSize: 16, fontWeight: 700, width: 38, textAlign: 'center' }} />
-              </div>
-              <div style={{ flex: 1, minWidth: 80 }}>
-                <input value={c.name} onChange={e => upd(c.id, 'name', e.target.value)}
-                  style={{ ...ghost, color: c.isPlayer ? C.gold : C.text, fontSize: 13, fontWeight: c.isPlayer ? 700 : 400, width: '100%' }} />
-                {c.conditions.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginTop: 3 }}>
-                    {c.conditions.map(cd => (
-                      <span key={cd} className="hov-btn" onClick={() => toggleCond(c.id, cd)}
-                        style={{ fontSize: 8, background: C.red + '22', border: `1px solid ${C.red}44`, color: C.red, padding: '1px 5px', cursor: 'pointer', letterSpacing: 1 }}>
-                        {cd} ✕
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-                <button onClick={() => upd(c.id, 'hp', Math.max(0, c.hp - 1))}
-                  style={{ ...ghost, color: C.textDim, fontSize: 18, width: 22, cursor: 'pointer', textAlign: 'center' }}>−</button>
-                <div style={{ textAlign: 'center', minWidth: 42 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: hpClr, lineHeight: 1 }}>{c.hp}</div>
-                  <div style={{ fontSize: 9, color: C.textMuted }}>/{c.maxHp}</div>
-                </div>
-                <button onClick={() => upd(c.id, 'hp', Math.min(c.maxHp, c.hp + 1))}
-                  style={{ ...ghost, color: C.textDim, fontSize: 18, width: 22, cursor: 'pointer', textAlign: 'center' }}>+</button>
-              </div>
-              <div style={{ textAlign: 'center', flexShrink: 0, minWidth: 30 }}>
-                <div style={{ fontSize: 8, color: C.textMuted, letterSpacing: 1, textTransform: 'uppercase' }}>AC</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{c.ac}</div>
-              </div>
+              <input type="number" value={c.initiative} onChange={e => upd(c.id, 'initiative', +e.target.value)}
+                style={{ ...ghost, color: C.gold, fontSize: 13, fontWeight: 700, width: 30, textAlign: 'center' }} />
+              <input value={c.name} onChange={e => upd(c.id, 'name', e.target.value)}
+                style={{ ...ghost, color: c.isPlayer ? C.gold : C.text, fontSize: 11,
+                  fontWeight: c.isPlayer ? 700 : 400, flex: 1, minWidth: 0 }} />
+              <button onClick={() => upd(c.id, 'hp', Math.max(0, c.hp - 1))}
+                style={{ ...ghost, color: C.textDim, fontSize: 14, cursor: 'pointer', width: 18, textAlign: 'center' }}>−</button>
+              <span style={{ fontSize: 12, fontWeight: 700, color: hClr, minWidth: 22, textAlign: 'center' }}>{c.hp}</span>
+              <button onClick={() => upd(c.id, 'hp', Math.min(c.maxHp, c.hp + 1))}
+                style={{ ...ghost, color: C.textDim, fontSize: 14, cursor: 'pointer', width: 18, textAlign: 'center' }}>+</button>
+              <span style={{ fontSize: 9, color: C.textMuted, minWidth: 20 }}>/{c.maxHp}</span>
               <select onChange={e => { if (e.target.value) { toggleCond(c.id, e.target.value); e.target.value = '' } }}
-                style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.textDim, fontSize: 9, padding: '3px 5px', fontFamily: 'inherit', flexShrink: 0 }}>
-                <option value="">＋ Cond</option>
+                style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.textDim,
+                  fontSize: 8, padding: '2px 3px', fontFamily: 'inherit', maxWidth: 55 }}>
+                <option value="">+cond</option>
                 {CONDITIONS.filter(cd => !c.conditions.includes(cd)).map(cd => (
                   <option key={cd} value={cd}>{cd}</option>
                 ))}
               </select>
               {!c.isPlayer && (
                 <button onClick={() => { setCombatants(cs => cs.filter(x => x.id !== c.id)); if (activeId === c.id) setActiveId(sorted[0]?.id || char.id) }}
-                  style={{ ...ghost, color: C.textMuted, fontSize: 14, cursor: 'pointer', paddingLeft: 4 }}
+                  style={{ ...ghost, color: C.textMuted, fontSize: 12, cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.color = C.red}
                   onMouseLeave={e => e.currentTarget.style.color = C.textMuted}>✕</button>
               )}
             </div>
           )
         })}
+        {sorted.map(c => c.conditions.length > 0 && (
+          <div key={c.id + '_cond'} style={{ display: 'flex', gap: 3, flexWrap: 'wrap', paddingLeft: 38, marginBottom: 3 }}>
+            {c.conditions.map(cd => (
+              <span key={cd} className="hov-btn" onClick={() => toggleCond(c.id, cd)}
+                style={{ fontSize: 8, background: C.red + '22', border: `1px solid ${C.red}44`,
+                  color: C.red, padding: '1px 5px', cursor: 'pointer', letterSpacing: 1 }}>
+                {cd} ✕
+              </span>
+            ))}
+          </div>
+        ))}
       </div>
 
       {/* Add combatant */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '12px 14px', marginBottom: 10 }}>
-        <div style={{ fontSize: 9, color: C.textMuted, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 }}>Add Combatant</div>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input placeholder="Name" value={newName} onChange={e => setNewName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && addCombatant()}
-            style={{ flex: '2 1 100px', background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '6px 8px', fontSize: 11, fontFamily: 'inherit' }} />
-          <input placeholder="Init" type="number" value={newInit} onChange={e => setNewInit(e.target.value)}
-            style={{ width: 54, background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '6px 8px', fontSize: 11, fontFamily: 'inherit' }} />
-          <input placeholder="HP" type="number" value={newHp} onChange={e => setNewHp(e.target.value)}
-            style={{ width: 54, background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '6px 8px', fontSize: 11, fontFamily: 'inherit' }} />
-          <input placeholder="AC" type="number" value={newAc} onChange={e => setNewAc(e.target.value)}
-            style={{ width: 54, background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '6px 8px', fontSize: 11, fontFamily: 'inherit' }} />
-          <Btn variant="gold" onClick={addCombatant}>+ Add</Btn>
-        </div>
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+        <input placeholder="Name" value={newName} onChange={e => setNewName(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && addCombatant()}
+          style={{ flex: '2 1 80px', background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '5px 7px', fontSize: 10, fontFamily: 'inherit' }} />
+        <input placeholder="Init" type="number" value={newInit} onChange={e => setNewInit(e.target.value)}
+          style={{ width: 42, background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '5px 6px', fontSize: 10, fontFamily: 'inherit' }} />
+        <input placeholder="HP" type="number" value={newHp} onChange={e => setNewHp(e.target.value)}
+          style={{ width: 42, background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '5px 6px', fontSize: 10, fontFamily: 'inherit' }} />
+        <input placeholder="AC" type="number" value={newAc} onChange={e => setNewAc(e.target.value)}
+          style={{ width: 42, background: C.surface, border: `1px solid ${C.border}`, color: C.text, padding: '5px 6px', fontSize: 10, fontFamily: 'inherit' }} />
+        <Btn variant="gold" onClick={addCombatant}>+</Btn>
       </div>
-
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-        <Btn onClick={() => { setRound(1); setActiveId(sorted[0]?.id || char.id) }}>Reset Turns</Btn>
+      <div style={{ display: 'flex', gap: 6 }}>
+        <Btn onClick={() => { setRound(1); setActiveId(sorted[0]?.id || char.id) }}>Reset</Btn>
         <Btn onClick={() => {
           setCombatants([{ id: char.id, name: char.name || 'Your Character', initiative: dexMod, hp: char.hp.current, maxHp: char.hp.max, ac: char.ac, conditions: [], isPlayer: true }])
           setRound(1); setActiveId(char.id)
-        }}>Clear Encounter</Btn>
+        }}>Clear</Btn>
       </div>
     </div>
   )
