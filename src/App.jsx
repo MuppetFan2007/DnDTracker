@@ -17,6 +17,7 @@ export default function App() {
   const isSakura   = themeKey === 'sakura'
   const isKuromi   = themeKey === 'kuromi'
   const isMyMelody = themeKey === 'mymelody'
+  const isNier2b   = themeKey === 'nier2b'
 
   useEffect(() => {
     try { localStorage.setItem('dnd_theme', themeKey) } catch {}
@@ -40,12 +41,14 @@ export default function App() {
     : isSakura   ? 'sakura-root'
     : isKuromi   ? 'kuromi-root'
     : isMyMelody ? 'mymelody-root'
+    : isNier2b   ? 'nier2b-root'
     : ''
   const fontFamily = isVcr     ? "'Share Tech Mono', monospace"
     : isRacing   ? "'Rajdhani', 'Segoe UI', sans-serif"
     : isMyMelody ? "'Nunito', 'Segoe UI', sans-serif"
     : isKuromi   ? "'Share Tech Mono', monospace"
     : isMoon     ? "'Cinzel', 'Georgia', serif"
+    : isNier2b   ? "'Rajdhani', 'Segoe UI', sans-serif"
     : "'Segoe UI', system-ui, sans-serif"
 
   return (

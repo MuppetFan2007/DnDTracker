@@ -55,6 +55,15 @@ export const THEMES = {
     red: '#ff4fa3', green: '#00ffcc', yellow: '#ffe566', blue: '#39d0ff',
     activeSkill: '#00e5cc18', activeBorder: '#00e5cc',
   },
+  nier2b: {
+    name: '2B — NieR',
+    bg: '#09090b', surface: '#0e0e11', card: '#131316',
+    border: '#272729', borderHover: '#e8dfd0',
+    gold: '#e8dfd0', goldDim: '#9c9488',
+    text: '#f0ece6', textDim: '#787570', textMuted: '#383634',
+    red: '#bf1528', green: '#7ab88a', yellow: '#c8a84e', blue: '#6b8fb5',
+    activeSkill: '#1a1a1d', activeBorder: '#e8dfd0',
+  },
 }
 
 export const ThemeCtx = createContext(THEMES.vcr)
