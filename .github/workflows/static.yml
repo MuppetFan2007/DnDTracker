@@ -1,4 +1,4 @@
-name: Deploy static content to Pages
+name: Deploy Vite + React to GitHub Pages
 
 on:
   push:
@@ -8,15 +8,17 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      # 1️⃣ Checkout your repo
-      - uses: actions/checkout@v3
 
-      # 2️⃣ Setup Node.js
+    steps:
+      # 1️⃣ Checkout the repository
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # 2️⃣ Setup Node.js (stable)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"  # Node 18 is fine for most builds
+          node-version: "18"
 
       # 3️⃣ Install dependencies
       - name: Install dependencies
@@ -26,9 +28,14 @@ jobs:
       - name: Build
         run: npm run build
 
-      # 5️⃣ Deploy to GitHub Pages
-      - name: Deploy
+      # 5️⃣ Debug: Check build output
+      - name: List dist contents
+        run: ls -la ./dist
+
+      # 6️⃣ Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist   # Make sure this matches your actual build output folder
+          publish_dir: ./dist
+          force_orphan: true   # ensures gh-pages branch is created if missing
