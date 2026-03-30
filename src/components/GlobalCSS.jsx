@@ -961,6 +961,247 @@ export function GlobalCSS() {
       /* Scrollbar for racing */
       .racing-root::-webkit-scrollbar-thumb { background: #00e5cc44; }
 
+      /* ══════════════════════════════════════
+         ── NieR:Automata 2B theme ──
+         ══════════════════════════════════════ */
+      .nier2b-root {
+        font-family: 'Rajdhani', 'Segoe UI', sans-serif !important;
+        letter-spacing: 0.06em;
+      }
+      .nier2b-root input,
+      .nier2b-root select,
+      .nier2b-root textarea,
+      .nier2b-root button {
+        font-family: 'Rajdhani', 'Segoe UI', sans-serif !important;
+      }
+      .nier2b-root::-webkit-scrollbar-thumb { background: #e8dfd028; }
+
+      /* Card hover — cold white bloom */
+      .nier2b-root .hov-card:hover {
+        box-shadow:
+          0 0 0 1px #e8dfd0,
+          0 0 22px #e8dfd01a,
+          0 8px 38px rgba(0,0,0,0.92) !important;
+        border-color: #e8dfd0 !important;
+        transform: translateY(-3px) !important;
+        filter: brightness(1.04);
+      }
+
+      /* Input / select focus */
+      .nier2b-root input:focus,
+      .nier2b-root select:focus,
+      .nier2b-root textarea:focus {
+        border-color: #e8dfd0 !important;
+        box-shadow: 0 0 0 2px #e8dfd014, 0 0 10px #e8dfd020 !important;
+      }
+
+      /* Button hover */
+      .nier2b-root .hov-btn:hover {
+        opacity: 1 !important;
+        text-shadow: 0 0 8px #e8dfd0cc, 0 0 22px #e8dfd044;
+        filter: brightness(1.1);
+      }
+
+      /* Chip toggles */
+      .nier2b-root .chip-toggle:hover {
+        opacity: 1 !important;
+        box-shadow: 0 0 10px #e8dfd018 !important;
+        border-color: #e8dfd055 !important;
+      }
+
+      /* YoRHa heading glow */
+      .nier2b-root .nier2b-glow-text {
+        text-shadow: 0 0 14px #e8dfd077, 0 0 35px #e8dfd022;
+        letter-spacing: 0.14em;
+      }
+
+      /* ── Ultra-thin drifting scanlines ── */
+      .nier2b-scanlines {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: repeating-linear-gradient(
+          0deg, transparent, transparent 3px,
+          rgba(232,223,208,0.013) 3px, rgba(232,223,208,0.013) 4px
+        );
+        pointer-events: none; z-index: 9999;
+        animation: nier2b-scan-drift 10s linear infinite;
+      }
+      @keyframes nier2b-scan-drift {
+        from { background-position: 0 0; }
+        to   { background-position: 0 40px; }
+      }
+
+      /* ── Geometric diamond grid ── */
+      .nier2b-hexgrid {
+        position: fixed; inset: 0;
+        pointer-events: none; z-index: 0;
+        background-image:
+          linear-gradient(rgba(232,223,208,0.030) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(232,223,208,0.030) 1px, transparent 1px),
+          linear-gradient(45deg, rgba(232,223,208,0.013) 1px, transparent 1px),
+          linear-gradient(-45deg, rgba(232,223,208,0.013) 1px, transparent 1px);
+        background-size: 64px 64px, 64px 64px, 64px 64px, 64px 64px;
+        animation: nier2b-grid-breathe 20s ease-in-out infinite;
+      }
+      @keyframes nier2b-grid-breathe {
+        0%,100% { opacity: 0.42; }
+        50%     { opacity: 0.82; }
+      }
+
+      /* ── Periodic horizontal glitch bars ── */
+      .nier2b-glitch {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none; z-index: 9997; overflow: hidden;
+      }
+      .nier2b-glitch::before {
+        content: '';
+        position: absolute; left: 0; right: 0; height: 2px;
+        background: linear-gradient(90deg, transparent 0%, rgba(232,223,208,0.55) 30%, rgba(232,223,208,0.82) 50%, rgba(232,223,208,0.55) 70%, transparent 100%);
+        top: 0; opacity: 0;
+        animation: nier2b-bar-a 22s ease-in-out infinite 2s;
+      }
+      .nier2b-glitch::after {
+        content: '';
+        position: absolute; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(191,21,40,0.65) 38%, rgba(191,21,40,0.88) 55%, rgba(191,21,40,0.55) 74%, transparent 100%);
+        top: 0; opacity: 0;
+        animation: nier2b-bar-b 29s ease-in-out infinite 11s;
+      }
+      @keyframes nier2b-bar-a {
+        0%,100%   { opacity:0; top:  0%; transform: scaleX(1); }
+        2%        { opacity:0.9; top: 18%; transform: scaleX(1.00); }
+        2.5%      { opacity:0; top: 18%; transform: scaleX(0.55) translateX(-30px); }
+        5.5%      { opacity:0.72; top: 54%; }
+        5.9%      { opacity:0; }
+        8.5%      { opacity:0.86; top: 76%; transform: scaleX(0.88); }
+        9%        { opacity:0; }
+      }
+      @keyframes nier2b-bar-b {
+        0%,100%   { opacity:0; top: 0%; }
+        3%        { opacity:0.68; top: 32%; transform: scaleX(1); }
+        3.5%      { opacity:0; transform: scaleX(1.25) translateX(18px); }
+        7.5%      { opacity:0.62; top: 64%; }
+        7.9%      { opacity:0; }
+        13.5%     { opacity:0.78; top: 87%; transform: scaleX(0.78); }
+        14%       { opacity:0; }
+      }
+
+      /* ── Floating data fragments ── */
+      .nier2b-particles {
+        position: fixed; top: 0; left: 0;
+        width: 2px; height: 2px;
+        background: rgba(232,223,208,0.60);
+        pointer-events: none; z-index: 0;
+        animation: nier2b-particle-float 30s ease-in-out infinite;
+        box-shadow:
+           130px  210px 0 1px   rgba(232,223,208,0.22),
+           360px   90px 0 1.5px rgba(232,223,208,0.18),
+           580px  340px 0 1px   rgba(232,223,208,0.24),
+           820px  150px 0 1px   rgba(232,223,208,0.16),
+          1060px  490px 0 1.5px rgba(232,223,208,0.20),
+          1300px  240px 0 1px   rgba(232,223,208,0.18),
+          1540px   95px 0 1.5px rgba(232,223,208,0.22),
+          1780px  400px 0 1px   rgba(232,223,208,0.15),
+           190px  560px 0 1.5px rgba(232,223,208,0.14),
+           440px  710px 0 1px   rgba(232,223,208,0.18),
+           720px  610px 0 1.5px rgba(232,223,208,0.12),
+           970px  750px 0 1px   rgba(232,223,208,0.16),
+          1220px  670px 0 1.5px rgba(232,223,208,0.13),
+          1460px  800px 0 1px   rgba(232,223,208,0.11),
+          1700px  550px 0 1.5px rgba(232,223,208,0.17),
+           270px  440px 0 1px   rgba(191,21,40,0.22),
+           690px  270px 0 1px   rgba(191,21,40,0.16),
+          1120px  370px 0 1px   rgba(191,21,40,0.19),
+          1530px  500px 0 1px   rgba(191,21,40,0.14),
+            85px  870px 0 1.5px rgba(232,223,208,0.10),
+           510px  930px 0 1px   rgba(232,223,208,0.12),
+           920px  890px 0 1.5px rgba(232,223,208,0.09),
+          1320px  840px 0 1px   rgba(232,223,208,0.13),
+          1720px  900px 0 1.5px rgba(232,223,208,0.09);
+      }
+      @keyframes nier2b-particle-float {
+        0%,100% { opacity: 0.28; transform: translateY(0); }
+        35%     { opacity: 0.64; transform: translateY(-8px); }
+        68%     { opacity: 0.40; transform: translateY(5px); }
+      }
+
+      /* ── Machine core — rotating geometric ornament (bottom-right) ── */
+      .nier2b-core {
+        position: fixed; bottom: 90px; right: 28px;
+        width: 80px; height: 80px;
+        pointer-events: none; z-index: 0;
+      }
+      /* Outer rotating ring */
+      .nier2b-core::before {
+        content: '';
+        position: absolute; inset: 0;
+        border-radius: 50%;
+        border: 1px solid rgba(232,223,208,0.20);
+        box-shadow:
+          0 0 0 4px rgba(232,223,208,0.04),
+          0 0 0 10px rgba(232,223,208,0.02),
+          inset 0 0 20px rgba(232,223,208,0.03);
+        animation: nier2b-ring-spin 32s linear infinite;
+      }
+      /* Inner counter-rotating diamond */
+      .nier2b-core::after {
+        content: '';
+        position: absolute;
+        top: 50%; left: 50%;
+        width: 28px; height: 28px;
+        margin-top: -14px; margin-left: -14px;
+        border: 1px solid rgba(232,223,208,0.28);
+        box-shadow: 0 0 10px rgba(232,223,208,0.08), inset 0 0 6px rgba(232,223,208,0.04);
+        animation: nier2b-diamond-spin 20s linear infinite;
+      }
+      @keyframes nier2b-ring-spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+      @keyframes nier2b-diamond-spin {
+        from { transform: rotate(45deg); }
+        to   { transform: rotate(405deg); }
+      }
+
+      /* ── Dice: rolling glitch ── */
+      @keyframes nier2b-roll-glitch {
+        0%,100% { transform: skewX(0deg); filter: brightness(1); color: #e8dfd0; }
+        20%     { transform: skewX(-5deg) scaleX(1.04); filter: brightness(1.7); color: #f0ece6; }
+        40%     { transform: skewX(3deg); filter: brightness(0.65); color: #9c9488; }
+        60%     { transform: skewX(-2deg) scaleX(0.96); filter: brightness(1.35); color: #e8dfd0; }
+        80%     { transform: skewX(4deg) scaleX(1.02); filter: brightness(0.88); }
+      }
+      .dice-rolling-nier2b { animation: nier2b-roll-glitch 0.12s steps(1) infinite; }
+
+      /* ── Dice: result data-compile reveal ── */
+      @keyframes nier2b-result-in {
+        0%  { opacity: 0; transform: scaleY(0.15) scaleX(1.25); filter: brightness(3.5) blur(5px); }
+        40% { opacity: 1; transform: scaleY(1.07) scaleX(0.97); filter: brightness(1.5) blur(0); }
+        70% { transform: scaleY(0.97) scaleX(1.01); }
+        100%{ transform: scaleY(1) scaleX(1); filter: brightness(1); }
+      }
+      .dice-result-nier2b { animation: nier2b-result-in 0.40s ease-out forwards; }
+
+      /* ── Dice: data fragment particles ── */
+      @keyframes dice-nier2b-fly {
+        0%   { transform: translate(-50%,-50%) scale(1) rotate(0deg); opacity: 1; }
+        100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3) rotate(90deg); opacity: 0; }
+      }
+      .dice-particle-nier2b { animation: dice-nier2b-fly 0.65s ease-out forwards; font-weight: 700; }
+
+      /* ── Dice: scanline glitch overlay during roll ── */
+      @keyframes nier2b-dice-flicker {
+        0%,100% { opacity: 0; }
+        10%,30%,50%,70% { opacity: 0.09; }
+        20%,40%,60%,80% { opacity: 0; }
+      }
+      .dice-nier2b-glitch-overlay {
+        background: repeating-linear-gradient(
+          0deg, transparent, transparent 2px,
+          rgba(232,223,208,0.10) 2px, rgba(232,223,208,0.10) 4px
+        );
+        animation: nier2b-dice-flicker 0.12s steps(1) infinite;
+      }
+
       /* ── Shared ── */
       @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
       .vcr-blink { animation: blink 1s step-end infinite; }

@@ -21,6 +21,7 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
   const isKuromi   = themeKey === 'kuromi'
   const isMyMelody = themeKey === 'mymelody'
   const [search, setSearch] = useState('')
+  const [hoveredTheme, setHoveredTheme] = useState(null)
   const importRef = useRef(null)
 
   const handleImportFile = (e) => {
@@ -91,11 +92,46 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
             {isVcr    && <VcrClock />}
             {isRacing && <RacingLapCounter C={C} />}
             {/* Theme switcher */}
-            <div style={{ display: 'flex', gap: 5, background: C.surface, border: `1px solid ${C.border}`, padding: '4px 6px', borderRadius: isRacing || isMyMelody ? 20 : 0 }}>
+            <div style={{ position: 'relative', display: 'flex', gap: 5, background: C.surface, border: `1px solid ${C.border}`, padding: '4px 6px', borderRadius: isRacing || isMyMelody ? 20 : 0 }}>
               {Object.entries(THEMES).map(([k, t]) => (
-                <button key={k} className="hov-btn" onClick={() => setThemeKey(k)} title={t.name}
+                <button key={k} className="hov-btn" onClick={() => setThemeKey(k)}
+                  onMouseEnter={() => setHoveredTheme(k)}
+                  onMouseLeave={() => setHoveredTheme(null)}
                   style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${k === themeKey ? C.gold : 'transparent'}`, background: t.gold, padding: 0, boxShadow: k === themeKey ? `0 0 8px ${t.gold}` : 'none' }} />
               ))}
+              {hoveredTheme && (() => {
+                const ht = THEMES[hoveredTheme]
+                const htFont = hoveredTheme === 'vcr' || hoveredTheme === 'kuromi'
+                  ? "'Share Tech Mono', monospace"
+                  : hoveredTheme === 'racing' || hoveredTheme === 'nier2b'
+                  ? "'Rajdhani', sans-serif"
+                  : hoveredTheme === 'moon'
+                  ? "'Cinzel', Georgia, serif"
+                  : hoveredTheme === 'mymelody' || hoveredTheme === 'sakura'
+                  ? "'Nunito', sans-serif"
+                  : "'Segoe UI', sans-serif"
+                return (
+                  <div className="fade-up" style={{
+                    position: 'absolute', top: 'calc(100% + 10px)', left: '50%',
+                    transform: 'translateX(-50%)',
+                    background: ht.card,
+                    border: `1px solid ${ht.gold}`,
+                    color: ht.gold,
+                    padding: '4px 12px',
+                    fontSize: 11,
+                    fontFamily: htFont,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    whiteSpace: 'nowrap',
+                    pointerEvents: 'none',
+                    zIndex: 9999,
+                    boxShadow: `0 0 14px ${ht.gold}44, 0 4px 16px rgba(0,0,0,0.6)`,
+                    borderRadius: hoveredTheme === 'mymelody' || hoveredTheme === 'sakura' ? 20 : 0,
+                  }}>
+                    {ht.name}
+                  </div>
+                )
+              })()}
             </div>
             <input type="file" accept=".json" style={{ display: 'none' }} ref={importRef} onChange={handleImportFile} />
             <Btn onClick={() => importRef.current.click()}>Import</Btn>

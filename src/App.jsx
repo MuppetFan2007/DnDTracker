@@ -79,6 +79,13 @@ export default function App() {
       {isRacing && <div className="racing-speedlines" />}
       {isRacing && <div className="racing-stripe" />}
 
+      {/* NieR:Automata 2B — scanlines + hex grid + glitch bars + data fragments + machine core */}
+      {isNier2b && <div className="nier2b-scanlines" />}
+      {isNier2b && <div className="nier2b-hexgrid" />}
+      {isNier2b && <div className="nier2b-glitch" />}
+      {isNier2b && <div className="nier2b-particles" />}
+      {isNier2b && <div className="nier2b-core" />}
+
       {/* Kuromi — dark aura + particles + skull + lightning */}
       {isKuromi && <div className="kuromi-aura" />}
       {isKuromi && <div className="kuromi-particles" />}

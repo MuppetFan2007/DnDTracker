@@ -12,12 +12,13 @@ const DAMAGE_DICE = [
 ]
 
 export const THEME_FX = {
-  vcr:      { color: '#ff3c00', particles: [],                              label: 'ROLL' },
-  moon:     { color: '#c8b8ff', particles: ['✦','★','✧','☽','✦','★','✧'],  label: 'CAST' },
-  sakura:   { color: '#cc2878', particles: ['🌸','✿','🌸','🌸','✿','🌸'],   label: 'ROLL' },
-  racing:   { color: '#00e5cc', particles: ['▶','▶','▶','▶','▶','▶'],       label: 'GO!'  },
-  kuromi:   { color: '#c840ff', particles: ['⚡','✦','⚡','☠','⚡','✦'],     label: 'ROLL' },
-  mymelody: { color: '#d82858', particles: ['♥','♡','♥','✿','♥','♡','♥'],  label: 'ROLL' },
+  vcr:      { color: '#ff3c00', particles: [],                              label: 'ROLL'    },
+  moon:     { color: '#c8b8ff', particles: ['✦','★','✧','☽','✦','★','✧'],  label: 'CAST'    },
+  sakura:   { color: '#cc2878', particles: ['🌸','✿','🌸','🌸','✿','🌸'],   label: 'ROLL'    },
+  racing:   { color: '#00e5cc', particles: ['▶','▶','▶','▶','▶','▶'],       label: 'GO!'     },
+  kuromi:   { color: '#c840ff', particles: ['⚡','✦','⚡','☠','⚡','✦'],     label: 'ROLL'    },
+  mymelody: { color: '#d82858', particles: ['♥','♡','♥','✿','♥','♡','♥'],  label: 'ROLL'    },
+  nier2b:   { color: '#e8dfd0', particles: ['◆','◇','▪','◆','◇','▫','◆'],  label: 'EXECUTE' },
 }
 
 // Shared hook — d20 rolling with adv/disadv, used by DiceRoller and TabCore
@@ -54,7 +55,7 @@ export function useRollEngine(rollMode, themeKey) {
     }
 
     clearInterval(glitchRef.current)
-    const flickerMs = themeKey === 'vcr' ? 55 : themeKey === 'racing' ? 65 : 90
+    const flickerMs = themeKey === 'vcr' ? 55 : themeKey === 'racing' ? 65 : themeKey === 'nier2b' ? 70 : 90
     glitchRef.current = setInterval(() => {
       setDisplayNum(useTwo
         ? [Math.floor(Math.random() * max) + 1, Math.floor(Math.random() * max) + 1]
@@ -199,7 +200,7 @@ export function DiceRoller({ char, rollMode, setRollMode }) {
     }
 
     clearInterval(dmgGlitchRef.current)
-    const flickerMs = themeKey === 'vcr' ? 55 : themeKey === 'racing' ? 65 : 90
+    const flickerMs = themeKey === 'vcr' ? 55 : themeKey === 'racing' ? 65 : themeKey === 'nier2b' ? 70 : 90
     dmgGlitchRef.current = setInterval(() => {
       setDmgDisplay(Array.from({ length: count }, () => Math.floor(Math.random() * max) + 1))
     }, flickerMs)
@@ -271,6 +272,7 @@ export function DiceRoller({ char, rollMode, setRollMode }) {
       <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '18px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
         {themeKey === 'racing' && rolling && <div className="dice-speed-lines" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
         {themeKey === 'vcr'    && rolling && <div className="dice-vcr-flicker" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
+        {themeKey === 'nier2b' && rolling && <div className="dice-nier2b-glitch-overlay" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
 
         {/* Adv/disadv */}
         <ModeToggle rollMode={rollMode} setRollMode={setRollMode} C={C} />
@@ -379,6 +381,7 @@ export function DiceRoller({ char, rollMode, setRollMode }) {
       <div style={{ background: C.card, border: `1px solid ${C.border}`, padding: '18px', marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
         {themeKey === 'racing' && dmgRolling && <div className="dice-speed-lines" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
         {themeKey === 'vcr'    && dmgRolling && <div className="dice-vcr-flicker" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
+        {themeKey === 'nier2b' && dmgRolling && <div className="dice-nier2b-glitch-overlay" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }} />}
 
         {/* Die type selector */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
