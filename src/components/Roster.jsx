@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useT, THEMES } from '../themes.js'
 import { totalLevel } from '../utils.js'
 import { DND_ICONS, Icons } from './Icons.jsx'
@@ -24,8 +24,16 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
   const isA2       = themeKey === 'a2'
   const isTeto     = themeKey === 'teto'
   const [search, setSearch] = useState('')
-  const [hoveredTheme, setHoveredTheme] = useState(null)
+  const [themeOpen, setThemeOpen] = useState(false)
+  const themeRef = useRef(null)
   const importRef = useRef(null)
+
+  useEffect(() => {
+    if (!themeOpen) return
+    const handle = e => { if (themeRef.current && !themeRef.current.contains(e.target)) setThemeOpen(false) }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [themeOpen])
 
   const handleImportFile = (e) => {
     const file = e.target.files[0]
@@ -119,48 +127,56 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
             {isA2 && <A2UnitStatus />}
             {isTeto && <TetoUnitStatus />}
             {/* Theme switcher */}
-            <div style={{ position: 'relative', display: 'flex', gap: 5, background: C.surface, border: `1px solid ${C.border}`, padding: '4px 6px', borderRadius: isRacing || isMyMelody ? 20 : 0 }}>
-              {Object.entries(THEMES).map(([k, t]) => (
-                <button key={k} className="hov-btn" onClick={() => setThemeKey(k)}
-                  onMouseEnter={() => setHoveredTheme(k)}
-                  onMouseLeave={() => setHoveredTheme(null)}
-                  style={{ width: 20, height: 20, borderRadius: '50%', border: `2px solid ${k === themeKey ? C.gold : 'transparent'}`, background: t.gold, padding: 0, boxShadow: k === themeKey ? `0 0 8px ${t.gold}` : 'none' }} />
-              ))}
-              {hoveredTheme && (() => {
-                const ht = THEMES[hoveredTheme]
-                const htFont = hoveredTheme === 'vcr' || hoveredTheme === 'kuromi'
-                  ? "'Share Tech Mono', monospace"
-                  : hoveredTheme === 'racing' || hoveredTheme === 'nier2b'
-                  ? "'Rajdhani', sans-serif"
-                  : hoveredTheme === 'moon'
-                  ? "'Cinzel', Georgia, serif"
-                  : hoveredTheme === 'mymelody' || hoveredTheme === 'sakura'
-                  ? "'Nunito', sans-serif"
-                  : hoveredTheme === 'teto'
-                  ? "'Exo 2', sans-serif"
-                  : "'Segoe UI', sans-serif"
-                return (
-                  <div className="fade-up" style={{
-                    position: 'absolute', top: 'calc(100% + 10px)', left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: ht.card,
-                    border: `1px solid ${ht.gold}`,
-                    color: ht.gold,
-                    padding: '4px 12px',
-                    fontSize: 11,
-                    fontFamily: htFont,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    whiteSpace: 'nowrap',
-                    pointerEvents: 'none',
-                    zIndex: 9999,
-                    boxShadow: `0 0 14px ${ht.gold}44, 0 4px 16px rgba(0,0,0,0.6)`,
-                    borderRadius: hoveredTheme === 'mymelody' || hoveredTheme === 'sakura' ? 20 : 0,
-                  }}>
-                    {ht.name}
-                  </div>
-                )
-              })()}
+            <div ref={themeRef} style={{ position: 'relative' }}>
+              <button
+                className="hov-btn"
+                onClick={() => setThemeOpen(o => !o)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 7,
+                  background: C.surface, border: `1px solid ${themeOpen ? C.gold : C.border}`,
+                  padding: '6px 11px', cursor: 'pointer', borderRadius: isRacing || isMyMelody ? 20 : 4,
+                  transition: 'border-color 0.15s',
+                }}
+              >
+                <span style={{ width: 11, height: 11, borderRadius: '50%', background: C.gold, display: 'inline-block', boxShadow: `0 0 7px ${C.gold}` }} />
+                <span style={{ fontSize: 11, color: C.textDim, letterSpacing: 1, userSelect: 'none' }}>Theme</span>
+                <span style={{ fontSize: 9, color: C.textMuted, display: 'inline-block', transition: 'transform 0.2s cubic-bezier(0.34,1.56,0.64,1)', transform: themeOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</span>
+              </button>
+
+              {themeOpen && (
+                <div className="theme-dropdown" style={{
+                  position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                  background: C.surface, border: `1px solid ${C.border}`,
+                  minWidth: 190, zIndex: 9999,
+                  boxShadow: `0 12px 40px rgba(0,0,0,0.45), 0 0 0 1px ${C.border}`,
+                  borderRadius: isRacing || isMyMelody ? 14 : 6,
+                  overflow: 'hidden',
+                }}>
+                  {/* Thin colored top accent */}
+                  <div style={{ height: 2, background: `linear-gradient(90deg, transparent, ${C.gold}, transparent)` }} />
+                  {Object.entries(THEMES).map(([k, t], i, arr) => {
+                    const active = k === themeKey
+                    return (
+                      <button key={k} className="hov-btn" onClick={() => { setThemeKey(k); setThemeOpen(false) }}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 11,
+                          width: '100%', padding: '9px 14px',
+                          background: active ? `${t.gold}14` : 'transparent',
+                          border: 'none',
+                          borderBottom: i < arr.length - 1 ? `1px solid ${C.border}44` : 'none',
+                          color: active ? t.gold : C.textDim,
+                          cursor: 'pointer', fontSize: 12, textAlign: 'left',
+                          transition: 'background 0.12s',
+                        }}
+                      >
+                        <span style={{ width: 13, height: 13, borderRadius: '50%', background: t.gold, flexShrink: 0, boxShadow: active ? `0 0 9px ${t.gold}` : 'none', outline: active ? `2px solid ${t.gold}55` : '2px solid transparent', outlineOffset: 2, transition: 'box-shadow 0.15s, outline 0.15s' }} />
+                        <span style={{ flex: 1, letterSpacing: 0.5 }}>{t.name}</span>
+                        {active && <span style={{ fontSize: 10, opacity: 0.7 }}>✓</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
             <input type="file" accept=".json" style={{ display: 'none' }} ref={importRef} onChange={handleImportFile} />
             <Btn onClick={() => importRef.current.click()}>Import</Btn>

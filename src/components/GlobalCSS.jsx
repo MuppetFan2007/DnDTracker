@@ -8,6 +8,19 @@ export function GlobalCSS() {
       *, *::before, *::after { box-sizing: border-box; }
       body { margin: 0; }
 
+      /* Theme dropdown */
+      @keyframes theme-dropdown-in {
+        from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+        to   { opacity: 1; transform: translateY(0)   scale(1); }
+      }
+      .theme-dropdown {
+        animation: theme-dropdown-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        transform-origin: top right;
+      }
+      .theme-dropdown button:hover {
+        background: rgba(128,128,128,0.08) !important;
+      }
+
       ::-webkit-scrollbar { width: 5px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #ff3c0055; }
