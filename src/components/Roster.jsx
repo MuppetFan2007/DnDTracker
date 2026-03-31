@@ -156,23 +156,32 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey, setThemeKe
                   <div style={{ height: 2, background: `linear-gradient(90deg, transparent, ${C.gold}, transparent)` }} />
                   {Object.entries(THEMES).map(([k, t], i, arr) => {
                     const active = k === themeKey
+                    const isLast = i === arr.length - 1
+                    const afterDark = k === 'dark'
                     return (
-                      <button key={k} className="hov-btn" onClick={() => { setThemeKey(k); setThemeOpen(false) }}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 11,
-                          width: '100%', padding: '9px 14px',
-                          background: active ? `${t.gold}14` : 'transparent',
-                          border: 'none',
-                          borderBottom: i < arr.length - 1 ? `1px solid ${C.border}44` : 'none',
-                          color: active ? t.gold : C.textDim,
-                          cursor: 'pointer', fontSize: 12, textAlign: 'left',
-                          transition: 'background 0.12s',
-                        }}
-                      >
-                        <span style={{ width: 13, height: 13, borderRadius: '50%', background: t.gold, flexShrink: 0, boxShadow: active ? `0 0 9px ${t.gold}` : 'none', outline: active ? `2px solid ${t.gold}55` : '2px solid transparent', outlineOffset: 2, transition: 'box-shadow 0.15s, outline 0.15s' }} />
-                        <span style={{ flex: 1, letterSpacing: 0.5 }}>{t.name}</span>
-                        {active && <span style={{ fontSize: 10, opacity: 0.7 }}>✓</span>}
-                      </button>
+                      <React.Fragment key={k}>
+                        <button className="hov-btn" onClick={() => { setThemeKey(k); setThemeOpen(false) }}
+                          style={{
+                            display: 'flex', alignItems: 'center', gap: 11,
+                            width: '100%', padding: '9px 14px',
+                            background: active ? `${t.gold}14` : 'transparent',
+                            border: 'none',
+                            borderBottom: !isLast && !afterDark ? `1px solid ${C.border}44` : 'none',
+                            color: active ? t.gold : C.textDim,
+                            cursor: 'pointer', fontSize: 12, textAlign: 'left',
+                            transition: 'background 0.12s',
+                          }}
+                        >
+                          <span style={{ width: 13, height: 13, borderRadius: '50%', background: t.gold, flexShrink: 0, boxShadow: active ? `0 0 9px ${t.gold}` : 'none', outline: active ? `2px solid ${t.gold}55` : '2px solid transparent', outlineOffset: 2, transition: 'box-shadow 0.15s, outline 0.15s' }} />
+                          <span style={{ flex: 1, letterSpacing: 0.5 }}>{t.name}</span>
+                          {active && <span style={{ fontSize: 10, opacity: 0.7 }}>✓</span>}
+                        </button>
+                        {afterDark && (
+                          <div style={{ margin: '3px 0', borderTop: `1px solid ${C.border}`, opacity: 0.6 }}>
+                            <div style={{ padding: '4px 14px 2px', fontSize: 9, color: C.textMuted, letterSpacing: 2, textTransform: 'uppercase' }}>Themes</div>
+                          </div>
+                        )}
+                      </React.Fragment>
                     )
                   })}
                 </div>

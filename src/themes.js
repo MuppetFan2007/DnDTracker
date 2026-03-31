@@ -1,6 +1,24 @@
 import { createContext, useContext } from 'react'
 
 export const THEMES = {
+  light: {
+    name: 'Light',
+    bg: '#f4f5f7', surface: '#ffffff', card: '#ffffff',
+    border: '#dde1ea', borderHover: '#4f7df4',
+    gold: '#4f7df4', goldDim: '#2e5dd4',
+    text: '#111827', textDim: '#6b7280', textMuted: '#b0b8c8',
+    red: '#ef4444', green: '#22c55e', yellow: '#f59e0b', blue: '#3b82f6',
+    activeSkill: '#eef2ff', activeBorder: '#4f7df4',
+  },
+  dark: {
+    name: 'Dark',
+    bg: '#0f1117', surface: '#181b26', card: '#1e2130',
+    border: '#2a2d3d', borderHover: '#4f7df4',
+    gold: '#4f7df4', goldDim: '#2e5dd4',
+    text: '#e4e8f0', textDim: '#7a85a0', textMuted: '#353c55',
+    red: '#f87171', green: '#4ade80', yellow: '#fbbf24', blue: '#60a5fa',
+    activeSkill: '#1a2040', activeBorder: '#4f7df4',
+  },
   vcr: {
     name: 'VCR',
     bg: '#0a0a0a', surface: '#0f0f0f', card: '#111111',
