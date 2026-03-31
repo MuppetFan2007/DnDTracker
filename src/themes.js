@@ -55,6 +55,15 @@ export const THEMES = {
     red: '#ff4fa3', green: '#00ffcc', yellow: '#ffe566', blue: '#39d0ff',
     activeSkill: '#00e5cc18', activeBorder: '#00e5cc',
   },
+  a2: {
+    name: 'A2 — NieR',
+    bg: '#eae5dc', surface: '#f0ece4', card: '#f6f2eb',
+    border: '#cdc7ba', borderHover: '#7a4f26',
+    gold: '#7a4f26', goldDim: '#5a3b1c',
+    text: '#1a1610', textDim: '#6a5e50', textMuted: '#aaa090',
+    red: '#8c1a1a', green: '#3a6835', yellow: '#8a6a16', blue: '#3a5870',
+    activeSkill: '#e2dbd0', activeBorder: '#7a4f26',
+  },
   nier2b: {
     name: '2B — NieR',
     bg: '#09090b', surface: '#0e0e11', card: '#131316',
@@ -63,6 +72,15 @@ export const THEMES = {
     text: '#f0ece6', textDim: '#787570', textMuted: '#383634',
     red: '#bf1528', green: '#7ab88a', yellow: '#c8a84e', blue: '#6b8fb5',
     activeSkill: '#1a1a1d', activeBorder: '#e8dfd0',
+  },
+  teto: {
+    name: 'Kasane Teto',
+    bg: '#0e0006', surface: '#160009', card: '#1e000d',
+    border: '#4a0018', borderHover: '#ff2244',
+    gold: '#ff2244', goldDim: '#cc1133',
+    text: '#fff0f4', textDim: '#ff8899', textMuted: '#5a1828',
+    red: '#ff0044', green: '#44dd88', yellow: '#ffcc44', blue: '#7799ff',
+    activeSkill: '#2a0018', activeBorder: '#ff2244',
   },
 }
 

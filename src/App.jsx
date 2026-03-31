@@ -18,6 +18,8 @@ export default function App() {
   const isKuromi   = themeKey === 'kuromi'
   const isMyMelody = themeKey === 'mymelody'
   const isNier2b   = themeKey === 'nier2b'
+  const isA2       = themeKey === 'a2'
+  const isTeto     = themeKey === 'teto'
 
   useEffect(() => {
     try { localStorage.setItem('dnd_theme', themeKey) } catch {}
@@ -42,6 +44,8 @@ export default function App() {
     : isKuromi   ? 'kuromi-root'
     : isMyMelody ? 'mymelody-root'
     : isNier2b   ? 'nier2b-root'
+    : isA2       ? 'a2-root'
+    : isTeto     ? 'teto-root'
     : ''
   const fontFamily = isVcr     ? "'Share Tech Mono', monospace"
     : isRacing   ? "'Rajdhani', 'Segoe UI', sans-serif"
@@ -49,6 +53,8 @@ export default function App() {
     : isKuromi   ? "'Share Tech Mono', monospace"
     : isMoon     ? "'Cinzel', 'Georgia', serif"
     : isNier2b   ? "'Rajdhani', 'Segoe UI', sans-serif"
+    : isA2       ? "'Rajdhani', 'Segoe UI', sans-serif"
+    : isTeto     ? "'Exo 2', 'Segoe UI', sans-serif"
     : "'Segoe UI', system-ui, sans-serif"
 
   return (
@@ -79,12 +85,31 @@ export default function App() {
       {isRacing && <div className="racing-speedlines" />}
       {isRacing && <div className="racing-stripe" />}
 
-      {/* NieR:Automata 2B — scanlines + hex grid + glitch bars + data fragments + machine core */}
+      {/* NieR:Automata 2B — vignette + scanlines + grid + glitch + petals + particles + core + HUD */}
+      {isNier2b && <div className="nier2b-vignette" />}
       {isNier2b && <div className="nier2b-scanlines" />}
       {isNier2b && <div className="nier2b-hexgrid" />}
       {isNier2b && <div className="nier2b-glitch" />}
+      {isNier2b && <div className="nier2b-petals" />}
       {isNier2b && <div className="nier2b-particles" />}
       {isNier2b && <div className="nier2b-core" />}
+      {isNier2b && <div className="nier2b-hud" />}
+
+      {/* A2 — NieR:Automata — vignette + noise + wind streaks + dust + broken core + worn HUD */}
+      {isA2 && <div className="a2-vignette" />}
+      {isA2 && <div className="a2-noise" />}
+      {isA2 && <div className="a2-wind" />}
+      {isA2 && <div className="a2-dust" />}
+      {isA2 && <div className="a2-core" />}
+      {isA2 && <div className="a2-hud" />}
+
+      {/* Kasane Teto — glow corona + twin drills + 3D grid + note tiles + diagonal scan + shimmer */}
+      {isTeto && <div className="teto-glow" />}
+      {isTeto && <div className="teto-drills" />}
+      {isTeto && <div className="teto-grid" />}
+      {isTeto && <div className="teto-notes" />}
+      {isTeto && <div className="teto-scanband" />}
+      {isTeto && <div className="teto-shimmer" />}
 
       {/* Kuromi — dark aura + particles + skull + lightning */}
       {isKuromi && <div className="kuromi-aura" />}
