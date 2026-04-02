@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { ThemeCtx, THEMES } from './themes.js'
 import { loadLS, saveLS, blank, uid } from './utils.js'
 import { GlobalCSS }  from './components/GlobalCSS.jsx'
+import { Sidebar }    from './components/Sidebar.jsx'
+import { Home }       from './components/Home.jsx'
 import { Roster }     from './components/Roster.jsx'
 import { Creator }    from './components/Creator.jsx'
 import { Sheet }      from './components/Sheet.jsx'
+import { Wiki }       from './components/Wiki.jsx'
 
 export default function App() {
   const [themeKey, setThemeKey] = useState(() => {
@@ -26,7 +29,7 @@ export default function App() {
   }, [themeKey])
 
   const [chars,    setChars]    = useState(loadLS)
-  const [view,     setView]     = useState('roster')
+  const [view,     setView]     = useState('home')
   const [activeId, setActiveId] = useState(null)
   const [draft,    setDraft]    = useState(null)
   const [step,     setStep]     = useState(0)
@@ -36,6 +39,8 @@ export default function App() {
   const saveChar   = (char) => setChars(cs => cs.some(c => c.id === char.id) ? cs.map(c => c.id === char.id ? char : c) : [...cs, char])
   const deleteChar = (id)   => setChars(cs => cs.filter(c => c.id !== id))
   const importChars = (newChars) => newChars.forEach(c => saveChar({ ...c, id: uid() }))
+  const handleCreate = () => { setDraft(blank()); setStep(0); setView('create') }
+  const handleOpen   = (id) => { setActiveId(id); setView('sheet') }
 
   const rootClass = isVcr ? 'vcr-root'
     : isRacing   ? 'racing-root'
@@ -61,10 +66,9 @@ export default function App() {
     <ThemeCtx.Provider value={C}>
       <GlobalCSS />
 
-      {/* VCR scanlines */}
+      {/* ── Background effect layers ── */}
       {isVcr && <div className="vcr-scanlines" />}
 
-      {/* ✦ Galaxy — nebula + milkyway + aurora + stars + planet + spiral + shooting stars + shimmer */}
       {isMoon && <div className="moon-nebula" />}
       {isMoon && <div className="moon-milkyway" />}
       {isMoon && <div className="moon-aurora" />}
@@ -76,16 +80,13 @@ export default function App() {
       {isMoon && <div className="moon-shooting2" />}
       {isMoon && <div className="moon-shimmer" />}
 
-      {/* Sakura Miku — falling petals + sparkles + corner bloom */}
       {isSakura && <div className="sakura-petals" />}
       {isSakura && <div className="sakura-sparkles" />}
       {isSakura && <div className="sakura-bloom" />}
 
-      {/* Racing Miku — speed lines + animated stripe */}
       {isRacing && <div className="racing-speedlines" />}
       {isRacing && <div className="racing-stripe" />}
 
-      {/* NieR:Automata 2B — vignette + scanlines + grid + glitch + petals + particles + core + HUD */}
       {isNier2b && <div className="nier2b-vignette" />}
       {isNier2b && <div className="nier2b-scanlines" />}
       {isNier2b && <div className="nier2b-hexgrid" />}
@@ -95,7 +96,6 @@ export default function App() {
       {isNier2b && <div className="nier2b-core" />}
       {isNier2b && <div className="nier2b-hud" />}
 
-      {/* A2 — NieR:Automata — vignette + noise + wind streaks + dust + broken core + worn HUD */}
       {isA2 && <div className="a2-vignette" />}
       {isA2 && <div className="a2-noise" />}
       {isA2 && <div className="a2-wind" />}
@@ -103,7 +103,6 @@ export default function App() {
       {isA2 && <div className="a2-core" />}
       {isA2 && <div className="a2-hud" />}
 
-      {/* Kasane Teto — glow corona + twin drills + 3D grid + note tiles + diagonal scan + shimmer */}
       {isTeto && <div className="teto-glow" />}
       {isTeto && <div className="teto-drills" />}
       {isTeto && <div className="teto-grid" />}
@@ -111,32 +110,48 @@ export default function App() {
       {isTeto && <div className="teto-scanband" />}
       {isTeto && <div className="teto-shimmer" />}
 
-      {/* Kuromi — dark aura + particles + skull + lightning */}
       {isKuromi && <div className="kuromi-aura" />}
       {isKuromi && <div className="kuromi-particles" />}
       {isKuromi && <div className="kuromi-skull">💀</div>}
       {isKuromi && <div className="kuromi-lightning" />}
 
-      {/* My Melody — rainbow stripe + hearts + corner orbs + sparkles */}
       {isMyMelody && <div className="mymelody-rainbow" />}
       {isMyMelody && <div className="mymelody-hearts" />}
       {isMyMelody && <div className="mymelody-orbs" />}
       {isMyMelody && <div className="mymelody-sparkles" />}
 
-      <div
-        className={rootClass}
-        style={{ minHeight: '100vh', background: C.bg, color: C.text, fontFamily, display: 'flex', flexDirection: 'column' }}
-      >
-        <div style={{ flex: '1 0 auto' }}>
+      {/* ── App shell ── */}
+      <div className={`app-shell ${rootClass}`} style={{ background: C.bg, color: C.text, fontFamily }}>
+
+        <Sidebar
+          view={view}
+          setView={setView}
+          themeKey={themeKey}
+          setThemeKey={setThemeKey}
+          chars={chars}
+          onCreate={handleCreate}
+          onImport={importChars}
+        />
+
+        <main className="app-main">
+          {view === 'home' && (
+            <Home
+              chars={chars}
+              onCreate={handleCreate}
+              onOpen={handleOpen}
+              themeKey={themeKey}
+            />
+          )}
+
+          {view === 'wiki' && <Wiki themeKey={themeKey} />}
+
           {view === 'roster' && (
             <Roster
               chars={chars}
               themeKey={themeKey}
-              setThemeKey={setThemeKey}
-              onCreate={() => { setDraft(blank()); setStep(0); setView('create') }}
-              onOpen={id  => { setActiveId(id); setView('sheet') }}
+              onCreate={handleCreate}
+              onOpen={handleOpen}
               onDelete={deleteChar}
-              onImport={importChars}
             />
           )}
 
@@ -153,16 +168,10 @@ export default function App() {
 
           {view === 'sheet' && (() => {
             const char = chars.find(c => c.id === activeId)
-            if (!char) { setTimeout(() => setView('roster'), 0); return null }
+            if (!char) { setTimeout(() => setView('home'), 0); return null }
             return <Sheet char={char} onChange={saveChar} onBack={() => setView('roster')} />
           })()}
-        </div>
-
-        <footer className="app-footer" style={{ borderTop: `1px solid ${C.border}`, background: C.surface, color: C.textMuted }}>
-          <span style={{ color: C.gold, fontWeight: 700 }}>⚔ D&D 2024 Manager</span>
-          <span className="app-footer-mid">GLHF :3 </span>
-          <span>Characters saved locally</span>
-        </footer>
+        </main>
       </div>
     </ThemeCtx.Provider>
   )

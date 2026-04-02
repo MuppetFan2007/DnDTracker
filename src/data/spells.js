@@ -1,0 +1,675 @@
+// D&D 2024 Spell Reference
+// Fields: name, level (0=cantrip), school, castTime, range, duration,
+//         components, concentration, ritual, classes[], desc
+
+export const SPELLS = [
+
+  // ── CANTRIPS (Level 0) ───────────────────────────────────────────────────
+
+  { name: 'Eldritch Blast',    level: 0, school: 'Evocation',
+    castTime: 'Action', range: '120 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Warlock'],
+    desc: 'A beam of crackling energy streaks toward a creature. Make a ranged spell attack; on a hit deal 1d10 Force damage. You create additional beams at levels 5 (2), 11 (3), and 17 (4), each targeting the same or different creatures.' },
+
+  { name: 'Fire Bolt',         level: 0, school: 'Evocation',
+    castTime: 'Action', range: '120 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'Hurl a mote of fire at a creature or object. Ranged spell attack for 1d10 Fire damage, scaling to 2d10/3d10/4d10 at levels 5/11/17. Ignites flammable objects not being worn or carried.' },
+
+  { name: 'Sacred Flame',      level: 0, school: 'Evocation',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Cleric'],
+    desc: 'Flame-like radiance descends on a creature you can see. It must succeed on a Dexterity save (cover provides no bonus) or take 1d8 Radiant damage. Scales at levels 5/11/17.' },
+
+  { name: 'Toll the Dead',     level: 0, school: 'Necromancy',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Cleric', 'Warlock', 'Wizard'],
+    desc: 'A doleful bell tolls. Target makes a Wisdom save or takes 1d8 Necrotic damage — but 1d12 if the target is missing any HP. Scales at higher levels.' },
+
+  { name: 'Vicious Mockery',   level: 0, school: 'Enchantment',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Bard'],
+    desc: 'Unleash a string of insults laced with subtle magic. Target makes a Wisdom save or takes 1d6 Psychic damage and has Disadvantage on its next attack roll before end of your next turn. Scales.' },
+
+  { name: 'Shillelagh',        level: 0, school: 'Transmutation',
+    castTime: 'Bonus Action', range: 'Self', duration: '1 minute',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Druid'],
+    desc: 'Your club or quarterstaff becomes magical: use your Wisdom modifier for attack and damage rolls, and its damage die becomes 1d8. The weapon counts as magical for overcoming resistance.' },
+
+  { name: 'Guidance',          level: 0, school: 'Divination',
+    castTime: 'Action', range: 'Touch', duration: 'Concentration, 1 minute',
+    components: 'V, S', concentration: true, ritual: false,
+    classes: ['Cleric', 'Druid'],
+    desc: 'Touch a willing creature. Once before the spell ends, it can add 1d4 to one ability check of its choice. Excellent for skill checks outside of combat.' },
+
+  { name: 'Minor Illusion',    level: 0, school: 'Illusion',
+    castTime: 'Action', range: '30 ft', duration: '1 minute',
+    components: 'S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Create a sound or a Small-or-smaller image. A creature can use its action and make an Investigation check vs. your spell save DC to recognize it as illusory.' },
+
+  { name: 'Mage Hand',         level: 0, school: 'Conjuration',
+    castTime: 'Action', range: '30 ft', duration: '1 minute',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A spectral floating hand appears. It can manipulate objects, open unlocked doors, stow/retrieve items, and pour out containers. It can\'t attack, use magic items, or carry more than 10 lbs.' },
+
+  { name: 'Prestidigitation',  level: 0, school: 'Transmutation',
+    castTime: 'Action', range: '10 ft', duration: '1 hour',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A catch-all magical parlour trick: create a harmless sensory effect, light or snuff a candle, clean or soil an object, chill/warm/flavor food, make a color/symbol appear on a surface, or create a small trinket.' },
+
+  { name: 'Thaumaturgy',       level: 0, school: 'Transmutation',
+    castTime: 'Action', range: '30 ft', duration: '1 minute',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Cleric'],
+    desc: 'Manifest a minor wonder: your voice booms, flames flicker, tremors ripple underfoot, your eyes glow, or nearby doors slam open or shut. Up to 3 active effects at once.' },
+
+  { name: 'Blade Ward',        level: 0, school: 'Abjuration',
+    castTime: 'Action', range: 'Self', duration: 'Concentration, 1 minute',
+    components: 'V, S', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Gain Resistance to Bludgeoning, Piercing, and Slashing damage from weapon attacks for the duration. Useful when taking the Dodge action would otherwise waste your action.' },
+
+  { name: 'Chill Touch',       level: 0, school: 'Necromancy',
+    castTime: 'Action', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Melee spell attack. On a hit: 1d10 Necrotic damage and the target can\'t regain HP until the start of your next turn. Scales at levels 5/11/17.' },
+
+  { name: 'True Strike',       level: 0, school: 'Divination',
+    castTime: 'Action', range: 'Self', duration: 'Instantaneous',
+    components: 'S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Make one melee attack with the weapon or Unarmed Strike used as the component, using your spellcasting ability instead of Strength or Dexterity. Add an extra 1d6 Radiant on a hit. Scales.' },
+
+  { name: 'Produce Flame',     level: 0, school: 'Conjuration',
+    castTime: 'Action', range: 'Self', duration: '10 minutes',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Druid'],
+    desc: 'A flickering flame in your hand sheds bright light 20 ft and dim light 20 ft further. As a Bonus Action, hurl it: ranged spell attack for 1d8 Fire (extinguishes the flame). Scales.' },
+
+  { name: 'Spare the Dying',   level: 0, school: 'Necromancy',
+    castTime: 'Bonus Action', range: '15 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Cleric', 'Druid'],
+    desc: 'A living creature at 0 HP becomes Stable. At level 5, range increases to 30 ft; at level 11, you can target two creatures.' },
+
+  { name: 'Ray of Frost',      level: 0, school: 'Evocation',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'A frigid beam of blue-white light. Ranged spell attack for 1d8 Cold damage; the target\'s Speed is reduced by 10 ft until the start of your next turn. Scales.' },
+
+  { name: 'Poison Spray',      level: 0, school: 'Conjuration',
+    castTime: 'Action', range: '30 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Druid', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Project a puff of noxious gas. Target makes a Constitution save or takes 1d12 Poison damage. Scales.' },
+
+  // ── LEVEL 1 ─────────────────────────────────────────────────────────────
+
+  { name: 'Magic Missile',     level: 1, school: 'Evocation',
+    castTime: 'Action', range: '120 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'Create 3 glowing darts of magical force (more at higher slots). Each dart automatically hits and deals 1d4+1 Force damage. You can direct all darts at one target or spread them.' },
+
+  { name: 'Cure Wounds',       level: 1, school: 'Evocation',
+    castTime: 'Action', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid', 'Paladin', 'Ranger'],
+    desc: 'A creature you touch regains 2d8 + your spellcasting ability modifier HP. Does not work on undead or constructs. Heals more dice at higher spell slot levels.' },
+
+  { name: 'Healing Word',      level: 1, school: 'Evocation',
+    castTime: 'Bonus Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid'],
+    desc: 'A creature you can see regains 2d4 + your spellcasting modifier HP. The Bonus Action cast time makes this exceptional — you can still cast a cantrip on the same turn.' },
+
+  { name: 'Shield',            level: 1, school: 'Abjuration',
+    castTime: 'Reaction', range: 'Self', duration: '1 round',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'Reaction when you are hit by an attack or targeted by Magic Missile: gain +5 to AC (potentially turning the hit into a miss) and immunity to Magic Missile until the start of your next turn.' },
+
+  { name: 'Sleep',             level: 1, school: 'Enchantment',
+    castTime: 'Action', range: '60 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Wizard'],
+    desc: 'Targets with the fewest HP first are put to Sleep (up to a pool of 5d8 HP, more at higher slots). A sleeping creature wakes if it takes damage or someone shakes it awake.' },
+
+  { name: 'Charm Person',      level: 1, school: 'Enchantment',
+    castTime: 'Action', range: '30 ft', duration: '1 hour',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Bard', 'Druid', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'One humanoid makes a Wisdom save (with Advantage if you or your allies are fighting it) or is Charmed by you for 1 hour, treating you as a friendly acquaintance. It knows it was charmed when the spell ends.' },
+
+  { name: 'Thunderwave',       level: 1, school: 'Evocation',
+    castTime: 'Action', range: 'Self (15 ft cube)', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid', 'Sorcerer', 'Wizard'],
+    desc: 'A wave of thunder erupts. Creatures in a 15 ft cube: Constitution save or 2d8 Thunder and pushed 10 ft away (half damage on success). A loud boom is audible 300 ft away. Unattended objects fly outward.' },
+
+  { name: 'Burning Hands',     level: 1, school: 'Evocation',
+    castTime: 'Action', range: 'Self (15 ft cone)', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'A thin sheet of flames shoots from your outstretched fingertips. Creatures in a 15 ft cone: Dexterity save or 3d6 Fire (half on success). Ignites flammable, unattended objects.' },
+
+  { name: 'Detect Magic',      level: 1, school: 'Divination',
+    castTime: 'Action', range: 'Self', duration: 'Concentration, 10 minutes',
+    components: 'V, S', concentration: true, ritual: true,
+    classes: ['Bard', 'Cleric', 'Druid', 'Paladin', 'Ranger', 'Sorcerer', 'Wizard'],
+    desc: 'Sense the presence of magic within 30 ft. See a faint aura around magical creatures and objects, and you can use your action to learn the school of magic of any aura you detect.' },
+
+  { name: 'Mage Armor',        level: 1, school: 'Abjuration',
+    castTime: 'Action', range: 'Touch', duration: '8 hours',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'Touch a willing creature not wearing armor: their base AC becomes 13 + Dexterity modifier for 8 hours. The spell ends if the target dons armor.' },
+
+  { name: 'Hex',               level: 1, school: 'Enchantment',
+    castTime: 'Bonus Action', range: '90 ft', duration: 'Concentration, 1 hour',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Warlock'],
+    desc: 'Curse a creature: deal an extra 1d6 Necrotic whenever you hit it with an attack, and it has Disadvantage on ability checks of one chosen type. When it drops to 0 HP, you can move the curse to a new target as a Bonus Action.' },
+
+  { name: 'Bless',             level: 1, school: 'Enchantment',
+    castTime: 'Action', range: '30 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Cleric', 'Paladin'],
+    desc: 'Up to 3 willing creatures add 1d4 to attack rolls and saving throws for 1 minute. One of the best buff spells in the game — high impact, lasts the full combat.' },
+
+  { name: 'Faerie Fire',       level: 1, school: 'Evocation',
+    castTime: 'Action', range: '60 ft', duration: 'Concentration, 1 minute',
+    components: 'V', concentration: true, ritual: false,
+    classes: ['Bard', 'Druid'],
+    desc: 'Objects and creatures in a 20 ft cube may be outlined in blue, green, or violet light. Outlined creatures: can\'t benefit from invisibility, attack rolls against them have Advantage. Dexterity save to resist.' },
+
+  { name: 'Inflict Wounds',    level: 1, school: 'Necromancy',
+    castTime: 'Action', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Cleric'],
+    desc: 'Melee spell attack for 2d10 Necrotic damage. Extra 2d10 per additional slot level. One of the hardest-hitting single-target level-1 spells for Clerics who wade into melee.' },
+
+  { name: 'Divine Smite',      level: 1, school: 'Evocation',
+    castTime: 'Bonus Action', range: 'Self', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Paladin'],
+    desc: 'After hitting with a melee weapon or Unarmed Strike, expend a spell slot: deal +2d8 Radiant (+1d8 per slot level above 1st). Damage doubled against Undead and Fiends. Activated after knowing the hit lands.' },
+
+  { name: 'Find Familiar',     level: 1, school: 'Conjuration',
+    castTime: '1 hour', range: '10 ft', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: true,
+    classes: ['Wizard'],
+    desc: 'Summon a Tiny spirit in the form of an animal (bat, cat, crab, frog, hawk, lizard, octopus, owl, poisonous snake, spider, rat, or weasel) as your familiar. You can communicate telepathically and cast touch spells through it.' },
+
+  { name: 'Longstrider',       level: 1, school: 'Transmutation',
+    castTime: 'Action', range: 'Touch', duration: '1 hour',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Druid', 'Ranger', 'Wizard'],
+    desc: 'Touch a creature: its Speed increases by 10 ft for 1 hour. Extra targets with higher slot levels.' },
+
+  { name: 'Identify',          level: 1, school: 'Divination',
+    castTime: '1 minute', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: true,
+    classes: ['Bard', 'Wizard'],
+    desc: 'Learn all magical properties of a magic item or creature, including how to use them, whether any spells are active on it, and what spells.' },
+
+  { name: 'Grease',            level: 1, school: 'Conjuration',
+    castTime: 'Action', range: '60 ft', duration: '1 minute',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'Cover a 10 ft square in slick grease: creatures in the area make a Dexterity save or fall Prone. The area is Difficult Terrain for the duration.' },
+
+  { name: 'Command',           level: 1, school: 'Enchantment',
+    castTime: 'Action', range: '60 ft', duration: '1 round',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Cleric', 'Paladin'],
+    desc: 'Speak one-word command to a creature (Wisdom save to resist). Flee, Grovel, Halt, Approach, or Drop — each has a specific effect. Extra targets with higher slot levels.' },
+
+  // ── LEVEL 2 ─────────────────────────────────────────────────────────────
+
+  { name: 'Misty Step',        level: 2, school: 'Conjuration',
+    castTime: 'Bonus Action', range: 'Self', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Surrounded by silvery mist, you teleport up to 30 ft to an unoccupied space you can see. Only a Verbal component — cast it even with your hands full.' },
+
+  { name: 'Hold Person',       level: 2, school: 'Enchantment',
+    castTime: 'Action', range: '60 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A humanoid makes a Wisdom save or is Paralyzed for 1 minute, repeating the save each turn. Any attack made against a Paralyzed creature within 5 ft is automatically a critical hit.' },
+
+  { name: 'Shatter',           level: 2, school: 'Evocation',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A sudden loud ringing in a 10 ft sphere. Constitution save or 3d8 Thunder (half on success). Creatures made of inorganic material have Disadvantage on the save. Nonmagical objects in the area automatically take full damage.' },
+
+  { name: 'Invisibility',      level: 2, school: 'Illusion',
+    castTime: 'Action', range: 'Touch', duration: 'Concentration, 1 hour',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A creature and everything it wears/carries becomes Invisible for 1 hour. Ends early if the target attacks or casts a spell. Target extra creatures with higher slot levels.' },
+
+  { name: 'Scorching Ray',     level: 2, school: 'Evocation',
+    castTime: 'Action', range: '120 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'Create 3 rays of fire (one extra per slot level above 2nd). Each ray is a separate ranged spell attack dealing 2d6 Fire damage. Direct rays to the same or different targets.' },
+
+  { name: 'Blindness/Deafness',level: 2, school: 'Transmutation',
+    castTime: 'Action', range: '120 ft', duration: '1 minute',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Sorcerer', 'Wizard'],
+    desc: 'A creature makes a Constitution save or is Blinded or Deafened (your choice) for 1 minute. The target repeats the save at the end of each of its turns. No Concentration — stack it with other spells.' },
+
+  { name: 'Spider Climb',      level: 2, school: 'Transmutation',
+    castTime: 'Action', range: 'Touch', duration: 'Concentration, 1 hour',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A willing creature can walk along walls and across ceilings at normal speed while keeping its hands free, without needing to make ability checks.' },
+
+  { name: 'Enhance Ability',   level: 2, school: 'Transmutation',
+    castTime: 'Action', range: 'Touch', duration: 'Concentration, 1 hour',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid', 'Ranger', 'Sorcerer', 'Wizard'],
+    desc: 'Grant Advantage on ability checks of one type: Bull\'s Strength (STR), Cat\'s Grace (DEX), Bear\'s Endurance (CON), Fox\'s Cunning (INT), Owl\'s Wisdom (WIS), or Eagle\'s Splendor (CHA). Extra targets with higher slots.' },
+
+  { name: 'Prayer of Healing', level: 2, school: 'Evocation',
+    castTime: '10 minutes', range: '30 ft', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Cleric', 'Paladin'],
+    desc: 'Up to 5 creatures each regain 2d8 + your spellcasting modifier HP. The 10-minute cast time limits this to out-of-combat rest periods — but it\'s highly efficient healing for that niche.' },
+
+  { name: 'Spiritual Weapon',  level: 2, school: 'Evocation',
+    castTime: 'Bonus Action', range: '60 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S', concentration: true, ritual: false,
+    classes: ['Cleric', 'Paladin'],
+    desc: 'Summon a floating spectral weapon that you attack with as a Bonus Action each turn: melee spell attack for 1d8 + your spellcasting modifier Force damage. Move it 20 ft and attack on the same Bonus Action.' },
+
+  { name: 'Silence',           level: 2, school: 'Illusion',
+    castTime: 'Action', range: '120 ft', duration: 'Concentration, 10 minutes',
+    components: 'V, S', concentration: true, ritual: true,
+    classes: ['Bard', 'Cleric', 'Ranger'],
+    desc: 'No sound can be created or pass through a 20 ft radius sphere. Creatures inside are Deafened. Spells with a Verbal component cannot be cast inside the area.' },
+
+  { name: 'Suggestion',        level: 2, school: 'Enchantment',
+    castTime: 'Action', range: '30 ft', duration: 'Concentration, 8 hours',
+    components: 'V, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Suggest a reasonable course of action (wording matters — it must sound plausible) to a creature that can understand you. Wisdom save or it pursues the suggestion for up to 8 hours.' },
+
+  { name: 'Moonbeam',          level: 2, school: 'Evocation',
+    castTime: 'Action', range: '120 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Druid'],
+    desc: 'A silvery beam of pale light (5 ft radius, 40 ft tall). Creatures entering or starting their turn in it: Constitution save or 2d10 Radiant (half on success). Shapechangers have Disadvantage. Move it 60 ft as a Bonus Action.' },
+
+  { name: 'Pass without Trace', level: 2, school: 'Abjuration',
+    castTime: 'Action', range: 'Self', duration: 'Concentration, 1 hour',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Druid', 'Ranger'],
+    desc: 'A veil of shadows: you and up to 10 companions you choose gain +10 to Stealth checks and can\'t be tracked by nonmagical means. Individual companions can move ahead without breaking the spell.' },
+
+  { name: 'Knock',             level: 2, school: 'Transmutation',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'One lock, chain, or bar on a door, chest, or shackle is unlocked, opened, or unfastened. A loud knock rings out, audible 300 ft away — stealth not guaranteed.' },
+
+  { name: 'Darkness',          level: 2, school: 'Evocation',
+    castTime: 'Action', range: '60 ft', duration: 'Concentration, 10 minutes',
+    components: 'V, M', concentration: true, ritual: false,
+    classes: ['Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Magical darkness fills a 15 ft radius sphere from a point you choose. The darkness blocks Darkvision. Spells of level 2 or lower that create light can\'t illuminate it.' },
+
+  // ── LEVEL 3 ─────────────────────────────────────────────────────────────
+
+  { name: 'Fireball',          level: 3, school: 'Evocation',
+    castTime: 'Action', range: '150 ft', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'A bright streak explodes into a 20 ft radius sphere of fire. Dexterity save or 8d6 Fire (half on success). Fire spreads around corners and ignites flammable objects. The iconic AoE spell.' },
+
+  { name: 'Lightning Bolt',    level: 3, school: 'Evocation',
+    castTime: 'Action', range: 'Self (100 ft line)', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'A stroke of lightning in a 100 ft × 5 ft line. Dexterity save or 8d6 Lightning (half on success). Bounces off solid barriers; better in corridors, Fireball is better in open areas.' },
+
+  { name: 'Hypnotic Pattern',  level: 3, school: 'Illusion',
+    castTime: 'Action', range: '120 ft', duration: 'Concentration, 1 minute',
+    components: 'S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A twisting pattern of colors appears in a 30 ft cube. Each creature must make a Wisdom save or become Incapacitated and have Speed 0, mesmerized for 1 minute. Shaking or damage wakes them.' },
+
+  { name: 'Fly',               level: 3, school: 'Transmutation',
+    castTime: 'Action', range: 'Touch', duration: 'Concentration, 10 minutes',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A willing creature gains a Fly Speed of 60 ft for 10 minutes. If Concentration ends while aloft, the creature descends 60 ft per round. Additional targets with higher slot levels.' },
+
+  { name: 'Counterspell',      level: 3, school: 'Abjuration',
+    castTime: 'Reaction', range: '60 ft', duration: 'Instantaneous',
+    components: 'S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Reaction when a creature within 60 ft casts a spell: automatically stop spells of level 3 or lower. For higher-level spells, make a spellcasting ability check with a DC of 10 + the spell\'s level.' },
+
+  { name: 'Dispel Magic',      level: 3, school: 'Abjuration',
+    castTime: 'Action', range: '120 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid', 'Paladin', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'End one active spell of level 3 or lower on the target (automatic). For higher-level spells, make a spellcasting ability check with DC = 10 + the spell\'s level.' },
+
+  { name: 'Animate Dead',      level: 3, school: 'Necromancy',
+    castTime: '1 minute', range: '10 ft', duration: '24 hours',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Cleric', 'Wizard'],
+    desc: 'Raise one Tiny to Medium corpse or pile of bones as a Skeleton or Zombie under your control for 24 hours. Recast to extend. Affect up to 4 additional undead per slot level above 3rd.' },
+
+  { name: 'Revivify',          level: 3, school: 'Necromancy',
+    castTime: 'Action', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Cleric', 'Druid', 'Paladin'],
+    desc: 'Return a creature dead within the last minute to life with 1 HP. A 300 gp diamond is consumed. Can\'t restore someone who died of old age or lacks vital body parts.' },
+
+  { name: 'Mass Healing Word', level: 3, school: 'Evocation',
+    castTime: 'Bonus Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric'],
+    desc: 'Up to 6 creatures each regain 2d4 + your spellcasting modifier HP. The Bonus Action cast time is extraordinary at this level — heal six allies and still use your Action.' },
+
+  { name: 'Haste',             level: 3, school: 'Transmutation',
+    castTime: 'Action', range: '30 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'One willing creature: double Speed, +2 AC, Advantage on Dexterity saves, and one extra Action (Attack once, Dash, Disengage, Hide, or Use Object). Warning: when the spell ends, the target is Incapacitated for 1 turn.' },
+
+  { name: 'Spirit Guardians',  level: 3, school: 'Conjuration',
+    castTime: 'Action', range: 'Self (15 ft)', duration: 'Concentration, 10 minutes',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Cleric'],
+    desc: 'Spectral spirits orbit you in a 15 ft Emanation. Enemies in the area have their Speed halved; creatures entering or starting their turn there make a Wisdom save or take 3d8 Radiant/Necrotic (half on success). A top-tier Cleric melee option.' },
+
+  { name: 'Stinking Cloud',    level: 3, school: 'Conjuration',
+    castTime: 'Action', range: '90 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Wizard'],
+    desc: 'A 20 ft sphere of yellowish noxious gas. Creatures that start their turn inside make a Constitution save or waste their action retching. Excellent for crowd control without dealing damage (friendly fire concerns minimized).' },
+
+  { name: 'Sleet Storm',       level: 3, school: 'Conjuration',
+    castTime: 'Action', range: '150 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Druid', 'Sorcerer', 'Wizard'],
+    desc: 'A 40 ft radius, 20 ft tall cylinder becomes Heavily Obscured Difficult Terrain. Any creature standing in it must make a Dexterity save when entering or starting its turn there or fall Prone. Concentration checks from any damage.' },
+
+  // ── LEVEL 4 ─────────────────────────────────────────────────────────────
+
+  { name: 'Polymorph',         level: 4, school: 'Transmutation',
+    castTime: 'Action', range: '60 ft', duration: 'Concentration, 1 hour',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid', 'Sorcerer', 'Wizard'],
+    desc: 'Transform a creature into a Beast with CR ≤ its level/CR. All stats become the Beast\'s; it can\'t cast spells or speak. At 0 HP, reverts to original form with prior HP. Utility (Giant Eagle scouting) or combat buff.' },
+
+  { name: 'Banishment',        level: 4, school: 'Abjuration',
+    castTime: 'Action', range: '30 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Cleric', 'Paladin', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Creature makes a Charisma save or is sent to a harmless demi-plane for 1 minute. If maintained the full minute against a non-native creature, it is permanently sent to its home plane.' },
+
+  { name: 'Greater Invisibility',level: 4, school: 'Illusion',
+    castTime: 'Action', range: 'Touch', duration: 'Concentration, 1 minute',
+    components: 'V, S', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Wizard'],
+    desc: 'A creature becomes Invisible for 1 minute — even while attacking or casting spells. Attack rolls against it have Disadvantage; its attack rolls have Advantage. Much stronger than regular Invisibility.' },
+
+  { name: 'Ice Storm',         level: 4, school: 'Evocation',
+    castTime: 'Action', range: '300 ft', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Druid', 'Sorcerer', 'Wizard'],
+    desc: 'Hail batters a 20 ft radius, 40 ft tall cylinder. Dexterity save or 2d8 Bludgeoning + 4d6 Cold (half on success). The area becomes Difficult Terrain until end of your next turn.' },
+
+  { name: 'Dimension Door',    level: 4, school: 'Conjuration',
+    castTime: 'Action', range: '500 ft', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Teleport up to 500 ft to any point you can visualize (a doorway, hallway, or from memory). You can bring one willing Medium-or-smaller creature. If destination is occupied, both take 4d6 Force and teleport fails.' },
+
+  { name: 'Confusion',         level: 4, school: 'Enchantment',
+    castTime: 'Action', range: '90 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Druid', 'Sorcerer', 'Wizard'],
+    desc: 'Creatures in a 10 ft sphere make a Wisdom save or lose control: move randomly, attack randomly, or do nothing at all. Each affected creature repeats the save at end of its turn.' },
+
+  { name: 'Wall of Fire',      level: 4, school: 'Evocation',
+    castTime: 'Action', range: '120 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Druid', 'Sorcerer', 'Wizard'],
+    desc: 'Create a wall of fire (60 ft long, 20 ft tall, 1 ft thick) or a ring (20 ft diameter). One side deals 5d8 Fire to creatures entering or starting their turn within 10 ft.' },
+
+  { name: 'Blight',            level: 4, school: 'Necromancy',
+    castTime: 'Action', range: '30 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Druid', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Drain life from a creature. Constitution save or 8d8 Necrotic (half on success). Plant creatures have Disadvantage on the save and take maximum damage.' },
+
+  // ── LEVEL 5 ─────────────────────────────────────────────────────────────
+
+  { name: 'Hold Monster',      level: 5, school: 'Enchantment',
+    castTime: 'Action', range: '90 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Like Hold Person but for any creature type. Wisdom save or Paralyzed for 1 minute, repeating the save each turn. Attacks within 5 ft are automatic critical hits against Paralyzed creatures.' },
+
+  { name: 'Cone of Cold',      level: 5, school: 'Evocation',
+    castTime: 'Action', range: 'Self (60 ft cone)', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Druid', 'Sorcerer', 'Wizard'],
+    desc: 'A blast of freezing air and ice fills a 60 ft cone. Constitution save or 8d8 Cold (half on success). Creatures reduced to 0 HP become a frozen statue that shatters if damaged before a Long Rest.' },
+
+  { name: 'Mass Cure Wounds',  level: 5, school: 'Evocation',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid'],
+    desc: 'Up to 6 creatures each regain 5d8 + your spellcasting modifier HP. The Action cast time (vs. Healing Word\'s Bonus Action) is a tradeoff for the much larger heal and multi-target coverage.' },
+
+  { name: 'Greater Restoration', level: 5, school: 'Abjuration',
+    castTime: 'Action', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid'],
+    desc: 'End one of: reduce exhaustion by 1, end a charm/curse/hex/petrification, or restore a drained ability score/maximum HP. Requires a 100 gp diamond dust component.' },
+
+  { name: 'Raise Dead',        level: 5, school: 'Necromancy',
+    castTime: '1 hour', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Paladin'],
+    desc: 'Restore a creature dead up to 10 days to life with 1 HP (requires intact body; can\'t reverse old age). The creature suffers a -4 penalty to attack rolls, saves, and ability checks for 1d4 days, improving by 1 each day.' },
+
+  { name: 'Synaptic Static',   level: 5, school: 'Enchantment',
+    castTime: 'Action', range: '120 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Psychic energy explodes in a 20 ft sphere. Intelligence save or 8d6 Psychic; on failure, subtract 1d6 from all attack rolls, ability checks, and Concentration saves for 1 minute. No Concentration required.' },
+
+  { name: 'Wall of Force',     level: 5, school: 'Evocation',
+    castTime: 'Action', range: '120 ft', duration: 'Concentration, 10 minutes',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Wizard'],
+    desc: 'An immovable, invisible panel or hemisphere of force. Completely immune to all damage and immune to Dispel Magic. Only Disintegrate can destroy it. Nothing can pass through it — not spells, not air.' },
+
+  { name: 'Animate Objects',   level: 5, school: 'Transmutation',
+    castTime: 'Action', range: '120 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Wizard'],
+    desc: 'Animate up to 10 nonmagical objects (Tiny to Large) to fight as allies. Smaller objects = more objects animated but lower individual damage. A Tiny object attacks for 1d4+4; a Huge object attacks for 2d12+2.' },
+
+  { name: 'Dawn',              level: 5, school: 'Evocation',
+    castTime: 'Action', range: '60 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Cleric', 'Wizard'],
+    desc: 'A 30 ft radius, 40 ft tall cylinder of bright sunlight. Creatures in it at the start of your turn make a Constitution save or take 4d10 Radiant. Move it 60 ft as a Bonus Action. Dispels magical darkness.' },
+
+  // ── LEVEL 6 ─────────────────────────────────────────────────────────────
+
+  { name: 'Disintegrate',      level: 6, school: 'Transmutation',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'A thin green ray. Dexterity save or 10d6+40 Force damage (half on success). Reduced to 0 HP = instantly disintegrated into fine grey dust, along with all worn and carried nonmagical gear.' },
+
+  { name: 'True Seeing',       level: 6, school: 'Divination',
+    castTime: 'Action', range: 'Touch', duration: '1 hour',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A creature gains Truesight to 120 ft: sees through magical darkness, invisibility, illusions, and polymorph; perceives the original form of shapechangers; and can see into the Ethereal Plane.' },
+
+  { name: 'Chain Lightning',   level: 6, school: 'Evocation',
+    castTime: 'Action', range: '150 ft', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'A bolt leaps to a primary target for 10d8 Lightning (Dexterity save for half), then arcs to up to 3 additional targets within 30 ft of the previous strike. One more arc per slot level above 6th.' },
+
+  { name: 'Heal',              level: 6, school: 'Evocation',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Cleric', 'Druid'],
+    desc: 'Restore 70 HP and simultaneously end any Blinded, Deafened, or disease conditions. Does not work on Undead or Constructs. More efficient total healing than any 6th-level slot spent elsewhere.' },
+
+  { name: 'Globe of Invulnerability', level: 6, school: 'Abjuration',
+    castTime: 'Action', range: 'Self (10 ft sphere)', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'An immobile, faintly shimmering barrier. Spells of level 5 and lower cannot affect creatures inside the globe, even if cast from outside. Raises the threshold by 1 per extra slot level.' },
+
+  { name: 'Sunbeam',           level: 6, school: 'Evocation',
+    castTime: 'Action', range: 'Self (60 ft line)', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Cleric', 'Druid', 'Sorcerer', 'Wizard'],
+    desc: 'A beam of sunlight (5 ft wide, 60 ft long). Constitution save or 6d8 Radiant and Blinded until end of your next turn (half on success). Undead/oozes have Disadvantage. Reuse each turn as an Action.' },
+
+  // ── LEVEL 7 ─────────────────────────────────────────────────────────────
+
+  { name: 'Plane Shift',       level: 7, school: 'Conjuration',
+    castTime: 'Action', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Cleric', 'Druid', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Transport up to 8 willing creatures to a plane of existence you specify. Alternatively, use as an attack (Charisma save or banished to a random location on another plane). Material component differs per plane.' },
+
+  { name: 'Finger of Death',   level: 7, school: 'Necromancy',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A cold energy wave. Constitution save or 7d8+30 Necrotic (half on success). If this kills a humanoid, it immediately rises as a Zombie under your permanent command.' },
+
+  { name: 'Forcecage',         level: 7, school: 'Evocation',
+    castTime: 'Action', range: '100 ft', duration: 'Concentration, 1 hour',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A cage of pure force. Choose a barred cage (20 ft cube) or a solid box (10 ft cube). Immune to Dispel Magic. Blocks all teleportation. Creatures can\'t leave by any means short of Plane Shift or Wish.' },
+
+  { name: 'Regenerate',        level: 7, school: 'Transmutation',
+    castTime: '1 minute', range: 'Touch', duration: '1 hour',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Druid'],
+    desc: 'Target regains 4d8+15 HP immediately. For 1 hour, it regains 1 HP at the start of each of its turns and can regrow severed body parts in 2 minutes.' },
+
+  { name: 'Resurrection',      level: 7, school: 'Necromancy',
+    castTime: '1 hour', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric'],
+    desc: 'Restore a creature dead up to 100 years (requires body; can\'t reverse old age) to life with full HP, ending all conditions. The 1000 gp diamond component is consumed. The caster gains 1 level of Exhaustion.' },
+
+  { name: 'Etherealness',      level: 7, school: 'Transmutation',
+    castTime: 'Action', range: 'Self', duration: '8 hours',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Bard', 'Cleric', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Step into the Ethereal Plane. You can move through solid objects (though not end your turn in one). Perceive the Material Plane within 60 ft, dimly. Action to return. Brings companions with higher slot levels.' },
+
+  // ── LEVEL 8 ─────────────────────────────────────────────────────────────
+
+  { name: 'Dominate Monster',  level: 8, school: 'Enchantment',
+    castTime: 'Action', range: '60 ft', duration: 'Concentration, 1 hour',
+    components: 'V, S', concentration: true, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Any creature type makes a Wisdom save or is Charmed by you for 1 hour. Issue telepathic commands. It repeats the save each time it takes damage.' },
+
+  { name: 'Maze',              level: 8, school: 'Conjuration',
+    castTime: 'Action', range: '60 ft', duration: 'Concentration, 10 minutes',
+    components: 'V, S', concentration: true, ritual: false,
+    classes: ['Wizard'],
+    desc: 'Banish a creature to an extradimensional labyrinth. Minotaurs escape instantly. Others make a DC 20 Intelligence (Investigation) check as an Action each turn. Returns when it escapes or the spell ends.' },
+
+  { name: 'Power Word Stun',   level: 8, school: 'Enchantment',
+    castTime: 'Action', range: '60 ft', duration: 'Varies',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'A creature with 150 HP or fewer is Stunned. At the end of each of its turns it makes a Constitution save to end the effect. Choose targets wisely — it doesn\'t work at all on creatures above 150 HP.' },
+
+  { name: 'Antimagic Field',   level: 8, school: 'Abjuration',
+    castTime: 'Action', range: 'Self (10 ft sphere)', duration: 'Concentration, 1 hour',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Cleric', 'Wizard'],
+    desc: 'A 10 ft sphere of antimagic surrounds you. Within it: spells can\'t be cast, magical effects are suppressed, magical items become mundane, and summoned creatures vanish. You\'re immune to all magic while inside.' },
+
+  { name: 'Sunburst',          level: 8, school: 'Evocation',
+    castTime: 'Action', range: '150 ft', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Cleric', 'Druid', 'Sorcerer', 'Wizard'],
+    desc: 'Brilliant sunlight blazes in a 60 ft radius sphere. Constitution save or 12d6 Radiant and Blinded for 1 minute (half damage, not Blinded on success). Undead and oozes have Disadvantage on the save.' },
+
+  // ── LEVEL 9 ─────────────────────────────────────────────────────────────
+
+  { name: 'Wish',              level: 9, school: 'Conjuration',
+    castTime: 'Action', range: 'Self', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'The most powerful spell in existence. Duplicate any spell of 8th level or lower without material components, or reshape reality to your will. Using it for anything other than duplication risks: stress damage (3d4+33), losing access to Wish forever (33% chance).' },
+
+  { name: 'Time Stop',         level: 9, school: 'Transmutation',
+    castTime: 'Action', range: 'Self', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'Stop time for everyone except yourself. Take 1d4+1 extra turns in a row. Each extra turn ends immediately if you affect another creature or an object held/worn by one.' },
+
+  { name: 'Power Word Kill',   level: 9, school: 'Enchantment',
+    castTime: 'Action', range: '60 ft', duration: 'Instantaneous',
+    components: 'V', concentration: false, ritual: false,
+    classes: ['Bard', 'Sorcerer', 'Warlock', 'Wizard'],
+    desc: 'Speak one word of absolute power. A creature with 100 HP or fewer dies instantly — no saving throw. No exceptions. For targets above 100 HP, nothing happens.' },
+
+  { name: 'True Resurrection',  level: 9, school: 'Necromancy',
+    castTime: '1 hour', range: 'Touch', duration: 'Instantaneous',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Cleric', 'Druid'],
+    desc: 'Restore a creature dead up to 200 years to life with full HP, in a new body if the original was destroyed. Works even on old-age death. The 25,000 gp diamond component is consumed. No Exhaustion for caster.' },
+
+  { name: 'Meteor Swarm',      level: 9, school: 'Evocation',
+    castTime: 'Action', range: '1 mile', duration: 'Instantaneous',
+    components: 'V, S', concentration: false, ritual: false,
+    classes: ['Sorcerer', 'Wizard'],
+    desc: 'Four meteors strike four 40 ft radius points within 1 mile. Each creature in a blast area makes a Dexterity save or takes 20d6 Fire + 20d6 Bludgeoning (half on success). The total potential damage is astronomical.' },
+
+  { name: 'Foresight',         level: 9, school: 'Divination',
+    castTime: '1 minute', range: 'Touch', duration: '8 hours',
+    components: 'V, S, M', concentration: false, ritual: false,
+    classes: ['Bard', 'Druid', 'Warlock', 'Wizard'],
+    desc: 'Touch a creature. For 8 hours: can\'t be Surprised, has Advantage on all d20 Tests, and attack rolls against it have Disadvantage. No Concentration. The most powerful non-9th-slot buff in the game.' },
+
+  { name: 'Gate',              level: 9, school: 'Conjuration',
+    castTime: 'Action', range: '60 ft', duration: 'Concentration, 1 minute',
+    components: 'V, S, M', concentration: true, ritual: false,
+    classes: ['Cleric', 'Sorcerer', 'Wizard'],
+    desc: 'Create a portal between your plane and another, or call a specific named creature from another plane to appear in the nearest unoccupied space. If summoned, it is not automatically friendly.' },
+
+]

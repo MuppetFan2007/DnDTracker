@@ -21,6 +21,49 @@ export function GlobalCSS() {
         background: rgba(128,128,128,0.08) !important;
       }
 
+      /* ── App shell layout ── */
+      .app-shell { display: flex; min-height: 100vh; }
+
+      .app-sidebar {
+        width: 220px; flex-shrink: 0;
+        height: 100vh; position: sticky; top: 0;
+        display: flex; flex-direction: column;
+        overflow: hidden;
+      }
+
+      .app-main {
+        flex: 1; min-width: 0;
+        min-height: 100vh;
+        overflow-y: auto;
+      }
+
+      /* Sidebar nav item hover */
+      .sidebar-nav-item { font-family: inherit; }
+      .sidebar-nav-item:hover { background: rgba(128,128,128,0.07) !important; }
+
+      /* ── Home page ── */
+      .home-hero-bg {
+        position: absolute; inset: 0;
+        background: linear-gradient(135deg, transparent 50%, rgba(128,128,128,0.03) 100%);
+        pointer-events: none;
+      }
+      .home-stat-card {
+        transition: transform 0.18s, box-shadow 0.18s;
+        cursor: default;
+      }
+      .home-stat-card:hover { transform: translateY(-3px); }
+      .home-char-card {
+        transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+        cursor: pointer;
+      }
+      .home-char-card:hover { transform: translateY(-3px); }
+
+      /* Sidebar brand area animation */
+      @keyframes sidebar-brand-glow {
+        0%, 100% { opacity: 0.7; }
+        50%       { opacity: 1; }
+      }
+
       ::-webkit-scrollbar { width: 5px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #ff3c0055; }
