@@ -8,6 +8,7 @@ import { Roster }     from './components/Roster.jsx'
 import { Creator }    from './components/Creator.jsx'
 import { Sheet }      from './components/Sheet.jsx'
 import { Wiki }       from './components/Wiki.jsx'
+import { Party }      from './components/Party.jsx'
 
 export default function App() {
   const [themeKey, setThemeKey] = useState(() => {
@@ -28,7 +29,14 @@ export default function App() {
     try { localStorage.setItem('dnd_theme', themeKey) } catch {}
   }, [themeKey])
 
-  const [chars,    setChars]    = useState(loadLS)
+  const [chars,    setChars]    = useState(() =>
+    loadLS().map(c => {
+      if (typeof c.equipment === 'string') {
+        return { ...c, equipmentNotes: c.equipmentNotes || c.equipment, equipment: [], conditions: c.conditions || [] }
+      }
+      return { ...c, equipment: Array.isArray(c.equipment) ? c.equipment : [], conditions: c.conditions || [] }
+    })
+  )
   const [view,     setView]     = useState('home')
   const [activeId, setActiveId] = useState(null)
   const [draft,    setDraft]    = useState(null)
@@ -143,7 +151,16 @@ export default function App() {
             />
           )}
 
-          {view === 'wiki' && <Wiki themeKey={themeKey} />}
+          {view === 'wiki'  && <Wiki themeKey={themeKey} />}
+
+          {view === 'party' && (
+            <Party
+              chars={chars}
+              onSave={saveChar}
+              onOpen={handleOpen}
+              themeKey={themeKey}
+            />
+          )}
 
           {view === 'roster' && (
             <Roster

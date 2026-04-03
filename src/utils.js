@@ -22,7 +22,7 @@ export const blank = () => ({
   savingThrowProfs: [], skillProfs: [],
   languages: 'Common',
   personalityTraits: '', ideals: '', bonds: '', flaws: '',
-  features: '', equipment: '', spells: [],
+  features: '', equipment: [], equipmentNotes: '', spells: [],
   spellSlotsUsed: Array(9).fill(0),
   warlockSlotsUsed: 0,
   skillExpert: [],
@@ -30,5 +30,6 @@ export const blank = () => ({
   customActions: [],
   currency: { cp: 0, sp: 0, gp: 0, pp: 0 },
   speciesFeats: [], bgFeats: [], otherFeats: [],
+  conditions: [],
   notes: '', sessions: [], createdAt: Date.now(),
 })

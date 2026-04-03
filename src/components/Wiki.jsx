@@ -3,7 +3,18 @@ import { useT } from '../themes.js'
 import { DND } from '../data/dnd.js'
 import { CLASS_FEATURES } from '../data/classFeatures.js'
 import { SUBCLASS_FEATURES } from '../data/subclassFeatures.js'
+import { SUBCLASS_FEATURES_EXTRA } from '../data/subclassFeaturesMissing.js'
 import { SPELLS } from '../data/spells.js'
+
+/* Merge base subclass features with the extra ones (2014 + missing 2024) */
+const ALL_SUBCLASS_FEATURES = (() => {
+  const merged = {}
+  const allKeys = new Set([...Object.keys(SUBCLASS_FEATURES), ...Object.keys(SUBCLASS_FEATURES_EXTRA)])
+  for (const cls of allKeys) {
+    merged[cls] = { ...(SUBCLASS_FEATURES[cls] || {}), ...(SUBCLASS_FEATURES_EXTRA[cls] || {}) }
+  }
+  return merged
+})()
 import { DND_ICONS } from './Icons.jsx'
 
 /* ── Per-class metadata for new players ────────────────────────────── */
@@ -240,7 +251,7 @@ function ClassDetail({ className, C }) {
   const cls  = DND.classes.find(c => c.name === className)
   const info = CLASS_INFO[className]
   const features = CLASS_FEATURES[className] || []
-  const subclassFeatures = SUBCLASS_FEATURES[className] || {}
+  const subclassFeatures = ALL_SUBCLASS_FEATURES[className] || {}
   const cc = DND.classColors[className]
 
   if (!cls || !info) return null

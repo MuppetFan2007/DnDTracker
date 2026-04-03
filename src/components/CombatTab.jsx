@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useT } from '../themes.js'
 import { mod, fmt, profB, totalLevel } from '../utils.js'
 import { SecHdr, useInp, Btn } from './UI.jsx'
+import { ConditionChips } from './ConditionChips.jsx'
 
 // MUI Icons
 import SwordIcon            from '@mui/icons-material/Construction'        // Attack
@@ -142,6 +143,18 @@ export function CombatTab({ char, onChange }) {
             <div style={{ fontSize: 22, fontWeight: 700, color: clr }}>{v}</div>
           </div>
         ))}
+      </div>
+
+      {/* ── Conditions ── */}
+      <div style={{ marginBottom: 22 }}>
+        <div style={{ fontSize: 10, color: C.gold, textTransform: 'uppercase', letterSpacing: 3, marginBottom: 10, paddingBottom: 5, borderBottom: `1px solid ${C.gold}44` }}>
+          Conditions
+        </div>
+        <ConditionChips
+          conditions={char.conditions || []}
+          onChange={conds => onChange({ ...char, conditions: conds })}
+          size="md"
+        />
       </div>
 
       {/* ── 3-column card grid ── */}

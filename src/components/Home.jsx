@@ -3,6 +3,7 @@ import { useT } from '../themes.js'
 import { totalLevel } from '../utils.js'
 import { Icons, DND_ICONS } from './Icons.jsx'
 import { DND } from '../data/dnd.js'
+import { CONDITIONS } from '../data/conditions.js'
 
 export function Home({ chars, onCreate, onOpen, themeKey }) {
   const C = useT()
@@ -157,6 +158,35 @@ export function Home({ chars, onCreate, onOpen, themeKey }) {
           ))}
         </div>
       </div>
+
+      {/* ── Active conditions strip ── */}
+      {(() => {
+        const entries = chars.flatMap(c =>
+          (c.conditions || []).map(cid => {
+            const cond = CONDITIONS.find(x => x.id === cid)
+            return cond ? { cond, charName: c.name } : null
+          }).filter(Boolean)
+        )
+        if (!entries.length) return null
+        return (
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 10, color: C.textMuted, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 10 }}>
+              Active Conditions
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {entries.map(({ cond, charName }, i) => (
+                <span key={i} style={{
+                  fontSize: 10, padding: '3px 9px', borderRadius: 10,
+                  background: `${cond.color}20`, border: `1px solid ${cond.color}55`,
+                  color: cond.color, fontWeight: 600,
+                }}>
+                  {charName}: {cond.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* ── Recent characters ── */}
       <div>

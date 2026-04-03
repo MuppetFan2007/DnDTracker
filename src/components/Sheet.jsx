@@ -9,6 +9,10 @@ import { CombatTab } from './CombatTab.jsx'
 import { DiceRoller, THEME_FX, useRollEngine } from './DiceRoller.jsx'
 import { FeaturesTab } from './FeaturesTab.jsx'
 import { SessionNotesTab } from './SessionNotesTab.jsx'
+import { GearTab } from './GearTab.jsx'
+import { LevelUpModal } from './LevelUpModal.jsx'
+import { ConditionChips } from './ConditionChips.jsx'
+import { CONDITIONS as COND_DATA } from '../data/conditions.js'
 
 export function Sheet({ char, onChange, onBack }) {
   const C   = useT()
@@ -17,6 +21,7 @@ export function Sheet({ char, onChange, onBack }) {
   const [editing,     setEditing]     = useState(false)
   const [rollMode,    setRollMode]    = useState('normal')
   const [combatOpen,  setCombatOpen]  = useState(false)
+  const [levelUpOpen, setLevelUpOpen] = useState(false)
 
   // detect which theme is active
   const themeKey = Object.entries(THEMES).find(([, t]) => t.gold === C.gold)?.[0] || ''
@@ -32,7 +37,7 @@ export function Sheet({ char, onChange, onBack }) {
   const hpPct    = char.hp.max ? char.hp.current / char.hp.max * 100 : 0
   const hpColor  = hpPct > 60 ? C.green : hpPct > 30 ? C.yellow : C.red
 
-  const TABS = ['core', 'combat', 'spells', 'dice', 'features', 'sessions', 'character']
+  const TABS = ['core', 'combat', 'gear', 'spells', 'dice', 'features', 'sessions', 'character']
 
   const updateClass = (idx, field, val) => {
     const cls = [...(char.classes || [])]
@@ -61,6 +66,9 @@ export function Sheet({ char, onChange, onBack }) {
           </div>
           <Btn variant={editing ? 'gold' : 'default'} onClick={() => setEditing(e => !e)} style={isRacing ? { borderRadius: 20 } : {}}>
             {editing ? '✓ Done' : '✎ Edit'}
+          </Btn>
+          <Btn variant="default" onClick={() => setLevelUpOpen(true)} style={{ ...(isRacing ? { borderRadius: 20 } : {}), fontSize: 10, letterSpacing: 2, color: '#22c55e', borderColor: '#22c55e55' }}>
+            ↑ Lvl Up
           </Btn>
           <button onClick={() => setCombatOpen(true)} className="hov-btn"
             style={{
@@ -94,15 +102,22 @@ export function Sheet({ char, onChange, onBack }) {
               </div>
             )}
           </div>
-          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8 }}>
-            {[['AC','ac',char.ac],['SPEED','speed',`${char.speed}ft`],['INIT',null,fmt(char.initiative + mod(char.stats.dex))],['PROF',null,`+${pb}`]].map(([label, path, val]) => (
-              <div key={label} style={{ background: C.surface, border: `1px solid ${C.border}`, padding: '9px 10px', textAlign: 'center' }}>
-                <div style={{ fontSize: 9, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 3, marginBottom: 3 }}>{label}</div>
-                {editing && path
-                  ? <input type="number" value={char[path]} onChange={e => set(path, +e.target.value)} style={{ ...inp, textAlign: 'center', fontSize: 17, padding: '2px' }} />
-                  : <div style={{ fontSize: 20, fontWeight: 700, color: C.text }}>{val}</div>}
-              </div>
-            ))}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 8 }}>
+              {[['AC','ac',char.ac],['SPEED','speed',`${char.speed}ft`],['INIT',null,fmt(char.initiative + mod(char.stats.dex))],['PROF',null,`+${pb}`]].map(([label, path, val]) => (
+                <div key={label} style={{ background: C.surface, border: `1px solid ${C.border}`, padding: '9px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: 9, color: C.textMuted, textTransform: 'uppercase', letterSpacing: 3, marginBottom: 3 }}>{label}</div>
+                  {editing && path
+                    ? <input type="number" value={char[path]} onChange={e => set(path, +e.target.value)} style={{ ...inp, textAlign: 'center', fontSize: 17, padding: '2px' }} />
+                    : <div style={{ fontSize: 20, fontWeight: 700, color: C.text }}>{val}</div>}
+                </div>
+              ))}
+            </div>
+            <ConditionChips
+              conditions={char.conditions || []}
+              onChange={conds => set('conditions', conds)}
+              size="sm"
+            />
           </div>
         </div>
       </div>
@@ -129,6 +144,7 @@ export function Sheet({ char, onChange, onBack }) {
         <div className="fade-up" key={tab}>
           {tab === 'core'      && <TabCore      char={char} onChange={onChange} set={set} setN={setN} editing={editing} inp={inp} getSave={getSave} getSkill={getSkill} pb={pb} C={C} rollMode={rollMode} setRollMode={setRollMode} themeKey={themeKey} />}
           {tab === 'combat'    && <CombatTab    char={char} onChange={onChange} />}
+          {tab === 'gear'      && <GearTab      char={char} onChange={onChange} />}
           {tab === 'spells'    && <SpellSlotsTab char={char} onChange={onChange} />}
           {tab === 'dice'      && <DiceRoller   char={char} rollMode={rollMode} setRollMode={setRollMode} />}
           {tab === 'features'  && <FeaturesTab  char={char} onChange={onChange} />}
@@ -136,6 +152,15 @@ export function Sheet({ char, onChange, onBack }) {
           {tab === 'character' && <TabCharacter char={char} set={set} setN={setN} editing={editing} inp={inp} updateClass={updateClass} C={C} />}
         </div>
       </div>
+
+      {/* ── Level Up Modal ── */}
+      {levelUpOpen && (
+        <LevelUpModal
+          char={char}
+          onChange={(updated) => { onChange(updated); setLevelUpOpen(false) }}
+          onClose={() => setLevelUpOpen(false)}
+        />
+      )}
 
       {/* ── Combat Side Panel ── */}
       {combatOpen && (
@@ -528,11 +553,6 @@ function TabCharacter({ char, set, setN, editing, inp, updateClass, C }) {
 }
 
 /* ── Tab: Encounter Tracker ── */
-const CONDITIONS = [
-  'Blinded','Charmed','Deafened','Exhausted','Frightened','Grappled',
-  'Incapacitated','Invisible','Paralyzed','Petrified','Poisoned',
-  'Prone','Restrained','Stunned','Unconscious',
-]
 
 function CombatPanel({ char, onChange, onClose, C }) {
   const inp = useInp()
@@ -725,8 +745,8 @@ function CombatPanel({ char, onChange, onClose, C }) {
                 style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.textDim,
                   fontSize: 8, padding: '2px 3px', fontFamily: 'inherit', maxWidth: 55 }}>
                 <option value="">+cond</option>
-                {CONDITIONS.filter(cd => !c.conditions.includes(cd)).map(cd => (
-                  <option key={cd} value={cd}>{cd}</option>
+                {COND_DATA.filter(cd => !c.conditions.includes(cd.id)).map(cd => (
+                  <option key={cd.id} value={cd.id}>{cd.label}</option>
                 ))}
               </select>
               {!c.isPlayer && (

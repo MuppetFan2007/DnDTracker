@@ -24,7 +24,16 @@ export function Roster({ chars, onCreate, onOpen, onDelete, themeKey }) {
   const isTeto     = themeKey === 'teto'
   const [search, setSearch] = useState('')
 
-  const filtered = chars.filter(c => (c.name || '').toLowerCase().includes(search.toLowerCase()))
+  const filtered = chars.filter(c => {
+    const q = search.toLowerCase()
+    if (!q) return true
+    return (
+      (c.name || '').toLowerCase().includes(q) ||
+      (c.customSpecies || c.species || '').toLowerCase().includes(q) ||
+      (c.classes || []).some(cl => cl.name.toLowerCase().includes(q)) ||
+      (c.background || '').toLowerCase().includes(q)
+    )
+  })
 
   return (
     <div className="fade-up" style={{ padding: '28px 32px' }}>
